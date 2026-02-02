@@ -1,0 +1,11 @@
+{
+    "sheet_invoices": "Invoices",
+    "sheet_CreditCards": "Credit Cards",
+    "sheet_PurchaseOrders": "Purchase Orders",
+    "table_InvoiceTable": "InvoiceTable",
+    "table_CreditCards": "CreditCards",
+    "table_PurchaseOrders": "POTable",
+    "invoice_starting_row": 4,
+    "card_starting_row": 10,
+    "po_starting_row": 0
+}
