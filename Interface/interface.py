@@ -11,6 +11,8 @@ from Managers.file_management import count_files
 from Utils.observers import setup_observer
 from Interface.Windows.onboarding import create_onboarding_page
 import logging, os
+from customtkinter import CTkImage
+from PIL import Image
 
 def create_interface(globals):
     """Creates the core GUI interface."""
@@ -41,10 +43,69 @@ def create_interface(globals):
     apply_theme(globals.active_theme)
     globals.root.configure(fg_color=globals.theme_dict["CTkFrame"]["fg_color"])
 
-    # Get Icon
+    # Get Icons
     globals.icon = load_data_path("config", "assets/icon.png")
     icon_image = tk.PhotoImage(file=str(globals.icon))
     globals.root.iconphoto(False, icon_image)
+
+    def load_icons():
+        """Loads icons."""
+        globals.add_icon = CTkImage(
+        light_image=Image.open(load_data_path("config", "assets/add-2.png")),
+        dark_image=Image.open(load_data_path("config", "assets/add-2.png")),
+        size=(40, 40))
+
+        globals.auto_icon = CTkImage(
+        light_image=Image.open(load_data_path("config", "assets/auto.png")),
+        dark_image=Image.open(load_data_path("config", "assets/auto.png")),
+        size=(40, 40))
+        
+        globals.enter_icon = CTkImage(
+        light_image=Image.open(load_data_path("config", "assets/pen-2.png")),
+        dark_image=Image.open(load_data_path("config", "assets/pen-2.png")),
+        size=(40, 40))
+
+        globals.archive_icon = CTkImage(
+        light_image=Image.open(load_data_path("config", "assets/archive.png")),
+        dark_image=Image.open(load_data_path("config", "assets/archive.png")),
+        size=(40, 40))
+
+        globals.workbook_icon = CTkImage(
+        light_image=Image.open(load_data_path("config", "assets/workbook-1.png")),
+        dark_image=Image.open(load_data_path("config", "assets/workbook-1.png")),
+        size=(40, 40))
+
+        globals.inbox_folder_icon = CTkImage(
+        light_image=Image.open(load_data_path("config", "assets/inbox-1.png")),
+        dark_image=Image.open(load_data_path("config", "assets/inbox-1.png")),
+        size=(40, 40))
+
+        globals.delete_icon = CTkImage(
+        light_image=Image.open(load_data_path("config", "assets/delete-4.png")),
+        dark_image=Image.open(load_data_path("config", "assets/delete-4.png")),
+        size=(40, 40))
+
+        globals.send_icon = CTkImage(
+        light_image=Image.open(load_data_path("config", "assets/send.png")),
+        dark_image=Image.open(load_data_path("config", "assets/send.png")),
+        size=(40, 40))
+
+        globals.settings_icon = CTkImage(
+        light_image=Image.open(load_data_path("config", "assets/settings.png")),
+        dark_image=Image.open(load_data_path("config", "assets/settings.png")),
+        size=(40, 40))
+
+        globals.import_icon = CTkImage(
+        light_image=Image.open(load_data_path("config", "assets/upload.png")),
+        dark_image=Image.open(load_data_path("config", "assets/upload.png")),
+        size=(40, 40))
+
+        globals.export_icon = CTkImage(
+        light_image=Image.open(load_data_path("config", "assets/download.png")),
+        dark_image=Image.open(load_data_path("config", "assets/download.png")),
+        size=(40, 40))
+
+    load_icons()
 
     # Add Navigation
     create_top_bar(globals)

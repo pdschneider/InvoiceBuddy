@@ -17,7 +17,16 @@ class FolderEventHandler(FileSystemEventHandler):
 
     def on_any_event(self, event):
         """Ignores directories and irrelevant event types."""
+        # Only proceed upon specific events
         if event.is_directory or event.event_type not in ['created', 'deleted', 'modified', 'moved']:
+            return
+
+        # Only proceed if an event involves a pdf file
+        if event.event_type == 'moved':
+            if not (event.src_path.lower().endswith('.pdf') or 
+                    (event.dest_path and event.dest_path.lower().endswith('.pdf'))):
+                return
+        elif not event.src_path.lower().endswith('.pdf'):
             return
 
         current_time = time.time()
@@ -39,14 +48,15 @@ class FolderEventHandler(FileSystemEventHandler):
         self.update_callback()
         logging.debug(f"Watchdog: Folder change detected, updated counts.")
 
-def is_network_drive(path):
+def is_network_drive(globals, path):
     """Check if a path is on a network drive (Windows only). Returns False on Linux."""
-    if platform.system() != 'Windows':
+    if not platform.system().startswith("Windows"):
         return False
     drive, _ = os.path.splitdrive(path)
     if drive:
         drive_type = ctypes.windll.kernel32.GetDriveTypeW(drive + '\\')
         logging.debug(f"{path} is a network drive.")
+        globals.network_drive = True
         return drive_type == 4  # DRIVE_REMOTE (network drive)
     return False
 
@@ -59,7 +69,7 @@ def setup_observer(globals, direct, key):
         globals.observers[key].stop()
         globals.observers[key].join()
     handler = FolderEventHandler(globals, globals.update_file_counts)
-    if is_network_drive(directory):
+    if is_network_drive(globals, directory):
         observer = PollingObserver(timeout=1)
         logging.info(f"Using PollingObserver for network drive: {directory} (key: {key})")
     else:

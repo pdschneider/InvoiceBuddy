@@ -1,5 +1,5 @@
 # InvoiceBuddy.py
-# v0.1.0
+# v0.1.1
 
 # Sets up logging and settings files
 from Utils.setup import setup
@@ -45,17 +45,16 @@ else:
 """
 Changelog:
 
-- Initial Release
-- Normalized button icons
-- Application runs through initial checks and cleans settings files if corrupted or missing values
-- Draws window in the center of the screen if saved screen dimensions are missing or 0
-- Removed broken regenerate workbook buttons and revert history button
-- Sanitized settings pages to eliminate saving nonconforming values
-- Silenced CTkImage warnings
-- Ensures all file opening or path selection can only choose working paths
-- Application automatically creates new folders if one doesn't exist when archiving
-- Added onboarding page for application start under empty or invalid path conditions
-- Added welcome document
-- Fixed workbook and inbox not opening on Windows
+- Switched to toast notifications for some messages
+- Fixed error when deleting files on network drive
+- Removed unnecessary two letter word from onboarding page for English majors
+- History path defaults to user-specific default path if not valid
+- Changed "Moved" to "Archived" in history for clarity
+- Added optional update for company map upon startup
+- App ignores non-.pdf changes in the inbox folder, avoiding unnecessary GUI rebuilds
+- Fixed error when buddy is named 'inbox'
+- Updated PSI to Summit Fire
+- Updated dependencies
+- General stability improvements
 
 """

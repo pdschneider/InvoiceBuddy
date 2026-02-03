@@ -12,7 +12,7 @@ class Globals:
         self.observers = {}
 
         # Current Version
-        self.current_version = "v0.1.0"
+        self.current_version = "v0.1.1"
 
         # Global Variables
         self.os_name = platform.system()
@@ -61,6 +61,7 @@ class Globals:
 
         # Flags
         self.edit_flag = None
+        self.network_drive = False
 
         # Trees
         self.inbox_tree = None

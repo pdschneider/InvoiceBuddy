@@ -29,7 +29,7 @@ def create_onboarding_page(globals, onboarding_page):
                  text=f"Invoice Buddy is an application that makes entering spreadsheet data easier.\n\n" \
                         f"To use Invoice Buddy, you must first choose an inbox and a workbook path.\n\n" \
                         f"Your inbox is where you will add files to process.\n\n" \
-                        f"The workbook is the spreadsheet file you will be entering data to.\n\n" \
+                        f"The workbook is the spreadsheet file you will be entering data.\n\n" \
                         f"You will also need to choose an archive path for storing files after processing.\n\n" \
                         f"Only choose the 'top-level' archive path. The application will create subfolders for you.\n\n" \
                         f"Have fun!").pack(fill="both", expand=True, padx=10, pady=10)

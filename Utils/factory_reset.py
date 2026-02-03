@@ -16,3 +16,4 @@ def factory_reset(error):
              icon="error")
     if answer:
         shutil.rmtree(load_data_path("config"))
+    root.destroy()

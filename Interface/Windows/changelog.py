@@ -23,6 +23,28 @@ def create_changelog(globals, changelog_tab):
 
        # Main Changelog Sections
 
+       # v0.1.1
+       ctk.CTkLabel(changelog_frame,
+                     text="v0.1.1",
+                     font=fonts.heading_font,
+                     anchor="center").pack(fill="x", pady=20, padx=10)
+
+       ctk.CTkLabel(changelog_frame,
+                     justify="left",
+                     anchor="center",
+                     wraplength=400,
+                     text = "- Switched to toast notifications for some messages\n" \
+                              "- Fixed error when deleting files on network drive\n" \
+                              "- Removed unnecessary two letter word from onboarding page\n" \
+                              "- History path defaults to user-specific default path if not valid\n" \
+                              "- Changed 'Moved' to 'Archived' in history for clarity\n" \
+                              "- Added optional update for company map upon startup\n" \
+                              "- App ignores non-.pdf changes in the inbox folder, avoiding unnecessary GUI rebuilds\n" \
+                              "- Fixed error when buddy is named 'inbox'\n" \
+                              "- Updated PSI to Summit Fire\n" \
+                              "- Updated dependencies\n" \
+                              "- General stability improvements").pack(fill="both", expand=True, padx=10, pady=10)
+
        # v0.1.0
        ctk.CTkLabel(changelog_frame,
                      text="v0.1.0",

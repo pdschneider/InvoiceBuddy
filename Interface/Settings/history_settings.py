@@ -14,28 +14,7 @@ import Utils.fonts as fonts
 def create_history_tab(globals, history_tab):
     """Initiates the History tab."""
 
-    # Get Icons
-    globals.workbook_icon = CTkImage(
-    light_image=Image.open(load_data_path("config", "assets/workbook-1.png")),
-    dark_image=Image.open(load_data_path("config", "assets/workbook-1.png")),
-    size=(40, 40))
-
-    globals.inbox_folder_icon = CTkImage(
-    light_image=Image.open(load_data_path("config", "assets/inbox-1.png")),
-    dark_image=Image.open(load_data_path("config", "assets/inbox-1.png")),
-    size=(40, 40))
-
-    globals.import_icon = CTkImage(
-    light_image=Image.open(load_data_path("config", "assets/upload.png")),
-    dark_image=Image.open(load_data_path("config", "assets/upload.png")),
-    size=(40, 40))
-
-    globals.export_icon = CTkImage(
-    light_image=Image.open(load_data_path("config", "assets/download.png")),
-    dark_image=Image.open(load_data_path("config", "assets/download.png")),
-    size=(40, 40))
-
-    all_columns = ("File Name", "Source Folder", "Destination Folder", "Type", "Moved", "Entered")
+    all_columns = ("File Name", "Source Folder", "Destination Folder", "Type", "Archived", "Entered")
 
     globals.history_tree = ttk.Treeview(history_tab, columns=all_columns, show="headings", selectmode="extended")
 
@@ -46,7 +25,7 @@ def create_history_tab(globals, history_tab):
     globals.history_tree.column("Source Folder", width=100, anchor="w")
     globals.history_tree.column("Destination Folder", width=100, anchor="w")
     globals.history_tree.column("Type", width=100, anchor="w")
-    globals.history_tree.column("Moved", width=50, anchor="center")
+    globals.history_tree.column("Archived", width=50, anchor="center")
     globals.history_tree.column("Entered", width=50, anchor="center")
     globals.history_tree.pack(fill="both", expand=True, pady=5)
 
@@ -78,7 +57,7 @@ def create_history_tab(globals, history_tab):
                                             font=fonts.button_font, 
                                             width=50, 
                                             height=50,
-                                            command=lambda: open_selected_folders(globals.history_tree))
+                                            command=lambda: open_selected_folders(globals))
     directory_label = ctk.CTkLabel(button_frame, text="Inbox")
     directory_open_button.grid(row=0, column=0, padx=5)
     directory_label.grid(row=1, column=0)

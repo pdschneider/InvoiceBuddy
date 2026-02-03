@@ -1,7 +1,9 @@
 # Utils/setup.py
-import logging, os, json, csv, shutil
+import logging, os, json, csv, shutil, hashlib
 from logging.handlers import TimedRotatingFileHandler
-from Utils.load_settings import load_data_path, load_settings
+from Utils.load_settings import load_data_path, load_settings, load_default_data_path
+import tkinter as tk
+from tkinter import messagebox
 
 def setup():
     setup_logging()
@@ -12,6 +14,7 @@ def setup():
     setup_spreadsheet()
     setup_history()
     setup_themes()
+    company_map_check()
 
 def setup_logging():
     """Sets up logging for both the log file as well as standard console output."""
@@ -150,19 +153,19 @@ def setup_settings():
         if "saved_width" not in data:
             data["saved_width"] = 0
             changed = True
-            logging.info("Added missing 'logging_level' key to settings.json")
+            logging.info("Added missing 'saved_width' key to settings.json")
         if "saved_height" not in data:
             data["saved_height"] = 0
             changed = True
-            logging.info(f"Adding missing 'active_theme' key to settings.json")
+            logging.info(f"Adding missing 'saved_height' key to settings.json")
         if "saved_x" not in data:
             data["saved_x"] = 0
             changed = True
-            logging.info(f"Added missing 'history_path' key to settings.json")
+            logging.info(f"Added missing 'saved_x' key to settings.json")
         if "saved_y" not in data:
             data["saved_y"] = 0
             changed = True
-            logging.info(f"Added missing 'history_path' key to settings.json")
+            logging.info(f"Added missing 'saved_y' key to settings.json")
 
         # Check to make sure keys are the correct type
         if not isinstance(data["logging_level"], str):
@@ -214,10 +217,14 @@ def setup_settings():
             logging.info(f"Adding missing 'active_theme' key to settings.json")
 
         # Check to make sure paths are valid
-        logging.info(f"History path: {data["history_path"]}")
-        if not os.path.exists(data["history_path"]):
-            logging.warning(f"History Path not a valid path.")
-            data["history_path"] = ""
+        logging.debug(f"History path: {data["history_path"]}")
+        if not os.path.isfile(data["history_path"]):
+            logging.warning(f"History Path not a valid path. Defaulting to default history file.")
+            try:
+                data["history_path"] = load_data_path("local", "history.csv")
+            except Exception as e:
+                logging.warning(f"Unable to set up default history file. Sanitizing to empty path...")
+                data["history_path"] = ""
             changed = True
             logging.info(f"Sanitizing incorrect type 'history_path'")
 
@@ -333,7 +340,7 @@ def setup_spreadsheet():
 
 def setup_history():
     """Initializes the history file with headers in the app's designated folder."""
-    headers = ["File Name", "Source Folder", "Destination Folder", "Type", "Moved", "Entered"]
+    headers = ["File Name", "Source Folder", "Destination Folder", "Type", "Archived", "Entered"]
     history_file = load_data_path("local", "history.csv")
 
     # Create the file if it does not exist
@@ -416,3 +423,46 @@ def setup_themes():
         theme_directory = os.path.normpath(load_data_path("config", "themes"))
     except Exception as e:
         logging.error(f"Unable to load themes due to {e}")
+
+def company_map_check():
+    """Checks if company map is different from user's company map, prompts for change."""
+    try:
+
+        # Read the contents of the default company_map path and hash it
+        default_company_path = load_default_data_path("config", "company_map.json")
+        with open(default_company_path, 'r') as f:
+            default_company_file = f.read()
+        hashed_default_company_map = hashlib.md5(default_company_file.encode()).hexdigest()
+        logging.debug(f"Default company map hash: {hashed_default_company_map}")
+
+        # Read the contents of the current user's company_map path and hash it
+        user_company_path = load_data_path("config", "company_map.json")
+        with open(user_company_path, 'r') as f:
+            user_company_file = f.read()
+        hashed_user_company_map = hashlib.md5(user_company_file.encode()).hexdigest()
+        logging.debug(f"User company map hash: {hashed_user_company_map}")
+
+    except Exception as e:
+        logging.warning(f"Unable to hash company_map.json files due to: {e}")
+        return
+
+    if hashed_default_company_map != hashed_user_company_map:
+        try:
+            root = tk.Tk()
+            root.withdraw()
+            answer = messagebox.askyesno(parent=root, 
+                                title="Update Company Map?" ,
+                                message="Updated company database available. Would you like to update?")
+            if answer:
+                if os.path.isfile(load_data_path("config", "company_map.json")):
+                    logging.debug(f"Removing old company map...")
+                    os.remove(load_data_path("config", "company_map.json"))
+                logging.info(f"Updating company map...")
+                load_default_data_path("config", "company_map.json")
+            else:
+                logging.info(f"Not updating company map.")
+            root.destroy()
+        except Exception as e:
+            logging.warning(f"Unable to update company map due to: {e}")
+    else:
+        logging.info(f"Company map already at current version!")

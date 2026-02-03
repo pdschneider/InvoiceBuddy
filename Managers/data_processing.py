@@ -4,10 +4,12 @@ from io import BytesIO
 from tkinter import messagebox, simpledialog
 from openpyxl import load_workbook
 from Managers.history_manager import load_history, add_update_history
+from Utils.toast import show_toast
 
 def parse_invoices(globals, history_tree, file_list=None):
     """Writes filename data to the Invoices sheet of the workbook, respecting a configurable starting column."""
     try:
+        # Make sure inbox and workbook paths are valid
         if os.path.isdir(globals.sources["inbox"]):
             invoice_dir = globals.sources["inbox"]
         elif os.path.isdir(globals.inbox_dir_var.get().strip()):
@@ -20,8 +22,17 @@ def parse_invoices(globals, history_tree, file_list=None):
         elif os.path.isfile(globals.workbook_var.get().strip()):
             workbook_file_path = globals.workbook_var.get().strip()
         else:
+            logging.warning(f"No valid workbook path. Skipping entering data.")
             return
         logging.debug(f"Checking directory: {invoice_dir}")
+
+        # Ensure workbook is writable
+        if os.access(workbook_file_path, os.W_OK):
+            logging.debug(f"Workbook is accessible.")
+            pass
+        else:
+            messagebox.showerror("Permission Error", f"Permission denied to write to {workbook_file_path}.\nIs the workbook already open?")
+            raise PermissionError(f"Permission denied to write to {workbook_file_path}")
 
         if file_list is None:
             all_files = os.listdir(invoice_dir)
@@ -58,17 +69,21 @@ def parse_invoices(globals, history_tree, file_list=None):
         sheet = wb[globals.sheet_invoices]
         logging.info(f"Loaded sheet '{globals.sheet_invoices}' with max row: {sheet.max_row}")
 
-        try:
+        # Set starting row
+        if globals.invoice_starting_row and isinstance(globals.invoice_starting_row, int) and globals.invoice_starting_row != 0:
             current_row = globals.invoice_starting_row
-        except Exception:
-            current_row = 4
-            logging.error("Could not read invoice starting row. Defaulting to 3.")
+        else:
+            current_row = 1
+            logging.error("Could not read invoice starting row. Defaulting to 1.")
 
-        if globals.invoice_starting_column:
+        # Set starting column
+        if globals.invoice_starting_column and isinstance(globals.invoice_starting_column, int) and globals.invoice_starting_column != 0:
             starting_column = globals.invoice_starting_column
         else:
             starting_column = 1
-        columns_to_check = 5
+            logging.error("Could not read invoice starting column. Defaulting to 1.")
+
+        columns_to_check = 5  # If any of these columns are not empty, skip row
 
         # Find the first fully empty row starting from current_row
         while not all(
@@ -90,7 +105,8 @@ def parse_invoices(globals, history_tree, file_list=None):
             portions = base_name.split()
             logging.debug(f"Writing '{full_file_name}' → row {current_row}, columns {starting_column}+ : {portions}")
 
-            # Write each portion starting at the defined column
+
+            # Write each portion starting at the defined column (in memory)
             for j, portion in enumerate(portions, start=starting_column):
                 sheet.cell(row=current_row, column=j, value=portion.strip())
 
@@ -109,11 +125,11 @@ def parse_invoices(globals, history_tree, file_list=None):
         if os.access(workbook_file_path, os.W_OK):
             wb.save(workbook_file_path)
             logging.info(f"Saved workbook to {workbook_file_path}")
-            messagebox.showinfo("Success", "Invoice data was added to the spreadsheet.")
 
             # Refresh history treeview
             load_history(history_tree)
         else:
+            messagebox.showerror("Error", f"Permission denied to write to {workbook_file_path}.\nIs the workbook open?")
             raise PermissionError(f"Permission denied to write to {workbook_file_path}")
 
     except Exception as e:
@@ -123,6 +139,7 @@ def parse_invoices(globals, history_tree, file_list=None):
 def parse_credit_cards(globals, history_tree, file_list=None):
     """Writes filename data to the Credit Cards sheet of the workbook, respecting a configurable starting column."""
     try:
+        # Ensure inbox and workbook paths are valid
         if os.path.isdir(globals.sources["inbox"]):
             credit_dir = globals.sources["inbox"]
         elif os.path.isdir(globals.inbox_dir_var.get().strip()):
@@ -137,6 +154,14 @@ def parse_credit_cards(globals, history_tree, file_list=None):
         else:
             return
         logging.debug(f"Checking directory: {credit_dir}")
+
+        # Ensure workbook is writable
+        if os.access(workbook_file_path, os.W_OK):
+            logging.debug(f"Workbook is accessible.")
+            pass
+        else:
+            messagebox.showerror("Permission Error", f"Permission denied to write to {workbook_file_path}.\nIs the workbook already open?")
+            raise PermissionError(f"Permission denied to write to {workbook_file_path}")
 
         if file_list is None:
             all_files = os.listdir(credit_dir)
@@ -226,11 +251,11 @@ def parse_credit_cards(globals, history_tree, file_list=None):
         if os.access(workbook_file_path, os.W_OK):
             wb.save(workbook_file_path)
             logging.info(f"Saved workbook to {workbook_file_path}")
-            messagebox.showinfo("Success", "Credit card data was added to the spreadsheet.")
 
             # Refresh history treeview
             load_history(history_tree)
         else:
+            messagebox.showerror("Permission Error", f"Permission denied to write to {workbook_file_path}.\nIs the workbook already open?")
             raise PermissionError(f"Permission denied to write to {workbook_file_path}")
 
     except Exception as e:

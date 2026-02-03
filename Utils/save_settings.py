@@ -1,9 +1,10 @@
 # Utils/save_settings.py
 import logging, json, os
-from Utils.load_settings import load_settings, load_paths, load_folder_map, load_data_path, load_spreadsheet_specs
+from Utils.load_settings import load_settings, load_paths, load_folder_map, load_data_path
 from Managers.history_manager import load_history
 from pypdf import PdfReader, PdfWriter
 from config import apply_theme
+from Utils.toast import show_toast
 
 def save_all_settings(globals):
     """
@@ -16,8 +17,13 @@ def save_all_settings(globals):
     def _gather_buddy_info(globals):
         """Collect current buddy name → path from the UI entries."""
         buddy_map = {}
+        buddy_counter = 0
         for entry in globals.buddy_entries:  # ← Use the UI list
             name = entry["name_var"].get().strip()[:9]
+            if name == "inbox":
+                buddy_counter += 1
+                name = f"inbox-{buddy_counter}"
+                logging.warning(f"Buddy name cannot be 'inbox'. Sanitizing....")
             path = entry["path_var"].get().strip()
             if name and path and os.path.isdir(path):  # Only save if both are filled
                 buddy_map[name] = path
@@ -126,6 +132,9 @@ def save_all_settings(globals):
             globals.refresh_send_buttons()
         except Exception as e:
             logging.error(f"Failed to refresh inbox send buttons: {e}")
+
+    # Show success toast
+    show_toast(globals, "Saved!")
 
 def save_paths(globals, sources=None, buddies=None):
     """

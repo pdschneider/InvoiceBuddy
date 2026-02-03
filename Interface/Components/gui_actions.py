@@ -7,6 +7,7 @@ from Managers.file_management import move_files
 from Managers.history_manager import revert_moves
 from Managers.import_export import export_history, import_history
 from Utils.save_settings import save_metadata
+from Utils.toast import show_toast
 
 def add_file(globals):
     """Moves a file to the inbox."""
@@ -56,19 +57,23 @@ def open_workbook(globals):
     """Opens the Excel workbook at the initiated file path."""
     if os.path.isfile(globals.workbook):
         try:
-            if not os.path.isfile(globals.workbook):
-                messagebox.showerror("Error", f"Invalid workbook file: {globals.workbook}")
-                logging.error(f"Cannot open workbook: Invalid file path {globals.workbook}")
-                return
+            if globals.os_name.startswith("Windows"):
+                os.startfile(globals.workbook)
             else:
-                if globals.os_name.startswith("Windows"):
-                    os.startfile(globals.workbook)
-                else:
-                    subprocess.run(['xdg-open', globals.workbook], check=True)
+                subprocess.run(['xdg-open', globals.workbook], check=True)
             logging.info(f"Opened workbook: {globals.workbook}")
+        except PermissionError as e:
+            messagebox.showerror("Error", f"Permission Error. Is the workbook already open?\n {e}")
+            logging.error(f"Permission Error. Is the workbook already open?\n {e}")
+            return
         except Exception as e:
             messagebox.showerror("Error", f"Failed to open workbook {globals.workbook}: {e}")
             logging.error(f"Error opening workbook {globals.workbook}: {e}")
+            return
+    else:
+        messagebox.showerror("Error", f"Cannot open workbook. Invalid file path: {globals.workbook}")
+        logging.error(f"Cannot open workbook. Invalid file path {globals.workbook}")
+        return
 
 def open_directory(directory):
     """Opens the directory of the current tab."""
@@ -86,15 +91,15 @@ def open_directory(directory):
         messagebox.showerror("Error", f"Failed to open directory {directory}: {e}")
         logging.error(f"Error opening directory {directory}: {e}")
 
-def open_selected_folders(history_tree):
+def open_selected_folders(globals):
     """Opens the folders that the files at selected treeview rows are located in."""
-    selected_items = history_tree.selection()
+    selected_items = globals.history_tree.selection()
     if not selected_items:
-        messagebox.showinfo("No Selection", "No items selected to open folders.")
+        show_toast(globals, "No items selected to open folders.")
         return
     folders = set()
     for item_id in selected_items:
-        values = history_tree.item(item_id)['values']
+        values = globals.history_tree.item(item_id)['values']
         dst_folder = values[2]
         src_folder= values[1]
         if dst_folder != "N/A" and os.path.isdir(dst_folder):
@@ -102,7 +107,7 @@ def open_selected_folders(history_tree):
         if not os.path.isdir(dst_folder):
             folders.add(src_folder)
     if not folders:
-        messagebox.showinfo("No Folders", "No valid folders found for selected items.")
+        show_toast(globals, "No valid folders found for selected items.")
         return
     for folder in folders:
         open_directory(folder)
@@ -116,16 +121,16 @@ def pdf_button(globals, companies=None, directory=None, file_list=None):
     """One-click auto-naming — all logic in apply_auto_naming."""
     save_metadata(globals)
     if not file_list:
-        messagebox.showinfo("No Selection", "Please select one or more files to auto-name.")
+        show_toast(globals, "Please select one or more files to auto-name.")
         return
 
     search_dir = os.path.normpath(directory or globals.sources['inbox'])
     changes = apply_auto_naming(search_dir, file_list)
 
     if changes == 0:
-        messagebox.showinfo("Done", "Files already properly named or no matches found in file contents.")
+        show_toast(globals, "Files already properly named or no matches found in file contents.")
     else:
-        messagebox.showinfo("Auto-Name Complete", f"Updated {changes} file(s).")
+        show_toast(globals, f"Auto-Name Complete. Updated {changes} file(s).")
 
     globals.root.after(100, globals.update_file_counts)
 
@@ -157,11 +162,11 @@ def smart_spreadsheet_button(globals, file_list=None):
       - "Card"     → parse_credit_cards
       - "Purchase" → skipped (or warn)
     """
-    if not file_list:
-        messagebox.showinfo("No Selection", "Please select one or more files to enter.")
-        return
-
     save_metadata(globals)
+
+    if not file_list:
+        show_toast(globals, "Please select one or more files to enter.")
+        return
 
     # Split files by type
     invoices = []
@@ -194,10 +199,9 @@ def smart_spreadsheet_button(globals, file_list=None):
     skipped = len(purchases) + len(unknown)
 
     if skipped == 0 and (os.path.isfile(globals.workbook) or os.path.isfile(globals.workbook_var.get().strip())):
-        messagebox.showinfo("Success", f"Entered {processed} files into the spreadsheet.")
+        show_toast(globals, f"Entered {processed} files into the spreadsheet.")
     elif skipped != 0 and (os.path.isfile(globals.workbook) or os.path.isfile(globals.workbook_var.get().strip())):
-        messagebox.showinfo(
-            "Partial Success",
+        show_toast(globals,
             f"Entered {processed} files.\n"
             f"Skipped {skipped} files (tagged as Purchase or unknown).")
     else:
@@ -217,7 +221,7 @@ def move_button(globals):
     save_metadata(globals)
     selected_items = globals.history_tree.selection()
     if not selected_items:
-        messagebox.showinfo("No Selection", "No files selected to move.")
+        show_toast(globals, "No files selected to move.")
         return
 
     groups = {}
@@ -232,7 +236,7 @@ def move_button(globals):
         groups[key].append(os.path.join(src_folder), filename)
 
     if not groups:
-        messagebox.showinfo("No Valid Files", "No valid files found to move.")
+        show_toast(globals, "No valid files found to move.")
         return
 
     for (directory, file_type), file_list in groups.items():

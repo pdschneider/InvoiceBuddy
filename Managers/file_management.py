@@ -2,6 +2,7 @@
 import logging, os, shutil
 from tkinter import messagebox
 from Managers.history_manager import load_history, add_update_history
+from Utils.toast import show_toast
 
 move_log = []
 
@@ -56,4 +57,4 @@ def move_files(globals, history_tree, directory, folder_map, oneoffs_folder, fil
     elif moved_files == 0:
         messagebox.showwarning("No Files", f"No files moved in {directory}.")
     else:
-        messagebox.showinfo("Success", f"Moved {moved_files} files successfully!")
+        show_toast(globals, f"Archived {moved_files} files successfully!")

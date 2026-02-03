@@ -16,6 +16,7 @@ from PIL import Image
 from send2trash import send2trash
 from Utils.load_settings import load_data_path
 from Utils.save_settings import save_metadata
+from Utils.toast import show_toast
 
 def create_inbox(globals, inbox_tab):
     """Initiates the Inbox tab."""
@@ -33,47 +34,6 @@ def create_inbox(globals, inbox_tab):
     process_buttons_frame = ctk.CTkFrame(inbox_tab, fg_color="transparent")
     globals.process_buttons_frame = process_buttons_frame
 
-    # Get Icons
-    globals.add_icon = CTkImage(
-    light_image=Image.open(load_data_path("config", "assets/add-2.png")),
-    dark_image=Image.open(load_data_path("config", "assets/add-2.png")),
-    size=(40, 40))
-
-    globals.auto_icon = CTkImage(
-    light_image=Image.open(load_data_path("config", "assets/auto.png")),
-    dark_image=Image.open(load_data_path("config", "assets/auto.png")),
-    size=(40, 40))
-    
-    globals.enter_icon = CTkImage(
-    light_image=Image.open(load_data_path("config", "assets/pen-2.png")),
-    dark_image=Image.open(load_data_path("config", "assets/pen-2.png")),
-    size=(40, 40))
-
-    globals.archive_icon = CTkImage(
-    light_image=Image.open(load_data_path("config", "assets/archive.png")),
-    dark_image=Image.open(load_data_path("config", "assets/archive.png")),
-    size=(40, 40))
-
-    globals.workbook_icon = CTkImage(
-    light_image=Image.open(load_data_path("config", "assets/workbook-1.png")),
-    dark_image=Image.open(load_data_path("config", "assets/workbook-1.png")),
-    size=(40, 40))
-
-    globals.inbox_folder_icon = CTkImage(
-    light_image=Image.open(load_data_path("config", "assets/inbox-1.png")),
-    dark_image=Image.open(load_data_path("config", "assets/inbox-1.png")),
-    size=(40, 40))
-
-    globals.delete_icon = CTkImage(
-    light_image=Image.open(load_data_path("config", "assets/delete-4.png")),
-    dark_image=Image.open(load_data_path("config", "assets/delete-4.png")),
-    size=(40, 40))
-
-    globals.send_icon = CTkImage(
-    light_image=Image.open(load_data_path("config", "assets/send.png")),
-    dark_image=Image.open(load_data_path("config", "assets/send.png")),
-    size=(40, 40))
-
     def get_selected_files():
         """Returns a list of files which have been selected in a treeview."""
         selected_items = globals.inbox_tree.selection()
@@ -87,7 +47,7 @@ def create_inbox(globals, inbox_tab):
         file_list = get_selected_files()
 
         if not file_list:
-            messagebox.showinfo("No Selection", "Please select one or more files before running the search.")
+            show_toast(globals, "Please select one or more files before running the search.")
             logging.warning(f"PDF Search aborted. No files selected.")
             return
 
@@ -107,7 +67,7 @@ def create_inbox(globals, inbox_tab):
         selected_files = get_selected_files()
         save_metadata(globals)
         if not selected_files:
-            messagebox.showinfo("No Selection", "Please select files to move.")
+            show_toast(globals, "Please select files to move.")
             return
         if not os.path.exists(target_dir):
             messagebox.showerror("Error", f"Target directory does not exist: {target_dir}")
@@ -134,7 +94,7 @@ def create_inbox(globals, inbox_tab):
         if errors:
             messagebox.showerror("Move Errors", "\n".join(errors))
         else:
-            messagebox.showinfo("Success", f"Moved {moved_count} files successfully!")
+            show_toast(globals, f"Moved {moved_count} files successfully!")
 
     # Process buttons frame (configure grid to allow dynamic columns)
     process_buttons_frame.grid_columnconfigure((0,1,2,3,4,5,6,7,8,9), weight=0)  # Up to 10 columns should be plenty
@@ -224,41 +184,60 @@ def create_inbox(globals, inbox_tab):
     def delete_selected_to_trash(globals):
         """Safely move selected files to the system trash."""
         save_metadata(globals)
-        if send2trash is None:
-            messagebox.showerror("Error", "send2trash library not available — cannot delete safely.")
-            return
-
         selected_files = get_selected_files()
+
+        # Show message if no files are selected
         if not selected_files:
-            messagebox.showinfo("No Selection", "Please select one or more files to delete.")
+            show_toast(globals, "Please select one or more files to delete.")
             return
 
-        # Confirmation dialog
+        # Important variables
         count = len(selected_files)
-        if not messagebox.askyesno("Confirm Delete",
-                                   f"Move {count} file{'s' if count != 1 else ''} to the Recycle Bin/Trash?\n\n"
-                                   "You can recover them later from there.",
-                                   icon="warning"):
-            return
-
         trashed_count = 0
         errors = []
 
-        for file_path in selected_files:
-            try:
-                send2trash(file_path)
-                trashed_count += 1
-                logging.info(f"Trashed: {os.path.basename(file_path)}")
-            except Exception as e:
-                errors.append(f"{os.path.basename(file_path)}: {str(e)}")
-                logging.error(f"Failed to trash {file_path}: {e}")
+        # If not on network drive, use safer deletion method
+        if not globals.network_drive:
+            if not messagebox.askyesno("Confirm Delete",
+                                    f"Move {count} file{'s' if count != 1 else ''} to the Recycle Bin?\n\n"
+                                    "You can recover them later from there.",
+                                    icon="warning"):
+                return
+
+            # Send files safely to trash
+            for file_path in selected_files:
+                try:
+                    send2trash(file_path)
+                    trashed_count += 1
+                    logging.info(f"Trashed: {os.path.basename(file_path)}")
+                except Exception as e:
+                    errors.append(f"{os.path.basename(file_path)}: {str(e)}")
+                    logging.error(f"Failed to trash {file_path}: {e}")
+        
+        # If on network drive, fall back to permanent deletion method
+        else:
+            if not messagebox.askyesno("Confirm Delete",
+                                    f"Permanently delete {count} file{'s' if count != 1 else ''}?\n\n"
+                                    "You cannot recover them later.",
+                                    icon="warning"):
+                return
+
+            # Delete files permanently
+            for file_path in selected_files:
+                try:
+                    os.remove(file_path)
+                    trashed_count += 1
+                    logging.info(f"Deleted: {os.path.basename(file_path)}")
+                except Exception as e:
+                    errors.append(f"{os.path.basename(file_path)}: {str(e)}")
+                    logging.error(f"Failed to delete {file_path}: {e}")
 
         # Refresh UI
         globals.update_file_counts()
 
         # Feedback
         if trashed_count == len(selected_files):
-            messagebox.showinfo("Success", f"Moved {trashed_count} file{'s' if trashed_count != 1 else ''} to trash.")
+            show_toast(globals, f"Moved {trashed_count} file{'s' if trashed_count != 1 else ''} to trash.")
         elif trashed_count > 0:
             messagebox.showwarning("Partial Success", f"Trashed {trashed_count} files.\n\nFailed:\n" + "\n".join(errors))
         else:

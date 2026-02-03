@@ -4,7 +4,7 @@ from tkinter import messagebox
 from openpyxl import load_workbook
 from Utils.load_settings import load_history_path
 
-headers = ["File Name", "Source Folder", "Destination Folder", "Type", "Moved", "Entered"]
+headers = ["File Name", "Source Folder", "Destination Folder", "Type", "Archived", "Entered"]
 
 def load_history(history_tree):
     """Loads history from the history.csv file, return default headers if file doesn't exist."""

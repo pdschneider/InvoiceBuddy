@@ -1,6 +1,7 @@
 # Utils/load_settings.py
 import logging, platform, os, sys, json, shutil
-import customtkinter as ctk
+from customtkinter import CTkImage
+from PIL import Image
 
 def load_data_path(direct=None, filename=None):
     """
@@ -137,6 +138,143 @@ def load_data_path(direct=None, filename=None):
             logging.error(f"Error creating data directory: {e}")
             raise
     return os.path.normpath(os.path.join(data_dir, filename)) if filename else data_dir
+
+def load_default_data_path(direct=None, filename=None):
+    """
+    Get the path to a default file.
+
+        Parameters:
+                direct = The file type to specify its directory, either configuration, persistent user data, or logs
+                filename = The file name being accessed
+    """
+    default_files = ["settings.json", 
+                        "company_map.json", 
+                        "folder_maps.json", 
+                        "FY26-Blank_Workbook.xlsx",
+                        "paths.json",
+                        "spreadsheet.json",
+                        "assets/icon.png",
+                        "assets/add-1.png",
+                        "assets/add-2.png",
+                        "assets/add-3.png",
+                        "assets/archive.png",
+                        "assets/auto.png",
+                        "assets/card-1.png",
+                        "assets/card-2.png",
+                        "assets/cards-1.png",
+                        "assets/cards-2.png",
+                        "assets/delete-1.png",
+                        "assets/delete-2.png",
+                        "assets/delete-3.png",
+                        "assets/delete-4.png",
+                        "assets/inbox-1.png",
+                        "assets/inbox-2.png",
+                        "assets/invoice-1.png",
+                        "assets/invoice-2.png",
+                        "assets/invoice.3.png",
+                        "assets/mail.png",
+                        "assets/pen-1.png",
+                        "assets/pen-2.png",
+                        "assets/pencil.png",
+                        "assets/settings.png",
+                        "assets/toggle.png",
+                        "assets/workbook-1.png",
+                        "assets/workbook-2.png",
+                        "assets/send.png",
+                        "assets/download.png",
+                        "assets/upload.png",
+                        "themes/cosmic_sky.json", 
+                        "themes/pastel_green.json", 
+                        "themes/trojan_red.json", 
+                        "themes/dark_cloud.json", 
+                        "themes/soft_light.json"]
+    if getattr(sys, 'frozen', False):
+        logging.debug(f"Program has been bundled with Pyinstaller")
+        if direct == "config":
+            if platform.system().startswith("Windows"):
+                persistent_dir = os.path.normpath(os.path.join(os.getenv("APPDATA"), "InvoiceBuddy"))
+            else:
+                persistent_dir = os.path.normpath(os.path.expanduser("~/.config/InvoiceBuddy"))
+        elif direct == "local":
+            if platform.system().startswith("Windows"):
+                persistent_dir = os.path.normpath(os.path.join(os.getenv("LOCALAPPDATA"), "InvoiceBuddy"))
+            else:
+                persistent_dir = os.path.normpath(os.path.expanduser("~/.local/share/InvoiceBuddy"))
+            default_files = ["users.json",
+                             "history.csv",
+                             "Welcome to Invoice Buddy.pdf"]
+        else:
+            if platform.system().startswith("Windows"):
+                persistent_dir = os.path.normpath(os.path.join(os.getenv("LOCALAPPDATA"), "InvoiceBuddy", "Cache"))
+            else:
+                persistent_dir = os.path.normpath(os.path.expanduser("~/.cache/InvoiceBuddy"))
+            default_files = []
+
+        # Checks if any file has themes/ or assets/ path
+        try:
+            os.makedirs(persistent_dir, exist_ok=True)
+            if "themes/" in str(default_files):
+                themes_dir = os.path.join(persistent_dir, "themes")
+                os.makedirs(themes_dir, exist_ok=True)
+            if "assets/" in str(default_files):
+                assets_dir = os.path.join(persistent_dir, "assets")
+                os.makedirs(assets_dir, exist_ok=True)
+            if not os.access(persistent_dir, os.W_OK):
+                raise PermissionError(f"No write permission for {persistent_dir}")
+        except Exception as e:
+            logging.error(f"Error creating persistent data directory: {e}")
+            raise
+        bundled_dir = os.path.normpath(os.path.join(sys._MEIPASS, "defaults"))
+        for default_file in default_files:
+            bundled_file = os.path.normpath(os.path.join(bundled_dir, default_file))
+            persistent_file = os.path.normpath(os.path.join(persistent_dir, default_file))
+            if os.path.exists(bundled_file) and not os.path.exists(persistent_file):
+                try:
+                    logging.info(f"Copying {default_file} from {bundled_file} to {persistent_file}")
+                    shutil.copy(bundled_file, persistent_file)
+                except Exception as e:
+                    logging.error(f"Error copying {default_file}: {e}")
+        data_dir = persistent_dir
+        return os.path.normpath(os.path.join(bundled_dir, filename)) if filename else data_dir
+    else:  #  Running in development
+        base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        data_dir = os.path.normpath(os.path.join(base_dir, "data"))
+        defaults_dir = os.path.normpath(os.path.join(base_dir, "defaults"))
+
+        # Checks if any file has themes/ or assets/ path
+        try:
+            os.makedirs(data_dir, exist_ok=True)
+            if "themes/" in str(default_files):
+                themes_dir = os.path.join(data_dir, "themes")
+                os.makedirs(themes_dir, exist_ok=True)
+            if "assets/" in str(default_files):
+                assets_dir = os.path.join(data_dir, "assets")
+                os.makedirs(assets_dir, exist_ok=True)
+            if not os.access(data_dir, os.W_OK):
+                raise PermissionError(f"No write permission for {persistent_dir}")
+        except Exception as e:
+            logging.error(f"Error creating persistent data directory: {e}")
+            raise
+
+        # Loads defaults
+        for default_file in default_files:
+            bundled_file = os.path.normpath(os.path.join(defaults_dir, default_file))
+            persistent_file = os.path.normpath(os.path.join(data_dir, default_file))
+
+            if os.path.exists(bundled_file) and not os.path.exists(persistent_file):
+                try:
+                    logging.info(f"Copying {default_file} from {bundled_file} to {persistent_file}")
+                    shutil.copy(bundled_file, persistent_file)
+                except Exception as e:
+                    logging.error(f"Error copying {default_file}: {e}")
+        try:
+            os.makedirs(data_dir, exist_ok=True)
+            if not os.access(data_dir, os.W_OK):
+                raise PermissionError(f"No write permission for {data_dir}")
+        except Exception as e:
+            logging.error(f"Error creating data directory: {e}")
+            raise
+        return os.path.normpath(os.path.join(defaults_dir, filename)) if filename else data_dir
 
 def load_spreadsheet_specs():
     """Get the spreadsheet data such as table and sheet names."""

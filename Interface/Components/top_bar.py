@@ -35,11 +35,6 @@ def create_top_bar(globals):
     globals.inbox_icon = load_data_path("config", "assets/mail.png")
     inbox_icon = tk.PhotoImage(file=str(globals.inbox_icon))
 
-    globals.settings_icon = CTkImage(
-    light_image=Image.open(load_data_path("config", "assets/settings.png")),
-    dark_image=Image.open(load_data_path("config", "assets/settings.png")),
-    size=(40, 40))
-
     # Main top bar
     top_bar = ctk.CTkFrame(globals.root, height=55, corner_radius=0)
     globals.top_bar = top_bar
