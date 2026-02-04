@@ -1,7 +1,7 @@
 #Managers/data_processing.py
 import os, logging, msoffcrypto
 from io import BytesIO
-from tkinter import messagebox, simpledialog
+from tkinter import simpledialog
 from openpyxl import load_workbook
 from Managers.history_manager import load_history, add_update_history
 from Utils.toast import show_toast
@@ -31,7 +31,7 @@ def parse_invoices(globals, history_tree, file_list=None):
             logging.debug(f"Workbook is accessible.")
             pass
         else:
-            messagebox.showerror("Permission Error", f"Permission denied to write to {workbook_file_path}.\nIs the workbook already open?")
+            show_toast(globals, f"Permission denied to write to workbook. Is it already open?", _type="error")
             raise PermissionError(f"Permission denied to write to {workbook_file_path}")
 
         if file_list is None:
@@ -43,7 +43,7 @@ def parse_invoices(globals, history_tree, file_list=None):
             full_file_names = [os.path.basename(f) for f in file_list]
 
         if not full_file_names:
-            messagebox.showwarning("Warning", f"No files found in {invoice_dir}")
+            show_toast(globals, f"No files found in {invoice_dir}")
             logging.warning(f"No files found in {invoice_dir}")
             return
 
@@ -74,7 +74,7 @@ def parse_invoices(globals, history_tree, file_list=None):
             current_row = globals.invoice_starting_row
         else:
             current_row = 1
-            logging.error("Could not read invoice starting row. Defaulting to 1.")
+            logging.error(f"Could not read {globals.invoice_sheet_label} starting row. Defaulting to 1.")
 
         # Set starting column
         if globals.invoice_starting_column and isinstance(globals.invoice_starting_column, int) and globals.invoice_starting_column != 0:
@@ -129,12 +129,12 @@ def parse_invoices(globals, history_tree, file_list=None):
             # Refresh history treeview
             load_history(history_tree)
         else:
-            messagebox.showerror("Error", f"Permission denied to write to {workbook_file_path}.\nIs the workbook open?")
+            show_toast(globals, f"Permission denied. Is the workbook open?", _type="error")
             raise PermissionError(f"Permission denied to write to {workbook_file_path}")
 
     except Exception as e:
-        logging.error(f"Invoice processing error: {e}")
-        messagebox.showerror("Error", f"An error occurred while processing invoices:\n{e}")
+        logging.error(f"{globals.invoice_sheet_label} processing error: {e}")
+        show_toast(globals, f"An error occurred while processing", _type="error")
 
 def parse_credit_cards(globals, history_tree, file_list=None):
     """Writes filename data to the Credit Cards sheet of the workbook, respecting a configurable starting column."""
@@ -160,7 +160,7 @@ def parse_credit_cards(globals, history_tree, file_list=None):
             logging.debug(f"Workbook is accessible.")
             pass
         else:
-            messagebox.showerror("Permission Error", f"Permission denied to write to {workbook_file_path}.\nIs the workbook already open?")
+            show_toast(globals, f"Permission denied.\nIs the workbook already open?", _type="error")
             raise PermissionError(f"Permission denied to write to {workbook_file_path}")
 
         if file_list is None:
@@ -172,7 +172,7 @@ def parse_credit_cards(globals, history_tree, file_list=None):
             full_file_names = [os.path.basename(f) for f in file_list]
 
         if not full_file_names:
-            messagebox.showwarning("Warning", f"No files found in {credit_dir}")
+            show_toast(globals, f"No files found in {credit_dir}", _type="error")
             logging.warning(f"No files found in {credit_dir}")
             return
 
@@ -203,7 +203,8 @@ def parse_credit_cards(globals, history_tree, file_list=None):
             current_row = globals.card_starting_row
         except Exception:
             current_row = 3
-            logging.error("Could not read card starting row. Defaulting to 3.")
+            show_toast(globals, f"Could not read {globals.card_sheet_label} starting row. Defaulting to 3.", _type="error")
+            logging.error(f"Could not read {globals.card_sheet_label} starting row. Defaulting to 3.")
 
         if globals.card_starting_column:
             starting_column = globals.card_starting_column
@@ -255,9 +256,9 @@ def parse_credit_cards(globals, history_tree, file_list=None):
             # Refresh history treeview
             load_history(history_tree)
         else:
-            messagebox.showerror("Permission Error", f"Permission denied to write to {workbook_file_path}.\nIs the workbook already open?")
+            show_toast(globals, f"Permission denied.\nIs the workbook already open?", _type="error")
             raise PermissionError(f"Permission denied to write to {workbook_file_path}")
 
     except Exception as e:
-        messagebox.showerror("Error", f"An error occurred while processing credit cards:\n{e}")
-        logging.error(f"Credit card processing error: {e}")
+        show_toast(globals, f"An error occurred while processing entries for {globals.card_sheet_label}", _type="error")
+        logging.error(f"{globals.card_sheet_label} processing error: {e}")

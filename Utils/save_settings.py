@@ -127,6 +127,9 @@ def save_all_settings(globals):
 
     load_history(globals.history_tree)
 
+    # Configure labels
+    configure_labels(globals)
+
     if hasattr(globals, "refresh_send_buttons"):
         try:
             globals.refresh_send_buttons()
@@ -204,7 +207,10 @@ def save_spreadsheet_specs(globals):
         "po_starting_row": globals.po_starting_row_var.get() or 0,
         "invoice_starting_column": globals.invoice_starting_column_var.get() or 1,
         "card_starting_column": globals.card_starting_column_var.get() or 1,
-        "po_starting_column": globals.po_starting_column_var.get() or 1}
+        "po_starting_column": globals.po_starting_column_var.get() or 1,
+        "invoice_icon": globals.invoice_icon_path or "assets/invoice-1.png",
+        "card_icon": globals.card_icon_path or "assets/card-1.png",
+        "po_icon": globals.po_icon_path or "assets/invoice-2.png"}
     
     try:
         with open(file_path, 'w', encoding='utf-8') as f:
@@ -283,3 +289,8 @@ def save_metadata(globals):
             except Exception as e:
                 logging.error(f"Error saving PDF identities: {e}")
     logging.info(f"Settings saved successfully.")
+
+def configure_labels(globals):
+    globals.invoice_sheet_label.configure(text=globals.sheet_invoices or globals.sheet_invoices_var)
+    globals.card_sheet_label.configure(text=globals.sheet_CreditCards or globals.sheet_CreditCards_var)
+    globals.po_sheet_label.configure(text=globals.sheet_PurchaseOrders or globals.sheet_PurchaseOrders_var)

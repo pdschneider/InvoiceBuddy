@@ -12,7 +12,7 @@ class Globals:
         self.observers = {}
 
         # Current Version
-        self.current_version = "v0.1.1"
+        self.current_version = "v0.1.2"
 
         # Global Variables
         self.os_name = platform.system()
@@ -43,6 +43,9 @@ class Globals:
         self.theme_path = None
         self.inbox_button = None
         self.settings_button = None
+        self.invoice_sheet_label = None
+        self.card_sheet_label = None
+        self.po_sheet_label = None
 
         # Icons
         self.icon = None
@@ -58,6 +61,21 @@ class Globals:
         self.send_icon = None
         self.import_icon = None
         self.export_icon = None
+
+        self.icons_list = ["assets/invoice-1.png",
+                            "assets/invoice-2.png",
+                            "assets/invoice-3.png",
+                            "assets/card-1.png",
+                            "assets/card-2.png",
+                            "assets/cards-1.png",
+                            "assets/cards-2.png",
+                            "assets/money-1.png",
+                            "assets/money-2.png",
+                            "assets/money-bag.png",]
+
+        self.invoice_icon = None
+        self.card_icon = None
+        self.po_icon = None
 
         # Flags
         self.edit_flag = None
@@ -135,6 +153,9 @@ class Globals:
         self.invoice_starting_column = spreadsheet_specs.get("invoice_starting_column", 1)
         self.card_starting_column = spreadsheet_specs.get("card_starting_column", 1)
         self.po_starting_column = spreadsheet_specs.get("po_starting_column", 1)
+        self.invoice_icon_path = spreadsheet_specs.get("invoice_icon", "assets/invoice-1.png")
+        self.card_icon_path = spreadsheet_specs.get("card_icon", "assets/card-1.png")
+        self.po_icon_path = spreadsheet_specs.get("po_icon", "assets/invoice-2.png")
 
 def apply_theme(name: str) -> None:
     """Loads the user's chosen theme and applies it to ctk widgets."""

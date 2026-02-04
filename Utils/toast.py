@@ -4,21 +4,24 @@ import Utils.fonts as fonts
 import logging
 
 def _place_toast(root, toast):
-    """Re‑position toast at the bottom‑right of *root*."""
+    """Reposition toast at the bottom right of *root*."""
     root.update_idletasks()
     x = root.winfo_x() + root.winfo_width() - toast.winfo_reqwidth() - 20
     y = root.winfo_y() + root.winfo_height() - toast.winfo_reqheight() - 20
     toast.geometry(f"+{x}+{y}")
 
-def show_toast(globals, message, duration=3000):
-    """Shows a toast notification at the bottom right of the screen. Replaces some messagebox's"""
+def show_toast(globals, message, duration=3000, _type=None):
+    """Shows a toast notification at the bottom right of the screen."""
     # Create the toast window
     toast = tk.Toplevel(globals.root)
     toast.overrideredirect(True)
 
     # Styling
     try:
-        background = globals.theme_dict["CTkFrame"]["text_color"]
+        if _type == "error":
+            background = "#8B0000"
+        else:
+            background = globals.theme_dict["CTkFrame"]["text_color"]
     except Exception:
         logging.warning("Theme lookup failed – using dark background")
         background = "#333333"

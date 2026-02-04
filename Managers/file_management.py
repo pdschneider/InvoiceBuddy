@@ -53,8 +53,10 @@ def move_files(globals, history_tree, directory, folder_map, oneoffs_folder, fil
         load_history(history_tree)
 
     if errors:
-        messagebox.showerror("Move Errors", "\n".join(errors))
+        show_toast(globals, f"Error moving some files", _type="error")
+        logging.error("Move Errors", "\n".join(errors))
     elif moved_files == 0:
-        messagebox.showwarning("No Files", f"No files moved in {directory}.")
+        show_toast(globals, f"No files moved in {directory}.", _type="error")
+        logging.warning("No Files", f"No files moved in {directory}.")
     else:
         show_toast(globals, f"Archived {moved_files} files successfully!")

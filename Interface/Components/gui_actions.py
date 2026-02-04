@@ -1,6 +1,6 @@
 # Interface/Components/gui_actions.py
 import os, subprocess, logging, shutil
-from tkinter import messagebox, filedialog
+from tkinter import filedialog, messagebox
 from Managers.pdfsearch import apply_auto_naming
 from Managers.data_processing import parse_invoices, parse_credit_cards
 from Managers.file_management import move_files
@@ -25,7 +25,7 @@ def add_file(globals):
                 for file in files_list:
                     if not file.lower().endswith(".pdf"):
                         logging.warning(f"Only PDF files can be added.")
-                        messagebox.showerror(parent=globals.root, title="Unable to Add File", message="Only PDF files can be added.")
+                        show_toast(globals, "Only PDF files can be added.", _type="error")
                         return
                 for file in new_file:
                         save_metadata(globals)
@@ -34,10 +34,10 @@ def add_file(globals):
         except Exception as e:
             for file in new_file:
                 logging.error(f"Could not add {file} to inbox due to: {e}")
-            messagebox.showerror(parent=globals.root, title="Unable to Add File", message="Unable to add files.")
+            show_toast(globals, f"Unable to add files.", _type="error")
     else:
         logging.error(f"Cannot add files to an invalid inbox path.")
-        messagebox.showwarning(parent=globals.root, title="Unable to Add File", message="Select a valid inbox path first.")
+        show_toast(globals, f"Unable to add file - Select a valid inbox path first", _type="error")
 
 def browse_file(var):
     """Open a file dialog to select a file and set the variable."""
@@ -63,15 +63,15 @@ def open_workbook(globals):
                 subprocess.run(['xdg-open', globals.workbook], check=True)
             logging.info(f"Opened workbook: {globals.workbook}")
         except PermissionError as e:
-            messagebox.showerror("Error", f"Permission Error. Is the workbook already open?\n {e}")
-            logging.error(f"Permission Error. Is the workbook already open?\n {e}")
+            show_toast(globals, f"Permission Error. Is the workbook already open?", _type="error")
+            logging.error(f"Permission Error accessing {globals.workbook}: {e}")
             return
         except Exception as e:
-            messagebox.showerror("Error", f"Failed to open workbook {globals.workbook}: {e}")
+            show_toast(globals, "Failed to open workbook", _type="error")
             logging.error(f"Error opening workbook {globals.workbook}: {e}")
             return
     else:
-        messagebox.showerror("Error", f"Cannot open workbook. Invalid file path: {globals.workbook}")
+        show_toast(globals, f"Invalid workbook path", _type="error")
         logging.error(f"Cannot open workbook. Invalid file path {globals.workbook}")
         return
 
@@ -79,7 +79,7 @@ def open_directory(directory):
     """Opens the directory of the current tab."""
     try:
         if not directory or not os.path.isdir(directory):
-            messagebox.showerror("Error", f"Invalid directory: {directory}")
+            show_toast(globals, "Invalid directory", _type="error")
             logging.error(f"Cannot open directory: Invalid path {directory}")
             return
         try:
@@ -88,7 +88,7 @@ def open_directory(directory):
             subprocess.run(['xdg-open', directory], check=True)
         logging.info(f"Opened directory: {directory}")
     except Exception as e:
-        messagebox.showerror("Error", f"Failed to open directory {directory}: {e}")
+        show_toast(globals, f"Failed to open directory", _type="error")
         logging.error(f"Error opening directory {directory}: {e}")
 
 def open_selected_folders(globals):
@@ -121,16 +121,16 @@ def pdf_button(globals, companies=None, directory=None, file_list=None):
     """One-click auto-naming — all logic in apply_auto_naming."""
     save_metadata(globals)
     if not file_list:
-        show_toast(globals, "Please select one or more files to auto-name.")
+        messagebox.showinfo("Nothing Selected", "Please select one or more files to auto-name.")
         return
 
     search_dir = os.path.normpath(directory or globals.sources['inbox'])
     changes = apply_auto_naming(search_dir, file_list)
 
     if changes == 0:
-        show_toast(globals, "Files already properly named or no matches found in file contents.")
+        messagebox.showinfo("Nothing to Do", "Files already properly named or no matches found in file contents.")
     else:
-        show_toast(globals, f"Auto-Name Complete. Updated {changes} file(s).")
+        messagebox.showinfo("Complete", f"Auto-Name Complete. Updated {changes} file(s).")
 
     globals.root.after(100, globals.update_file_counts)
 
@@ -148,7 +148,8 @@ def parse_to_spreadsheet(globals, file_type, file_list=None):
         "Credit Cards": parse_credit_cards,}
 
     if file_type not in parsers:
-        messagebox.showerror("Error", f"Unsupported file type: {file_type}")
+        show_toast(globals, f"Unsupported file type: {file_type}", _type="error")
+        logging.error(f"Unsupported file type: {file_type}")
         return
 
     # Call the selected parser with the exact signature it expects
@@ -205,7 +206,7 @@ def smart_spreadsheet_button(globals, file_list=None):
             f"Entered {processed} files.\n"
             f"Skipped {skipped} files (tagged as Purchase or unknown).")
     else:
-        messagebox.showwarning("Warning", f"No valid workbook path. Skipping entering data.")
+        show_toast(globals, f"No valid workbook path. Skipping entering data.", _type="error")
         logging.warning(f"No valid workbook path. Skipping entering data.")
 
 def invoice_button(globals, file_list=None):

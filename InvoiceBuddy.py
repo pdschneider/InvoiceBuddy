@@ -1,5 +1,5 @@
 # InvoiceBuddy.py
-# v0.1.1
+# v0.1.2
 
 # Sets up logging and settings files
 from Utils.setup import setup
@@ -45,16 +45,11 @@ else:
 """
 Changelog:
 
-- Switched to toast notifications for some messages
-- Fixed error when deleting files on network drive
-- Removed unnecessary two letter word from onboarding page for English majors
-- History path defaults to user-specific default path if not valid
-- Changed "Moved" to "Archived" in history for clarity
-- Added optional update for company map upon startup
-- App ignores non-.pdf changes in the inbox folder, avoiding unnecessary GUI rebuilds
-- Fixed error when buddy is named 'inbox'
-- Updated PSI to Summit Fire
-- Updated dependencies
-- General stability improvements
+- Switched some warning messageboxes to toasts
+- Icons now visible in spreadsheet settings
+- Changing the sheet name now changes its label
+- User can now select from a set of icons to represent sheets
+- New icons added
+- Updated logging with new sheet labels
 
 """

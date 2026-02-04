@@ -17,22 +17,6 @@ class Treeview:
         self._last_idx = None
         self._rename_bind_id = None
 
-        # Get Icons
-        self.invoice_icon = CTkImage(
-        light_image=Image.open(load_data_path("config", "assets/invoice-1.png")),
-        dark_image=Image.open(load_data_path("config", "assets/invoice-1.png")),
-        size=(30, 30))
-
-        self.card_icon = CTkImage(
-        light_image=Image.open(load_data_path("config", "assets/card-1.png")),
-        dark_image=Image.open(load_data_path("config", "assets/card-1.png")),
-        size=(30, 30))
-
-        self.po_icon = CTkImage(
-        light_image=Image.open(load_data_path("config", "assets/invoice-2.png")),
-        dark_image=Image.open(load_data_path("config", "assets/invoice-2.png")),
-        size=(30, 30))
-
         if get_dir is None:
             self.get_dir = self.globals.sources["inbox"]
         elif callable(get_dir):
@@ -69,7 +53,7 @@ class Treeview:
             base_name = os.path.splitext(file)[0]
 
             identity_state = {"cycle": 0}
-            icons = [self.invoice_icon, self.card_icon, self.po_icon]
+            icons = [self.globals.invoice_icon, self.globals.card_icon, self.globals.po_icon]
             types = ["Invoice", "Card", "Purchase"]
 
             full_path = os.path.join(self.get_dir(), file)
@@ -276,7 +260,7 @@ class Treeview:
             base_name = os.path.splitext(file)[0]
 
             identity_state = {"cycle": 0}
-            icons = [self.invoice_icon, self.card_icon, self.po_icon]
+            icons = [self.globals.invoice_icon, self.globals.card_icon, self.globals.po_icon]
             types = ["Invoice", "Card", "Purchase"]
 
             full_path = os.path.join(self.get_dir(), file)

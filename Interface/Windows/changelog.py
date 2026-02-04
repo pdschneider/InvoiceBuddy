@@ -23,6 +23,23 @@ def create_changelog(globals, changelog_tab):
 
        # Main Changelog Sections
 
+       # v0.1.2
+       ctk.CTkLabel(changelog_frame,
+                     text="v0.1.2",
+                     font=fonts.heading_font,
+                     anchor="center").pack(fill="x", pady=20, padx=10)
+
+       ctk.CTkLabel(changelog_frame,
+                     justify="left",
+                     anchor="center",
+                     wraplength=400,
+                     text = "- Switched some warning messageboxes to toasts\n" \
+                              "- Icons now visible in spreadsheet settings\n" \
+                              "- Changing the sheet name now changes its label\n" \
+                              "- User can now select from a set of icons to represent sheets\n" \
+                              "- New icons added\n" \
+                              "- Updated logging with new sheet labels").pack(fill="both", expand=True, padx=10, pady=10)
+
        # v0.1.1
        ctk.CTkLabel(changelog_frame,
                      text="v0.1.1",

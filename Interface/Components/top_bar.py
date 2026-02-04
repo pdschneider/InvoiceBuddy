@@ -2,8 +2,6 @@
 import customtkinter as ctk
 import tkinter as tk
 from CTkToolTip import CTkToolTip
-from customtkinter import CTkImage
-from PIL import Image
 from Utils.load_settings import load_data_path
 
 def create_top_bar(globals):
@@ -31,10 +29,6 @@ def create_top_bar(globals):
         globals.settings_page.tkraise()
         globals.title.configure(text="Settings")
 
-    # Get Icons
-    globals.inbox_icon = load_data_path("config", "assets/mail.png")
-    inbox_icon = tk.PhotoImage(file=str(globals.inbox_icon))
-
     # Main top bar
     top_bar = ctk.CTkFrame(globals.root, height=55, corner_radius=0)
     globals.top_bar = top_bar
@@ -44,7 +38,7 @@ def create_top_bar(globals):
     # Inbox button (left)
     globals.inbox_button = ctk.CTkButton(
         top_bar,
-        image=inbox_icon,
+        image=globals.inbox_icon,
         text=None,
         width=45,
         height=45)

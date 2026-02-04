@@ -70,7 +70,8 @@ def create_inbox(globals, inbox_tab):
             show_toast(globals, "Please select files to move.")
             return
         if not os.path.exists(target_dir):
-            messagebox.showerror("Error", f"Target directory does not exist: {target_dir}")
+            logging.error(f"Target directory does not exist: {target_dir}")
+            show_toast(globals, "Target directory does not exist", _type="error")
             return
 
         moved_count = 0
@@ -92,7 +93,8 @@ def create_inbox(globals, inbox_tab):
         globals.update_file_counts()
         load_history(globals.history_tree)
         if errors:
-            messagebox.showerror("Move Errors", "\n".join(errors))
+            logging.error("Move Errors", f'\n'.join(errors))
+            show_toast(globals, "Some file move errors occurred", _type="error")
         else:
             show_toast(globals, f"Moved {moved_count} files successfully!")
 
@@ -239,9 +241,11 @@ def create_inbox(globals, inbox_tab):
         if trashed_count == len(selected_files):
             show_toast(globals, f"Moved {trashed_count} file{'s' if trashed_count != 1 else ''} to trash.")
         elif trashed_count > 0:
-            messagebox.showwarning("Partial Success", f"Trashed {trashed_count} files.\n\nFailed:\n" + "\n".join(errors))
+            logging.warning(f"Trashed {trashed_count} files.\n\nFailed:\n" + "\n".join(errors))
+            show_toast(globals, f"Trashed {trashed_count} files - Some Failed to Trash\n", _type="error")
         else:
-            messagebox.showerror("Failed", "Could not move any files to trash.\n\n" + "\n".join(errors))
+            logging.error(f"Could not move any files to trash.\n\n" + "\n".join(errors))
+            show_toast(globals, f"Could not move any files to trash.", _type="error")
 
     # Attach command
     delete_button.configure(command=lambda: delete_selected_to_trash(globals))

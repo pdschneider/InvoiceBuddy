@@ -105,6 +105,26 @@ def create_interface(globals):
         dark_image=Image.open(load_data_path("config", "assets/download.png")),
         size=(40, 40))
 
+        globals.inbox_icon = CTkImage(
+        light_image=Image.open(load_data_path("config", "assets/mail.png")),
+        dark_image=Image.open(load_data_path("config", "assets/mail.png")),
+        size=(40, 40))
+
+        globals.invoice_icon = CTkImage(
+        light_image=Image.open(load_data_path("config", globals.invoice_icon_path)),
+        dark_image=Image.open(load_data_path("config", globals.invoice_icon_path)),
+        size=(30, 30))
+
+        globals.card_icon = CTkImage(
+        light_image=Image.open(load_data_path("config", globals.card_icon_path)),
+        dark_image=Image.open(load_data_path("config", globals.card_icon_path)),
+        size=(30, 30))
+
+        globals.po_icon = CTkImage(
+        light_image=Image.open(load_data_path("config", globals.po_icon_path)),
+        dark_image=Image.open(load_data_path("config", globals.po_icon_path)),
+        size=(30, 30))
+
     load_icons()
 
     # Add Navigation

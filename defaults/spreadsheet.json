@@ -7,5 +7,8 @@
     "table_PurchaseOrders": "POTable",
     "invoice_starting_row": 4,
     "card_starting_row": 10,
-    "po_starting_row": 0
+    "po_starting_row": 0,
+    "invoice_icon": "assets/invoice-1.png",
+    "card_icon": "assets/card-1.png",
+    "po_icon": "assets/invoice-2.png"
 }
