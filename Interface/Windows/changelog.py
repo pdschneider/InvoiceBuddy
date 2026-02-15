@@ -23,6 +23,23 @@ def create_changelog(globals, changelog_tab):
 
        # Main Changelog Sections
 
+       # v0.1.3
+       ctk.CTkLabel(changelog_frame,
+                     text="v0.1.3",
+                     font=fonts.heading_font,
+                     anchor="center").pack(fill="x", pady=20, padx=10)
+
+       ctk.CTkLabel(changelog_frame,
+                     justify="left",
+                     anchor="center",
+                     wraplength=400,
+                     text = "- Spreadsheet settings are now housed in a scrollable frame\n" \
+                              "- Invoice number & date detection have been enhanced\n" \
+                              "- Internal company database updated\n" \
+                              "- Removed 'Program has been bundled with Pyinstaller' debug log spam\n" \
+                              "- Archive path automatically transfers from folder_maps.json to paths.json\n" \
+                              "- The app now prompts to update the folder map as well as company map").pack(fill="both", expand=True, padx=10, pady=10)
+
        # v0.1.2
        ctk.CTkLabel(changelog_frame,
                      text="v0.1.2",

@@ -56,7 +56,6 @@ def load_data_path(direct=None, filename=None):
                         "themes/dark_cloud.json", 
                         "themes/soft_light.json"]
     if getattr(sys, 'frozen', False):
-        logging.debug(f"Program has been bundled with Pyinstaller")
         if direct == "config":
             if platform.system().startswith("Windows"):
                 persistent_dir = os.path.normpath(os.path.join(os.getenv("APPDATA"), "InvoiceBuddy"))
@@ -195,7 +194,6 @@ def load_default_data_path(direct=None, filename=None):
                         "themes/dark_cloud.json", 
                         "themes/soft_light.json"]
     if getattr(sys, 'frozen', False):
-        logging.debug(f"Program has been bundled with Pyinstaller")
         if direct == "config":
             if platform.system().startswith("Windows"):
                 persistent_dir = os.path.normpath(os.path.join(os.getenv("APPDATA"), "InvoiceBuddy"))
@@ -326,20 +324,28 @@ def load_history_path():
 def load_folder_map():
     """Load folder_map from folder_maps.json and return (folder_map, oneoffs_folder)."""
     try:
+        # Load subfolders from folder_maps
         file_path = os.path.normpath(load_data_path("config", "folder_maps.json"))
         logging.debug(f"Loading folder_maps.json from: {file_path}")
         with open(file_path, 'r') as f:
-            data = json.load(f)
+            subfolder_data = json.load(f)
+        
+        # Load archive from paths.json
+        file_path = os.path.normpath(load_data_path("config", "paths.json"))
+        logging.debug(f"Loading paths.json from: {file_path}")
+        with open(file_path, 'r') as f:
+            archive_path_data = json.load(f)
         
         try:
-            archive_path = os.path.normpath(data['bases']['archive'])
+            archive_path = archive_path_data["sources"]["archive"]
+            logging.debug(f"Archive Path from load_folder_map: {archive_path}")
         except:
             logging.warning(f"Archive path not loaded properly in load_folder_map, sanitizing...")
             archive_path = ""
 
         folder_map = {}
         # All vendors (former facility + utility) now live under the single archive folder
-        for key_str, subfolder in data['maps'].items():
+        for key_str, subfolder in subfolder_data['maps'].items():
             tuple_key = tuple(key_str.split(','))
             full_path = os.path.join(archive_path, subfolder)
             logging.debug(f"Full path to folder_maps: {full_path}")

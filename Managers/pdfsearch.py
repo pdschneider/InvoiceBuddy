@@ -32,7 +32,7 @@ def extract_text_with_ocr(full_path):
         logging.error(f"OCR error on {full_path}: {e}")
         return ""
 
-def pdf_search(companies=None, directory=None, file_list=None):
+def company_search(companies=None, directory=None, file_list=None):
     """
     Returns dict: {original_filename: "SuggestedCompany.pdf" or None}
     Skips if file already starts with a known company.
@@ -122,7 +122,7 @@ def pdf_search(companies=None, directory=None, file_list=None):
         return results
 
     except Exception as e:
-        logging.error(f"Error in pdf_search: {e}")
+        logging.error(f"Error in company_search: {e}")
         return {}
 
 def date_search(companies=None, directory=None, file_list=None):
@@ -150,13 +150,15 @@ def date_search(companies=None, directory=None, file_list=None):
     }
 
     date_patterns = [
-        (r'\b(\d{4})-(\d{2})-(\d{2})\b', lambda m: f"{m.group(2)}-{m.group(3)}-{m.group(1)[-2:]}"),
-        (r'\b(\d{1,2})/(\d{1,2})/(\d{4})\b', lambda m: f"{m.group(1).zfill(2)}-{m.group(2).zfill(2)}-{m.group(3)[-2:]}"),
-        (r'\b(\d{2})-([A-Za-z]{3})-(\d{4})\b', lambda m: f"{month_map.get(m.group(2).lower(), '')}-{m.group(1)}-{m.group(3)[-2:]}" if month_map.get(m.group(2).lower()) else None),
-        (r'\b(\d{1,2})\.(\d{1,2})\.(\d{2})\b', lambda m: f"{m.group(1).zfill(2)}-{m.group(2).zfill(2)}-{m.group(3)}"),
-        (r'\b([A-Za-z]+)\s+(\d{1,2}),\s+(\d{4})\b', lambda m: f"{month_map.get(m.group(1).lower(), '')}-{m.group(2).zfill(2)}-{m.group(3)[-2:]}" if month_map.get(m.group(1).lower()) else None),
-        (r'\b([A-Za-z]+)\s+(\d{1,2})\s+(\d{4})\b', lambda m: f"{month_map.get(m.group(1).lower(), '')}-{m.group(2).zfill(2)}-{m.group(3)[-2:]}" if month_map.get(m.group(1).lower()) else None)
-    ]
+            (r'\b(\d{4})-(\d{2})-(\d{2})\b', lambda m: f"{m.group(2)}-{m.group(3)}-{m.group(1)[-2:]}"),
+            (r'\b(\d{1,2})/(\d{1,2})/(\d{4})\b', lambda m: f"{m.group(1).zfill(2)}-{m.group(2).zfill(2)}-{m.group(3)[-2:]}"),
+            (r'\b(\d{2})-([A-Za-z]{3})-(\d{4})\b', lambda m: f"{month_map.get(m.group(2).lower(), '')}-{m.group(1)}-{m.group(3)[-2:]}" if month_map.get(m.group(2).lower()) else None),
+            (r'\b(\d{1,2})\.(\d{1,2})\.(\d{2})\b', lambda m: f"{m.group(1).zfill(2)}-{m.group(2).zfill(2)}-{m.group(3)}"),
+            (r'\b([A-Za-z]+)\s+(\d{1,2}),\s+(\d{4})\b', lambda m: f"{month_map.get(m.group(1).lower(), '')}-{m.group(2).zfill(2)}-{m.group(3)[-2:]}" if month_map.get(m.group(1).lower()) else None),
+            (r'\b([A-Za-z]+)\s+(\d{1,2})\s+(\d{4})\b', lambda m: f"{month_map.get(m.group(1).lower(), '')}-{m.group(2).zfill(2)}-{m.group(3)[-2:]}" if month_map.get(m.group(1).lower()) else None),
+            (r'\b([A-Za-z]+)\s+(\d{1,2})(?:st|nd|rd|th)?\s*,?\s*(\d{4})\b', lambda m: f"{month_map.get(m.group(1).lower(), '')}-{m.group(2).zfill(2)}-{m.group(3)[-2:]}" if month_map.get(m.group(1).lower()) else None),
+            (r'\b(\d{1,2})[/-](\d{1,2})[/-](\d{2,4})\b', lambda m: f"{m.group(1).zfill(2)}-{m.group(2).zfill(2)}-{m.group(3).zfill(4)[-2:]}"),
+        ]
 
     try:
         if not os.path.isdir(search_dir):
@@ -218,12 +220,52 @@ def invoice_number_search(directory, file_list=None):
     search_dir = directory.strip()
 
     triggers = [
-        r'invoice\s*[:#]?\s*([A-Za-z0-9\-_]+)',
-        r'invoice\s+no?\.?\s*[:#]?\s*([A-Za-z0-9\-_]+)',
-        r'inv\s*[:#]?\s*([A-Za-z0-9\-_]+)',
-        r'invoice\s+number\s*[:#]?\s*([A-Za-z0-9\-_]+)',
-        r'order\s+number\s*[:#]?\s*([0-9]+)'
-    ]
+    # Looks for "order #:" or "order:" followed by a long alphanumeric code (8–30 chars)
+    r'order\s*#?\s*:\s*([A-Za-z0-9]{8,30})',
+
+    # Matches "invoice" or "inv" followed by optional "no.", "number", "#", then captures the next identifier
+    r'(?:invoice|inv)\s*(?:no\.?|number|#)\s*[:#]?\s*([A-Za-z0-9\-_]{3,20})',
+
+    # Catches "invoice no." (with optional period) followed by any short alphanumeric code
+    r'invoice\s+no?\.?\s*[:#]?\s*([A-Za-z0-9\-_]+)',
+
+    # Specifically targets "invoice" followed by "nbr.", "no.", "number", or "#", then a number
+    # Handles cases like "Invoice Nbr.: 009660" — requires at least 4 digits
+    r'\binvoice\s*(?:nbr\.?|no\.?|number|#)?\s*[:.]?\s*([0-9]{4,})',
+
+    # Strong pattern for "inv" or "invoice" (whole word) with optional label, captures pure numbers (3+ digits)
+    # Reliable for most clean "Invoice # 12345" or "Inv 678" formats
+    r'\binv(?:oice)?\b\s*(?:no\.?|number|#|[:#])?\s*([0-9]{3,})',
+
+    # Matches "invoice number" followed by any alphanumeric code
+    r'invoice\s+number\s*[:#]?\s*([A-Za-z0-9\-_]+)',
+
+    # Looks for "order number" followed by digits only
+    r'order\s+number\s*[:#]?\s*([0-9]+)',
+
+    # Looks for "invoice #" or just "invoice" followed by a number, skips a date if present, and captures
+    # only a number 3 digits or more while ignoring "wa" and zip codes
+    r'invoice\s*#?\s*wa\s*\d{5}\s*(?:\d{1,2}/\d{1,2}/\d{4}|\d{2}/\d{2}/\d{4})?\s*(\d{3,})\b',
+
+    # Fallback: finds the first standalone 6–8 digit number anywhere in the document
+    r'(?s)\b(\d{6,8})\b(?!\s*[/-]\d{1,2})',
+
+    # Catches "invoice" optionally followed by ":" or "#", then a number (at least 4 digits)
+    r'invoice\s*[:#]?\s*(\d{4,}[A-Za-z0-9\-_]*)',
+
+    # Looks for "order id" followed by alphanumeric code
+    r'order\s+id\s*[:#]?\s*([A-Za-z0-9]+)',
+
+    # Catches "order #" followed by digits only
+    r'order\s*#?\s*([0-9]+)',
+
+    # Very cautious fallback: 6–8 digit number not looking like a date or zip
+    # Tries to avoid obvious false positives like partial dates or postal codes
+    r'(?<![\d/])(?<!\d{2}-\d{2})(?<!\d{2}/\d{2})(?<!\d{5}\s)\b(\d{6,8})\b(?!\s*-?\s*\d{2})',
+
+    # Last-resort fallback: any standalone 6–8 digit number not followed by date-like pattern
+    r'\b(\d{6,8})\b(?![-/]\d)'
+]
 
     results = {}
 
@@ -315,6 +357,7 @@ def apply_auto_naming(directory, file_list=None):
             logging.debug(f"Full file contents with OCR: {text}")
 
         normalized = normalize_text(text)
+        logging.debug(f"Normalized Text: \n{normalized}\n")
 
         new_parts = parts[:]
 
@@ -346,7 +389,9 @@ def apply_auto_naming(directory, file_list=None):
             (r'\b(\d{2})-([A-Za-z]{3})-(\d{4})\b', lambda m: f"{month_map.get(m.group(2).lower(), '')}-{m.group(1)}-{m.group(3)[-2:]}" if month_map.get(m.group(2).lower()) else None),
             (r'\b(\d{1,2})\.(\d{1,2})\.(\d{2})\b', lambda m: f"{m.group(1).zfill(2)}-{m.group(2).zfill(2)}-{m.group(3)}"),
             (r'\b([A-Za-z]+)\s+(\d{1,2}),\s+(\d{4})\b', lambda m: f"{month_map.get(m.group(1).lower(), '')}-{m.group(2).zfill(2)}-{m.group(3)[-2:]}" if month_map.get(m.group(1).lower()) else None),
-            (r'\b([A-Za-z]+)\s+(\d{1,2})\s+(\d{4})\b', lambda m: f"{month_map.get(m.group(1).lower(), '')}-{m.group(2).zfill(2)}-{m.group(3)[-2:]}" if month_map.get(m.group(1).lower()) else None)
+            (r'\b([A-Za-z]+)\s+(\d{1,2})\s+(\d{4})\b', lambda m: f"{month_map.get(m.group(1).lower(), '')}-{m.group(2).zfill(2)}-{m.group(3)[-2:]}" if month_map.get(m.group(1).lower()) else None),
+            (r'\b([A-Za-z]+)\s+(\d{1,2})(?:st|nd|rd|th)?\s*,?\s*(\d{4})\b', lambda m: f"{month_map.get(m.group(1).lower(), '')}-{m.group(2).zfill(2)}-{m.group(3)[-2:]}" if month_map.get(m.group(1).lower()) else None),
+            (r'\b(\d{1,2})[/-](\d{1,2})[/-](\d{2,4})\b', lambda m: f"{m.group(1).zfill(2)}-{m.group(2).zfill(2)}-{m.group(3).zfill(4)[-2:]}"),
         ]
 
         # 2. Try to find date
@@ -364,13 +409,55 @@ def apply_auto_naming(directory, file_list=None):
 
         # 3. Try to find invoice number
         invoice = None
-        triggers = [  # reuse your patterns
-            r'invoice\s*[:#]?\s*([A-Za-z0-9\-_]+)',
-            r'invoice\s+no?\.?\s*[:#]?\s*([A-Za-z0-9\-_]+)',
-            r'inv\s*[:#]?\s*([A-Za-z0-9\-_]+)',
-            r'invoice\s+number\s*[:#]?\s*([A-Za-z0-9\-_]+)',
-            r'order\s+number\s*[:#]?\s*([0-9]+)'
-        ]
+
+        triggers = [
+    # Looks for "order #:" or "order:" followed by a long alphanumeric code (8–30 chars)
+    r'order\s*#?\s*:\s*([A-Za-z0-9]{8,30})',
+
+    # Matches "invoice" or "inv" followed by optional "no.", "number", "#", then captures the next identifier
+    r'(?:invoice|inv)\s*(?:no\.?|number|#)\s*[:#]?\s*([A-Za-z0-9\-_]{3,20})',
+
+    # Catches "invoice no." (with optional period) followed by any short alphanumeric code
+    r'invoice\s+no?\.?\s*[:#]?\s*([A-Za-z0-9\-_]+)',
+
+    # Specifically targets "invoice" followed by "nbr.", "no.", "number", or "#", then a number
+    # Handles cases like "Invoice Nbr.: 009660" — requires at least 4 digits
+    r'\binvoice\s*(?:nbr\.?|no\.?|number|#)?\s*[:.]?\s*([0-9]{4,})',
+
+    # Strong pattern for "inv" or "invoice" (whole word) with optional label, captures pure numbers (3+ digits)
+    # Reliable for most clean "Invoice # 12345" or "Inv 678" formats
+    r'\binv(?:oice)?\b\s*(?:no\.?|number|#|[:#])?\s*([0-9]{3,})',
+
+    # Matches "invoice number" followed by any alphanumeric code
+    r'invoice\s+number\s*[:#]?\s*([A-Za-z0-9\-_]+)',
+
+    # Looks for "order number" followed by digits only
+    r'order\s+number\s*[:#]?\s*([0-9]+)',
+
+    # Looks for "invoice #" or just "invoice" followed by a number, skips a date if present, and captures
+    # only a number 3 digits or more while ignoring "wa" and zip codes
+    r'invoice\s*#?\s*wa\s*\d{5}\s*(?:\d{1,2}/\d{1,2}/\d{4}|\d{2}/\d{2}/\d{4})?\s*(\d{3,})\b',
+
+    # Fallback: finds the first standalone 6–8 digit number anywhere in the document
+    r'(?s)\b(\d{6,8})\b(?!\s*[/-]\d{1,2})',
+
+    # Catches "invoice" optionally followed by ":" or "#", then a number (at least 4 digits)
+    r'invoice\s*[:#]?\s*(\d{4,}[A-Za-z0-9\-_]*)',
+
+    # Looks for "order id" followed by alphanumeric code
+    r'order\s+id\s*[:#]?\s*([A-Za-z0-9]+)',
+
+    # Catches "order #" followed by digits only
+    r'order\s*#?\s*([0-9]+)',
+
+    # Very cautious fallback: 6–8 digit number not looking like a date or zip
+    # Tries to avoid obvious false positives like partial dates or postal codes
+    r'(?<![\d/])(?<!\d{2}-\d{2})(?<!\d{2}/\d{2})(?<!\d{5}\s)\b(\d{6,8})\b(?!\s*-?\s*\d{2})',
+
+    # Last-resort fallback: any standalone 6–8 digit number not followed by date-like pattern
+    r'\b(\d{6,8})\b(?![-/]\d)'
+]
+        
         for pattern in triggers:
             match = re.search(pattern, normalized, re.IGNORECASE)
             if match:

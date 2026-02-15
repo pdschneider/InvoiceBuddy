@@ -1,5 +1,5 @@
 # InvoiceBuddy.py
-# v0.1.2
+# v0.1.3
 
 # Sets up logging and settings files
 from Utils.setup import setup
@@ -45,11 +45,11 @@ else:
 """
 Changelog:
 
-- Switched some warning messageboxes to toasts
-- Icons now visible in spreadsheet settings
-- Changing the sheet name now changes its label
-- User can now select from a set of icons to represent sheets
-- New icons added
-- Updated logging with new sheet labels
+- Spreadsheet settings are now housed in a scrollable frame
+- Invoice number & date detection have been enhanced
+- Internal company database updated
+- Removed "Program has been bundled with Pyinstaller" debug log spam
+- Archive path automatically transfers from folder_maps.json to paths.json
+- The app now prompts to update the folder map as well as company map
 
 """

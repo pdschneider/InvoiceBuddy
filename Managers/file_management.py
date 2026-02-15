@@ -21,17 +21,33 @@ def move_files(globals, history_tree, directory, folder_map, oneoffs_folder, fil
     """Moves files from one directory to another."""
     errors = []
     moved_files = 0
+    archive_root = globals.archive.strip()
+    logging.debug(f"Using archive_root: {archive_root}")
+
+    if not archive_root or not os.path.isdir(archive_root):
+        show_toast(globals, "Archive path not set or invalid!", _type="error")
+        logging.error(f"Cannot archive: invalid archive root '{archive_root}'")
+        return
 
     if file_list is None:
         file_list = [os.path.join(directory, filename) for filename in os.listdir(directory) if os.path.isfile(os.path.join(directory, filename))]
+    
     for src_file in file_list:
         filename = os.path.basename(src_file)
         first_word = os.path.splitext(filename)[0].split()[0].lower()
         logging.debug(f"First word of the filename: {first_word}")
+
         file_type = globals.file_identity.get(src_file, "Invoice")  # default to Invoice if untagged
         logging.debug(f"File identity for {src_file}: {file_type}")
 
-        dst_folder = next((folder for words, folder in folder_map.items() if first_word in words), oneoffs_folder)
+        # Find matching subfolder
+        subfolder_name = next(
+            (folder for words, folder in folder_map.items() if first_word in words),
+            oneoffs_folder
+        )
+        logging.debug(f"Matched subfolder: {subfolder_name}")
+
+        dst_folder = os.path.join(archive_root, subfolder_name)
         logging.debug(f"Destination folder: {dst_folder}")
         logging.debug(f"Miscellaneous folder: {oneoffs_folder}")
 

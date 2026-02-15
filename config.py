@@ -12,7 +12,7 @@ class Globals:
         self.observers = {}
 
         # Current Version
-        self.current_version = "v0.1.2"
+        self.current_version = "v0.1.3"
 
         # Global Variables
         self.os_name = platform.system()
@@ -135,10 +135,7 @@ class Globals:
         # Paths
         self.inbox = sources.get("inbox", "")
         self.workbook = sources.get("workbook", "")
-
-        # Folder Maps
-        data = json.load(open(os.path.normpath(load_data_path("config", "folder_maps.json")), 'r'))
-        self.archive_path = os.path.normpath(data['bases']['archive'])
+        self.archive = sources.get("archive", "")
 
         # Spreadsheet
         self.sheet_invoices = spreadsheet_specs.get("sheet_invoices", "Invoices")

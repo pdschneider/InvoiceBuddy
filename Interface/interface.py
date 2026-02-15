@@ -137,7 +137,7 @@ def create_interface(globals):
     # Inbox (Main) Page
     globals.main_page = ctk.CTkFrame(globals.main_frame)
     globals.main_page.pack(fill="both", expand=True, padx=10, pady=0)
-    if not os.path.isfile(globals.workbook) or not os.path.isdir(globals.inbox) or not os.path.isdir(globals.archive_path):
+    if not os.path.isfile(globals.workbook) or not os.path.isdir(globals.inbox) or not os.path.isdir(globals.archive):
         globals.main_page.pack_forget()
         globals.title.configure(text="Welcome!")
         globals.inbox_button.configure(state="disabled")
@@ -146,7 +146,7 @@ def create_interface(globals):
     # Onboarding Page
     globals.onboarding_page = ctk.CTkFrame(globals.main_frame)
     globals.onboarding_page.pack(fill="both", expand=True, padx=10, pady=0)
-    if os.path.isfile(globals.workbook) and os.path.isdir(globals.inbox) and os.path.isdir(globals.archive_path):
+    if os.path.isfile(globals.workbook) and os.path.isdir(globals.inbox) and os.path.isdir(globals.archive):
         globals.onboarding_page.pack_forget()
         globals.title.configure(text="Inbox")
 
@@ -175,7 +175,7 @@ def create_interface(globals):
         globals.invoice_starting_row_var = tk.IntVar(value=globals.invoice_starting_row)
         globals.card_starting_row_var = tk.IntVar(value=globals.card_starting_row)
         globals.po_starting_row_var = tk.IntVar(value=globals.po_starting_row)
-        globals.archive_path_var = tk.StringVar(value=globals.archive_path)
+        globals.archive_path_var = tk.StringVar(value=globals.archive)
         globals.invoice_starting_column_var = tk.IntVar(value=globals.invoice_starting_column)
         globals.card_starting_column_var = tk.IntVar(value=globals.card_starting_column)
         globals.po_starting_column_var = tk.IntVar(value=globals.po_starting_column)

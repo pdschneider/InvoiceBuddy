@@ -11,10 +11,12 @@ def setup():
     setup_folder_maps()
     setup_settings()
     setup_paths()
+    make_legacy_compatible()
     setup_spreadsheet()
     setup_history()
     setup_themes()
     company_map_check()
+    folder_maps_check()
 
 def setup_logging():
     """Sets up logging for both the log file as well as standard console output."""
@@ -88,29 +90,12 @@ def setup_folder_maps():
             data["maps"] = {}
             changed = True
             logging.info("Added missing 'maps' key to folder_maps.json")
-        if "bases" not in data:
-            data["bases"] = {}
-            changed = True
-            logging.info(f"Adding missing 'bases' key to folder_maps.json")
-
-        # Check to make sure keys are present
-        if "archive" not in data.get("bases", {}):
-            data["bases"]["archive"] = ""
-            changed = True
-            logging.info(f"Added missing 'archive' under bases")
 
         # Write to file
         if changed:
             with open(folder_map, 'w', encoding='utf-8') as f:
                 json.dump(data, f, indent=4)
             changed = False
-
-        # Check to make sure keys are the correct type
-        if not isinstance(data["bases"]["archive"], str):
-            logging.warning(f"Current type of value for archive: {type(data["bases"]["archive"])}")
-            data["bases"]["archive"] = ""
-            changed = True
-            logging.info(f"Sanitizing incorrect type 'archive' under bases")
 
         # Write to file
         if changed:
@@ -466,3 +451,102 @@ def company_map_check():
             logging.warning(f"Unable to update company map due to: {e}")
     else:
         logging.info(f"Company map already at current version!")
+
+def folder_maps_check():
+    """Checks if folder map is different from user's folder map, prompts for change."""
+    try:
+        # Read the contents of the default folder_maps path and hash it
+        default_folder_path = load_default_data_path("config", "folder_maps.json")
+        with open(default_folder_path, 'r') as f:
+            default_folder_file = f.read()
+        hashed_default_folder_map = hashlib.md5(default_folder_file.encode()).hexdigest()
+        logging.debug(f"Default folder map hash: {hashed_default_folder_map}")
+
+        # Read the contents of the current user's folder_maps path and hash it
+        user_folder_path = load_data_path("config", "folder_maps.json")
+        with open(user_folder_path, 'r') as f:
+            user_folder_file = f.read()
+        hashed_user_folder_map = hashlib.md5(user_folder_file.encode()).hexdigest()
+        logging.debug(f"User folder map hash: {hashed_user_folder_map}")
+
+    except Exception as e:
+        logging.warning(f"Unable to hash folder_maps.json files due to: {e}")
+        return
+
+    if hashed_default_folder_map != hashed_user_folder_map:
+        try:
+            root = tk.Tk()
+            root.withdraw()
+            answer = messagebox.askyesno(parent=root, 
+                                title="Update Folder Map?" ,
+                                message="Updated folder database available. Would you like to update?")
+            if answer:
+                if os.path.isfile(load_data_path("config", "folder_maps.json")):
+                    logging.debug(f"Removing old folder map...")
+                    os.remove(load_data_path("config", "folder_maps.json"))
+                logging.info(f"Updating folder map...")
+                load_default_data_path("config", "folder_maps.json")
+            else:
+                logging.info(f"Not updating folder map.")
+            root.destroy()
+        except Exception as e:
+            logging.warning(f"Unable to update folder map due to: {e}")
+    else:
+        logging.info(f"Folder map already at current version!")
+
+def make_legacy_compatible():
+    """Reads legacy entries in files and converts them to the modern format usable in recent versions."""
+    try:
+        # Load folder_maps.json
+        folder_maps_path = load_data_path("config", "folder_maps.json")
+        with open(folder_maps_path, 'r', encoding='utf-8') as f:
+            folder_data = json.load(f)
+
+        # Load paths.json
+        paths = load_data_path("config", "paths.json")
+        with open(paths, 'r', encoding='utf-8') as f:
+            paths_data = json.load(f)
+
+        # Get archive path from both files
+        archive_path = folder_data.get("bases", {}).get("archive", "")
+        new_archive_path = paths_data.get("sources", {}).get("archive", "")
+
+        # Skip if archive path is empty or falsy
+        if not archive_path:
+            logging.debug("No archive path defined in folder_maps.json → skipping")
+            return
+        
+        if new_archive_path:
+            logging.debug(f"Archive path already found in paths.json → skipping")
+            return
+
+        # Load paths.json
+        paths_file = load_data_path("config", "paths.json")
+        with open(paths_file, 'r', encoding='utf-8') as f:
+            paths_data = json.load(f)
+
+        changed = False
+
+        # Ensure "sources" exists
+        if "sources" not in paths_data:
+            paths_data["sources"] = {}
+            changed = True
+            logging.info("Added missing 'sources' key to paths.json")
+
+        # Add/update archive key only if it's not already there or different
+        current_archive = paths_data["sources"].get("archive", "")
+        if current_archive != archive_path:
+            paths_data["sources"]["archive"] = archive_path
+            changed = True
+            logging.info(f"Added/updated archive path in paths.json: {archive_path}")
+
+        # Save if changes were made
+        if changed:
+            with open(paths_file, 'w', encoding='utf-8') as f:
+                json.dump(paths_data, f, indent=4)
+            logging.debug("paths.json updated successfully")
+
+    except json.JSONDecodeError as e:
+        logging.error(f"JSON decode error in folder_maps.json or paths.json: {e}")
+    except Exception as e:
+        logging.error(f"Failed to set up archive path: {e}")

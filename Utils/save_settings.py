@@ -40,7 +40,8 @@ def save_all_settings(globals):
     # Sources from UI
     new_sources = {
         "inbox": globals.inbox_dir_var.get().strip() or globals.inbox,
-        "workbook": globals.workbook_var.get().strip() or globals.workbook}
+        "workbook": globals.workbook_var.get().strip() or globals.workbook,
+        "archive": globals.archive_path_var.get().strip() or globals.archive}
     if not os.path.isdir(new_sources["inbox"]):
         logging.debug(f"Inbox is not a valid path. Sanitizing...")
         new_sources["inbox"] = ""
@@ -175,6 +176,7 @@ def save_paths(globals, sources=None, buddies=None):
         globals.buddies = full_data["buddies"]
         globals.inbox = full_data["sources"].get("inbox", "")
         globals.workbook = full_data["sources"].get("workbook", "")
+        globals.archive = full_data["sources"].get("archive", "")
 
     except Exception as e:
         logging.error(f"Failed to save paths.json: {e}")
@@ -227,32 +229,6 @@ def save_folder_map(globals):
     try:
         with open(file_path, 'r', encoding='utf-8') as f:
             data = json.load(f)
-
-        if os.path.isdir(globals.archive_path_var.get().strip()):
-            new_archive = globals.archive_path_var.get().strip()
-        else:
-            logging.warning(f"Archive path invalid Sanitizing...")
-            new_archive = ""
-
-        if not new_archive:
-            logging.warning("Archive path is empty — not saving.")
-            return
-
-        # Normalize and ensure trailing separator
-        normalized_archive = os.path.normpath(new_archive)
-        if not normalized_archive.endswith(os.sep):
-            normalized_archive += os.sep
-
-        old_archive = data['bases']['archive']
-        data['bases']['archive'] = normalized_archive
-
-        with open(file_path, 'w', encoding='utf-8') as f:
-            json.dump(data, f, indent=4)
-
-        logging.info(f"Updated archive path in folder_maps.json: {old_archive} → {normalized_archive}")
-
-        # Update the live globals immediately (redundant but safe)
-        globals.archive_path = normalized_archive
 
     except FileNotFoundError:
         logging.error(f"folder_maps.json not found at {file_path}")

@@ -53,7 +53,6 @@
         "platt": "Platt",
         "precisiondoor": "Precision Door",
         "precisiongolf": "Precision Golf",
-        "psi": "Summit Fire",
         "psca,pugetsoundcleanair": "Puget Sound Clean Air",
         "qualityblinds": "Quality Blinds",
         "rotorooter,roto": "RotoRooter",
@@ -95,9 +94,24 @@
         "steam": "Steam",
         "newegg": "New Egg",
         "usps": "USPS",
-        "streamcord": "Streamcord"
-    },
-    "bases": {
-        "archive": ""
+        "streamcord": "Streamcord",
+        "xfinity": "Xfinity",
+        "chipotle": "Chipotle",
+        "cngc": "Cascade Natural Gas",
+        "rumble": "Rumble",
+        "olivegarden": "Olive Garden",
+        "thrivemarket": "Thrive Market",
+        "botanramen": "Botan Ramen n' Teriyaki",
+        "lowes": "Lowes",
+        "advancedasbestos": "Advanced Asbestos",
+        "batmaster": "Batmaster",
+        "champion": "Champion Bolt & Supply",
+        "greatfloors": "Great Floors",
+        "renusolutions": "Renu Solutions",
+        "Skyline": "Skyline Glass",
+        "SQI": "SQI Commercial Roofing",
+        "SummitFire": "Summit Fire & Security",
+        "Garmire": "Garmire Iron Works",
+        "Britten": "Britten"
     }
 }

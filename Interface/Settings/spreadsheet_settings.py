@@ -5,6 +5,7 @@ import Utils.fonts as fonts
 from Utils.save_settings import save_all_settings
 from Utils.load_settings import load_data_path
 from PIL import Image
+import logging
 
 def create_spreadsheet_settings_tab(globals, spreadsheet_tab):
     """
@@ -13,18 +14,24 @@ def create_spreadsheet_settings_tab(globals, spreadsheet_tab):
     Args:
         globals (globals): The global configuration object containing UI variables and settings.
     """
-    ctk.CTkLabel(spreadsheet_tab, 
-                font=fonts.title_font,
-                text="Spreadsheet").pack(pady=20, fill="x", anchor="center", padx=10)
+
+    # Scrollable frame to house settings
+    try:
+        scrollable_frame = ctk.CTkScrollableFrame(spreadsheet_tab)
+        scrollable_frame.pack(fill="both", expand=True, pady=0, padx=10)
+    except Exception as e:
+        scrollable_frame = ctk.CTkFrame(spreadsheet_tab)
+        scrollable_frame.pack(fill="both", expand=True, pady=0, padx=10)
+        logging.critical(f"Could not create scrollable frame: {e}. Using regular CTkFrame instead.")
 
     # Invoices
-    globals.invoice_sheet_label = ctk.CTkLabel(spreadsheet_tab, 
+    globals.invoice_sheet_label = ctk.CTkLabel(scrollable_frame, 
                 font=fonts.title_font,
                 text=globals.sheet_invoices)
     globals.invoice_sheet_label.pack(pady=20, fill="x", anchor="center", padx=10)
     
     # Invoice Paths Frame
-    invoice_paths_section = ctk.CTkFrame(spreadsheet_tab, fg_color="transparent")
+    invoice_paths_section = ctk.CTkFrame(scrollable_frame, fg_color="transparent")
     invoice_paths_section.pack(fill="x", pady=0, padx=0)
     invoice_paths_section.grid_columnconfigure(1, weight=1)
 
@@ -123,13 +130,13 @@ def create_spreadsheet_settings_tab(globals, spreadsheet_tab):
                     image=new_icon).pack(side="left", padx=4, pady=4)
 
     # Cards
-    globals.card_sheet_label = ctk.CTkLabel(spreadsheet_tab, 
+    globals.card_sheet_label = ctk.CTkLabel(scrollable_frame, 
                 font=fonts.title_font,
                 text=globals.sheet_CreditCards)
     globals.card_sheet_label.pack(pady=20, fill="x", anchor="center", padx=10)
 
     # Cards Paths Frame
-    cards_paths_section = ctk.CTkFrame(spreadsheet_tab, fg_color="transparent")
+    cards_paths_section = ctk.CTkFrame(scrollable_frame, fg_color="transparent")
     cards_paths_section.pack(fill="x", pady=0, padx=0)
     cards_paths_section.grid_columnconfigure(1, weight=1)
 
@@ -227,13 +234,13 @@ def create_spreadsheet_settings_tab(globals, spreadsheet_tab):
                     image=new_icon).pack(side="left", padx=4, pady=4)
 
     # Purchase Orders
-    globals.po_sheet_label = ctk.CTkLabel(spreadsheet_tab, 
+    globals.po_sheet_label = ctk.CTkLabel(scrollable_frame, 
                 font=fonts.title_font,
                 text=globals.sheet_PurchaseOrders)
     globals.po_sheet_label.pack(pady=20, fill="x", anchor="center", padx=10)
     
     # PO Paths Frame
-    po_paths_section = ctk.CTkFrame(spreadsheet_tab, fg_color="transparent")
+    po_paths_section = ctk.CTkFrame(scrollable_frame, fg_color="transparent")
     po_paths_section.pack(fill="x", pady=0, padx=0)
     po_paths_section.grid_columnconfigure(1, weight=1)
 
