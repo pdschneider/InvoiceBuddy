@@ -1,0 +1,156 @@
+{
+    "CTkFont": {
+        "family": "Segoe UI",
+        "size": 14,
+        "weight": "normal"
+    },
+    "CTk": {
+        "fg_color": "#555555"
+    },
+    "CTkFrame": {
+        "bg_color": "#2E2E2E",
+        "fg_color": "#2E2E2E",
+        "corner_radius": 10,
+        "border_color": "#2E2E2E",
+        "border_width": 0,
+        "text_color": "#e8e8e8",
+        "top_fg_color": "#2E2E2E",
+        "top_bg_color": "#2E2E2E"
+    },
+    "CTkLabel": {
+        "bg_color": "transparent",
+        "fg_color": "transparent",
+        "text_color": "#e8e8e8",
+        "border_width": 0,
+        "corner_radius": 0
+    },
+    "CTkButton": {
+        "bg_color": "#2d2d2d",
+        "fg_color": "#353535",
+        "border_color": "#2d2d2d",
+        "hover_color": "#383838",
+        "corner_radius": 8,
+        "border_width": 0,
+        "text_color": "#ffffff",
+        "bg_color_disabled": "#333333",
+        "fg_color_disabled": "#2b2b2b",
+        "border_color_disabled": "#404040",
+        "text_color_disabled": "#777777"
+    },
+    "CTkEntry": {
+        "bg_color": "#2a2a2a",
+        "fg_color": "#2a2a2a",
+        "border_color": "#555555",
+        "placeholder_text_color": "#888888",
+        "border_width": 2,
+        "text_color": "#F2F2F2",
+        "corner_radius": 8
+    },
+    "CTkCheckBox": {
+        "bg_color": "transparent",
+        "fg_color": "#666666",
+        "text_color": "#e8e8e8",
+        "border_color": "#666666",
+        "checkmark_color": "#ffffff",
+        "border_width": 3,
+        "hover_color": "#777777",
+        "corner_radius": 6,
+        "text_color_disabled": "#777777"
+    },
+    "CTkRadioButton": {
+        "bg_color": "transparent",
+        "fg_color": "#666666",
+        "text_color": "#e8e8e8",
+        "border_color": "#666666",
+        "radio_color": "#ffffff",
+        "border_width": 3,
+        "hover_color": "#777777",
+        "corner_radius": 20,
+        "border_width_unchecked": 2,
+        "border_width_checked": 6,
+        "text_color_disabled": "#777777"
+    },
+    "CTkComboBox": {
+        "bg_color": "#1e1e1e",
+        "fg_color": "#282828",
+        "border_color": "#555555",
+        "arrow_color": "#e8e8e8",
+        "border_width": 2,
+        "text_color": "#e8e8e8",
+        "corner_radius": 8,
+        "button_color": "#2d2d2d",
+        "button_hover_color": "#383838",
+        "text_color_disabled": "#777777"
+    },
+    "CTkTextbox": {
+        "bg_color": "#1e1e1e",
+        "fg_color": "#282828",
+        "border_color": "#555555",
+        "corner_radius": 8,
+        "border_width": 2,
+        "text_color": "#F2F2F2",
+        "scrollbar_button_color": "#404040",
+        "scrollbar_button_hover_color": "#505050"
+    },
+    "CTkScrollbar": {
+        "bg_color": "transparent",
+        "fg_color": "transparent",
+        "button_color": "#505050",
+        "button_hover_color": "#606060",
+        "button_pressed_color": "#707070",
+        "corner_radius": 8,
+        "border_width": 0,
+        "border_spacing": 2
+    },
+    "CTkSegmentedButton": {
+        "fg_color": "#1e1e1e",
+        "selected_color": "#2d2d2d",
+        "unselected_color": "#282828",
+        "selected_text_color": "#ffffff",
+        "unselected_text_color": "#e8e8e8",
+        "hover_color": "#383838",
+        "selected_hover_color": "#404040",
+        "unselected_hover_color": "#333333",
+        "text_color": "#ffffff",
+        "border_color": "#555555",
+        "border_width": 1,
+        "corner_radius": 8,
+        "text_color_disabled": "#777777"
+    },
+    "CTkTabview": {
+        "corner_radius": 10,
+        "border_width": 2,
+        "fg_color": "#242424",
+        "border_color": "#404040",
+        "selected_color": "#2d2d2d",
+        "selected_hover_color": "#383838",
+        "text_color": "#e8e8e8",
+        "text_color_disabled": "#888888"
+    },
+    "DropdownMenu": {
+        "fg_color": "#2a2a2a",
+        "hover_color": "#383838",
+        "text_color": "#e8e8e8"
+    },
+    "CTkScrollableFrame": {
+        "bg_color": "#242424",
+        "fg_color": "#2E2E2E",
+        "label_fg_color": "#e8e8e8",
+        "border_color": "#404040",
+        "border_width": 0,
+        "corner_radius": 10
+    },
+    "CTkToplevel": {
+        "fg_color": "#2E2E2E"
+    },
+    "CTkSlider": {
+        "fg_color": "#2a2a2a",
+        "progress_color": "#383838",
+        "button_color": "#353535",
+        "button_hover_color": "#333333",
+        "corner_radius": 6,
+        "button_corner_radius": 6,
+        "border_width": 2,
+        "button_length": 30
+    }
+}
