@@ -348,9 +348,6 @@ def load_folder_map():
         for key_str, subfolder in subfolder_data['maps'].items():
             tuple_key = tuple(key_str.split(','))
             full_path = os.path.join(archive_path, subfolder)
-            logging.debug(f"Full path to folder_maps: {full_path}")
-            logging.debug(f"Archive Path: {archive_path}")
-            logging.debug(f"Archive subfolder: {subfolder}")
             folder_map[tuple_key] = os.path.normpath(full_path)
 
         # One-offs → Miscellaneous subfolder inside the archive

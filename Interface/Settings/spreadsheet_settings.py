@@ -24,6 +24,8 @@ def create_spreadsheet_settings_tab(globals, spreadsheet_tab):
         scrollable_frame.pack(fill="both", expand=True, pady=0, padx=10)
         logging.critical(f"Could not create scrollable frame: {e}. Using regular CTkFrame instead.")
 
+    components_list = ["Company", "Date", "Invoice #", "Card Number", ""]
+
     # Invoices
     globals.invoice_sheet_label = ctk.CTkLabel(scrollable_frame, 
                 font=fonts.title_font,
@@ -89,24 +91,52 @@ def create_spreadsheet_settings_tab(globals, spreadsheet_tab):
                  textvariable=globals.invoice_starting_column_var)
     slider_label_2.pack(side="left")
 
+    ctk.CTkLabel(invoice_paths_section,
+                 font=fonts.heading_font,
+                 text="Column Order:").grid(row=4, column=0, padx=(20, 10), sticky="w")
+    
+    # Invoice Components
+    invoice_components_frame = ctk.CTkFrame(invoice_paths_section, fg_color="transparent")
+    invoice_components_frame.grid(row=4, column=1, padx=(5, 10), sticky="w")
+
+    invoice_a_box = ctk.CTkComboBox(invoice_components_frame, 
+                                    values=components_list,
+                                    variable=globals.invoice_com_a_var)
+    invoice_a_box.grid(row=1, column=1, padx=5)
+
+    invoice_b_box = ctk.CTkComboBox(invoice_components_frame, 
+                                    values=components_list,
+                                    variable=globals.invoice_com_b_var)
+    invoice_b_box.grid(row=1, column=2, padx=5)
+
+    invoice_c_box = ctk.CTkComboBox(invoice_components_frame, 
+                                    values=components_list,
+                                    variable=globals.invoice_com_c_var)
+    invoice_c_box.grid(row=1, column=3, padx=5)
+
+    invoice_d_box = ctk.CTkComboBox(invoice_components_frame, 
+                                    values=components_list,
+                                    variable=globals.invoice_com_d_var)
+    invoice_d_box.grid(row=1, column=4, padx=5)
+
     # Invoice Icon
     ctk.CTkLabel(invoice_paths_section,
                  font=fonts.heading_font,
-                 text="Icon:").grid(row=4, column=0, padx=(20, 10), sticky="w")
+                 text="Icon:").grid(row=5, column=0, padx=(20, 10), sticky="w")
     
     invoice_icon_button = ctk.CTkButton(invoice_paths_section,
                     text=None,
                     width=45,
                     image=globals.invoice_icon)
-    invoice_icon_button.grid(row=4, column=1, padx=5, sticky="w")
+    invoice_icon_button.grid(row=5, column=1, padx=5, sticky="w")
 
     ctk.CTkLabel(invoice_paths_section,
                  font=fonts.heading_font,
-                 text="Select Icon:").grid(row=5, column=0, padx=(20, 10), sticky="w")
+                 text="Select Icon:").grid(row=6, column=0, padx=(20, 10), sticky="w")
 
     # Invoice image selection sub-frame
     invoice_icons_frame = ctk.CTkFrame(invoice_paths_section, fg_color="transparent")
-    invoice_icons_frame.grid(row=5, column=1, padx=(0, 10), sticky="w")
+    invoice_icons_frame.grid(row=6, column=1, padx=(0, 10), sticky="w")
 
     def switch_invoice_icon(current_icon):
         """Switches invoice icon to selected icon"""
@@ -196,17 +226,45 @@ def create_spreadsheet_settings_tab(globals, spreadsheet_tab):
 
     ctk.CTkLabel(cards_paths_section,
                  font=fonts.heading_font,
-                 text="Icon:").grid(row=4, column=0, padx=(20, 10), sticky="w")
+                 text="Column Order:").grid(row=4, column=0, padx=(20, 10), sticky="w")
+    
+    # Card Components
+    card_components_frame = ctk.CTkFrame(cards_paths_section, fg_color="transparent")
+    card_components_frame.grid(row=4, column=1, padx=(5, 10), sticky="w")
+
+    card_a_box = ctk.CTkComboBox(card_components_frame, 
+                                 values=components_list,
+                                 variable=globals.card_com_a_var)
+    card_a_box.grid(row=1, column=1, padx=5)
+
+    card_b_box = ctk.CTkComboBox(card_components_frame, 
+                                 values=components_list,
+                                 variable=globals.card_com_b_var)
+    card_b_box.grid(row=1, column=2, padx=5)
+
+    card_c_box = ctk.CTkComboBox(card_components_frame, 
+                                 values=components_list,
+                                 variable=globals.card_com_c_var)
+    card_c_box.grid(row=1, column=3, padx=5)
+
+    card_d_box = ctk.CTkComboBox(card_components_frame, 
+                                 values=components_list,
+                                 variable=globals.card_com_d_var)
+    card_d_box.grid(row=1, column=4, padx=5)
+
+    ctk.CTkLabel(cards_paths_section,
+                 font=fonts.heading_font,
+                 text="Icon:").grid(row=5, column=0, padx=(20, 10), sticky="w")
     
     card_icon_button = ctk.CTkButton(cards_paths_section,
                   text=None,
                   width=45,
                   image=globals.card_icon)
-    card_icon_button.grid(row=4, column=1, padx=5, sticky="w")
+    card_icon_button.grid(row=5, column=1, padx=5, sticky="w")
 
     ctk.CTkLabel(cards_paths_section,
                  font=fonts.heading_font,
-                 text="Select Icon:").grid(row=5, column=0, padx=(20, 10), sticky="w")
+                 text="Select Icon:").grid(row=6, column=0, padx=(20, 10), sticky="w")
 
     def switch_card_icon(current_icon):
             """Switches invoice icon to selected icon"""
@@ -220,7 +278,7 @@ def create_spreadsheet_settings_tab(globals, spreadsheet_tab):
 
     # Cards image selection sub-frame
     cards_icons_frame = ctk.CTkFrame(cards_paths_section, fg_color="transparent")
-    cards_icons_frame.grid(row=5, column=1, padx=(0, 10), sticky="w")
+    cards_icons_frame.grid(row=6, column=1, padx=(0, 10), sticky="w")
 
     for icon in globals.icons_list:
         new_icon = CTkImage(
@@ -300,17 +358,45 @@ def create_spreadsheet_settings_tab(globals, spreadsheet_tab):
 
     ctk.CTkLabel(po_paths_section,
                  font=fonts.heading_font,
-                 text="Icon:").grid(row=4, column=0, padx=(20, 10), sticky="w")
+                 text="Column Order:").grid(row=4, column=0, padx=(20, 10), sticky="w")
+    
+    # Purchase Orders Components
+    po_components_frame = ctk.CTkFrame(po_paths_section, fg_color="transparent")
+    po_components_frame.grid(row=4, column=1, padx=(5, 10), sticky="w")
+
+    po_a_box = ctk.CTkComboBox(po_components_frame, 
+                               values=components_list,
+                               variable=globals.po_com_a_var)
+    po_a_box.grid(row=1, column=1, padx=5)
+
+    po_b_box = ctk.CTkComboBox(po_components_frame, 
+                               values=components_list,
+                               variable=globals.po_com_b_var)
+    po_b_box.grid(row=1, column=2, padx=5)
+
+    po_c_box = ctk.CTkComboBox(po_components_frame, 
+                               values=components_list,
+                               variable=globals.po_com_c_var)
+    po_c_box.grid(row=1, column=3, padx=5)
+
+    po_d_box = ctk.CTkComboBox(po_components_frame, 
+                               values=components_list,
+                               variable=globals.po_com_d_var)
+    po_d_box.grid(row=1, column=4, padx=5)
+
+    ctk.CTkLabel(po_paths_section,
+                 font=fonts.heading_font,
+                 text="Icon:").grid(row=5, column=0, padx=(20, 10), sticky="w")
     
     po_icon_button = ctk.CTkButton(po_paths_section,
                   text=None,
                   width=45,
                   image=globals.po_icon)
-    po_icon_button.grid(row=4, column=1, padx=5, sticky="w")
+    po_icon_button.grid(row=5, column=1, padx=5, sticky="w")
     
     ctk.CTkLabel(po_paths_section,
                  font=fonts.heading_font,
-                 text="Select Icon:").grid(row=5, column=0, padx=(20, 10), sticky="w")
+                 text="Select Icon:").grid(row=6, column=0, padx=(20, 10), sticky="w")
 
     def switch_po_icon(current_icon):
             """Switches invoice icon to selected icon"""
@@ -324,7 +410,7 @@ def create_spreadsheet_settings_tab(globals, spreadsheet_tab):
 
     # Purchase Orders image selection sub-frame
     po_icons_frame = ctk.CTkFrame(po_paths_section, fg_color="transparent")
-    po_icons_frame.grid(row=5, column=1, padx=(0, 10), sticky="w")
+    po_icons_frame.grid(row=6, column=1, padx=(0, 10), sticky="w")
 
     for icon in globals.icons_list:
         new_icon = CTkImage(

@@ -1,5 +1,5 @@
 # InvoiceBuddy.py
-# v0.1.3
+# v0.1.4
 
 # Sets up logging and settings files
 from Utils.setup import setup
@@ -45,11 +45,16 @@ else:
 """
 Changelog:
 
-- Spreadsheet settings are now housed in a scrollable frame
-- Invoice number & date detection have been enhanced
-- Internal company database updated
-- Removed "Program has been bundled with Pyinstaller" debug log spam
-- Archive path automatically transfers from folder_maps.json to paths.json
-- The app now prompts to update the folder map as well as company map
+- Removed folder map debug log spam on startup
+- Greatly improved auto-name logic
+- New companies added to database
+- Each autoname function has been split into their own scripts
+- Autoname now saves data to file metadata
+- Added startup checks to fix missing or nonconforming values in spreadsheet.json
+- Added column keys to default spreadsheet.json file
+- User can now choose the order autoname adds components to filenames
+- Added Credit Card Number component to auto-name
+- Added OCR fallback for cases when a file returns nothing
+- Updated dependencies
 
 """

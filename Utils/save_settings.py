@@ -103,6 +103,18 @@ def save_all_settings(globals):
     globals.invoice_starting_column_var.set(globals.invoice_starting_column)
     globals.card_starting_column_var.set(globals.card_starting_column)
     globals.po_starting_column_var.set(globals.po_starting_column)
+    globals.invoice_com_a_var.set(globals.invoice_component_a)
+    globals.invoice_com_b_var.set(globals.invoice_component_b)
+    globals.invoice_com_c_var.set(globals.invoice_component_c)
+    globals.invoice_com_d_var.set(globals.invoice_component_d)
+    globals.card_com_a_var.set(globals.card_component_a)
+    globals.card_com_b_var.set(globals.card_component_b)
+    globals.card_com_c_var.set(globals.card_component_c)
+    globals.card_com_d_var.set(globals.card_component_d)
+    globals.po_com_a_var.set(globals.po_component_a)
+    globals.po_com_b_var.set(globals.po_component_b)
+    globals.po_com_c_var.set(globals.po_component_c)
+    globals.po_com_d_var.set(globals.po_component_d)
 
     # Reload settings to update globals
     settings = load_settings()
@@ -212,7 +224,20 @@ def save_spreadsheet_specs(globals):
         "po_starting_column": globals.po_starting_column_var.get() or 1,
         "invoice_icon": globals.invoice_icon_path or "assets/invoice-1.png",
         "card_icon": globals.card_icon_path or "assets/card-1.png",
-        "po_icon": globals.po_icon_path or "assets/invoice-2.png"}
+        "po_icon": globals.po_icon_path or "assets/invoice-2.png",
+        "invoice_component_a": globals.invoice_com_a_var.get() or "",
+        "invoice_component_b": globals.invoice_com_b_var.get() or "",
+        "invoice_component_c": globals.invoice_com_c_var.get() or "",
+        "invoice_component_d": globals.invoice_com_d_var.get() or "",
+        "card_component_a": globals.card_com_a_var.get() or "",
+        "card_component_b": globals.card_com_b_var.get() or "",
+        "card_component_c": globals.card_com_c_var.get() or "",
+        "card_component_d": globals.card_com_d_var.get() or "",
+        "po_component_a": globals.po_com_a_var.get() or "",
+        "po_component_b": globals.po_com_b_var.get() or "",
+        "po_component_c": globals.po_com_c_var.get() or "",
+        "po_component_d": globals.po_com_d_var.get() or ""
+        }
     
     try:
         with open(file_path, 'w', encoding='utf-8') as f:

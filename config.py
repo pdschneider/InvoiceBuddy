@@ -12,7 +12,7 @@ class Globals:
         self.observers = {}
 
         # Current Version
-        self.current_version = "v0.1.3"
+        self.current_version = "v0.1.4"
 
         # Global Variables
         self.os_name = platform.system()
@@ -113,6 +113,22 @@ class Globals:
         self.card_starting_column_var = None
         self.po_starting_column_var = None
 
+        # Temporary Components Vars
+        self.invoice_com_a_var = None
+        self.invoice_com_b_var = None
+        self.invoice_com_c_var = None
+        self.invoice_com_d_var = None
+
+        self.card_com_a_var = None
+        self.card_com_b_var = None
+        self.card_com_c_var = None
+        self.card_com_d_var = None
+
+        self.po_com_a_var = None
+        self.po_com_b_var = None
+        self.po_com_c_var = None
+        self.po_com_d_var = None
+
         # Counts for Watchdog
         self.inbox_count_var = None
 
@@ -153,6 +169,18 @@ class Globals:
         self.invoice_icon_path = spreadsheet_specs.get("invoice_icon", "assets/invoice-1.png")
         self.card_icon_path = spreadsheet_specs.get("card_icon", "assets/card-1.png")
         self.po_icon_path = spreadsheet_specs.get("po_icon", "assets/invoice-2.png")
+        self.invoice_component_a = spreadsheet_specs.get("invoice_component_a", "Company")
+        self.invoice_component_b = spreadsheet_specs.get("invoice_component_b", "Date")
+        self.invoice_component_c = spreadsheet_specs.get("invoice_component_c", "Invoice #")
+        self.invoice_component_d = spreadsheet_specs.get("invoice_component_d", "")
+        self.card_component_a = spreadsheet_specs.get("card_component_a", "Company")
+        self.card_component_b = spreadsheet_specs.get("card_component_b", "Date")
+        self.card_component_c = spreadsheet_specs.get("card_component_c", "invoice #")
+        self.card_component_d = spreadsheet_specs.get("card_component_d", "")
+        self.po_component_a = spreadsheet_specs.get("po_component_a", "Company")
+        self.po_component_b = spreadsheet_specs.get("po_component_b", "Date")
+        self.po_component_c = spreadsheet_specs.get("po_component_c", "Invoice #")
+        self.po_component_d = spreadsheet_specs.get("po_component_d", "")
 
 def apply_theme(name: str) -> None:
     """Loads the user's chosen theme and applies it to ctk widgets."""

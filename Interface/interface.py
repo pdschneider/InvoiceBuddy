@@ -180,6 +180,22 @@ def create_interface(globals):
         globals.card_starting_column_var = tk.IntVar(value=globals.card_starting_column)
         globals.po_starting_column_var = tk.IntVar(value=globals.po_starting_column)
 
+        # Component Vars
+        globals.invoice_com_a_var = tk.StringVar(value=globals.invoice_component_a)
+        globals.invoice_com_b_var = tk.StringVar(value=globals.invoice_component_b)
+        globals.invoice_com_c_var = tk.StringVar(value=globals.invoice_component_c)
+        globals.invoice_com_d_var = tk.StringVar(value=globals.invoice_component_d)
+
+        globals.card_com_a_var = tk.StringVar(value=globals.card_component_a)
+        globals.card_com_b_var = tk.StringVar(value=globals.card_component_b)
+        globals.card_com_c_var = tk.StringVar(value=globals.card_component_c)
+        globals.card_com_d_var = tk.StringVar(value=globals.card_component_d)
+
+        globals.po_com_a_var = tk.StringVar(value=globals.po_component_a)
+        globals.po_com_b_var = tk.StringVar(value=globals.po_component_b)
+        globals.po_com_c_var = tk.StringVar(value=globals.po_component_c)
+        globals.po_com_d_var = tk.StringVar(value=globals.po_component_d)
+
         create_inbox(globals, globals.main_page)
         create_settings(globals, globals.settings_page)
         create_changelog(globals, globals.changelog)

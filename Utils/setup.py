@@ -310,8 +310,112 @@ def setup_spreadsheet():
     try:
         spreadsheet = load_data_path("config", "spreadsheet.json")
         with open(spreadsheet, 'r', encoding='utf-8') as f:
-            json.load(f)
+            data = json.load(f)
         logging.debug(f"spreadsheet data loaded successfully from {spreadsheet}")
+
+        # Check to make sure keys are present
+        if "sheet_invoices" not in data or not isinstance(data["sheet_invoices"], str):
+            data["sheet_invoices"] = "Invoices"
+            changed = True
+            logging.info("Added missing or incorrectly typed 'sheet_invoices' key to spreadsheet.json")
+        if "sheet_CreditCards" not in data or not isinstance(data["sheet_CreditCards"], str):
+            data["sheet_CreditCards"] = "Credit Cards"
+            changed = True
+            logging.info("Added missing or incorrectly typed 'Credit Cards' key to spreadsheet.json")
+        if "sheet_PurchaseOrders" not in data or not isinstance(data["sheet_PurchaseOrders"], str):
+            data["sheet_Purchase Orders"] = "Purchase Orders"
+            changed = True
+            logging.info("Added missing or incorrectly typed 'Purchase Orders' key to spreadsheet.json")
+        if "table_InvoiceTable" not in data or not isinstance(data["table_InvoiceTable"], str):
+            data["table_InvoiceTable"] = "InvoiceTable"
+            changed = True
+            logging.info("Added missing or incorrectly typed 'table_InvoiceTable' key to spreadsheet.json")
+        if "table_CreditCards" not in data or not isinstance(data["table_CreditCards"], str):
+            data["table_CreditCards"] = "CreditCards"
+            changed = True
+            logging.info("Added missing or incorrectly typed 'table_CreditCards' key to spreadsheet.json")
+        if "table_PurchaseOrders" not in data or not isinstance(data["table_PurchaseOrders"], str):
+            data["table_PurchaseOrders"] = "POTable"
+            changed = True
+            logging.info("Added missing or incorrectly typed 'table_PurchaseOrders' key to spreadsheet.json")
+        if "invoice_starting_row" not in data or not isinstance(data["invoice_starting_row"], str):
+            data["invoice_starting_row"] = 4
+            changed = True
+            logging.info("Added missing or incorrectly typed 'invoice_starting_row' key to spreadsheet.json")
+        if "card_starting_row" not in data or not isinstance(data["card_starting_row"], str):
+            data["card_starting_row"] = 10
+            changed = True
+            logging.info("Added missing or incorrectly typed 'card_starting_row' key to spreadsheet.json")
+        if "po_starting_row" not in data or not isinstance(data["po_starting_row"], str):
+            data["po_starting_row"] = 0
+            changed = True
+            logging.info("Added missing or incorrectly typed 'po_starting_row' key to spreadsheet.json")
+        if "invoice_icon" not in data or not isinstance(data["invoice_icon"], str):
+            data["invoice_icon"] = "assets/invoice-1.png"
+            changed = True
+            logging.info("Added missing or incorrectly typed 'invoice_icon' key to spreadsheet.json")
+        if "card_icon" not in data or not isinstance(data["card_icon"], str):
+            data["card_icon"] = "assets/card-1.png"
+            changed = True
+            logging.info("Added missing or incorrectly typed 'card_icon' key to spreadsheet.json")
+        if "po_icon" not in data or not isinstance(data["po_icon"], str):
+            data["po_icon"] = "assets/invoice-2.png"
+            changed = True
+            logging.info("Added missing or incorrectly typed 'card_icon' key to spreadsheet.json")
+        if "invoice_component_a" not in data or not isinstance(data["invoice_component_a"], str):
+            data["invoice_component_a"] = "Company"
+            changed = True
+            logging.info("Added missing or incorrectly typed 'invoice_component_a' key to spreadsheet.json")
+        if "invoice_component_b" not in data or not isinstance(data["invoice_component_b"], str):
+            data["invoice_component_b"] = "Date"
+            changed = True
+            logging.info("Added missing or incorrectly typed 'invoice_component_b' key to spreadsheet.json")
+        if "invoice_component_c" not in data or not isinstance(data["invoice_component_c"], str):
+            data["invoice_component_c"] = "Invoice #"
+            changed = True
+            logging.info("Added missing or incorrectly typed 'invoice_component_c' key to spreadsheet.json")
+        if "invoice_component_d" not in data or not isinstance(data["invoice_component_d"], str):
+            data["invoice_component_d"] = ""
+            changed = True
+            logging.info("Added missing or incorrectly typed 'invoice_component_d' key to spreadsheet.json")
+        if "card_component_a" not in data or not isinstance(data["card_component_a"], str):
+            data["card_component_a"] = "Company"
+            changed = True
+            logging.info("Added missing or incorrectly typed 'card_component_a' key to spreadsheet.json")
+        if "card_component_b" not in data or not isinstance(data["card_component_b"], str):
+            data["card_component_b"] = "Date"
+            changed = True
+            logging.info("Added missing or incorrectly typed 'card_component_b' key to spreadsheet.json")
+        if "card_component_c" not in data or not isinstance(data["card_component_c"], str):
+            data["card_component_c"] = "Invoice #"
+            changed = True
+            logging.info("Added missing or incorrectly typed 'card_component_c' key to spreadsheet.json")
+        if "card_component_d" not in data or not isinstance(data["card_component_d"], str):
+            data["card_component_d"] = ""
+            changed = True
+            logging.info("Added missing or incorrectly typed 'card_component_d' key to spreadsheet.json")
+        if "po_component_a" not in data or not isinstance(data["po_component_a"], str):
+            data["po_component_a"] = "Company"
+            changed = True
+            logging.info("Added missing or incorrectly typed 'po_component_a' key to spreadsheet.json")
+        if "po_component_b" not in data or not isinstance(data["po_component_b"], str):
+            data["po_component_b"] = "Date"
+            changed = True
+            logging.info("Added missing or incorrectly typed 'po_component_b' key to spreadsheet.json")
+        if "po_component_c" not in data or not isinstance(data["po_component_c"], str):
+            data["po_component_c"] = "Invoice #"
+            changed = True
+            logging.info("Added missing or incorrectly typed 'po_component_c' key to spreadsheet.json")
+        if "po_component_d" not in data or not isinstance(data["po_component_d"], str):
+            data["po_component_d"] = ""
+            changed = True
+            logging.info("Added missing or incorrectly typed 'po_component_d' key to spreadsheet.json")
+
+        # Write to file
+        if changed:
+            with open(spreadsheet, 'w', encoding='utf-8') as f:
+                json.dump(data, f, indent=4)
+
     except json.JSONDecodeError as e:
         logging.error(f"Invalid json synatax: {e} | Replacing corrupted spreadsheet file with default.")
         os.remove(spreadsheet)

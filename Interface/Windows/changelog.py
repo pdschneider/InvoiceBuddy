@@ -23,6 +23,28 @@ def create_changelog(globals, changelog_tab):
 
        # Main Changelog Sections
 
+       # v0.1.4
+       ctk.CTkLabel(changelog_frame,
+                     text="v0.1.4",
+                     font=fonts.heading_font,
+                     anchor="center").pack(fill="x", pady=20, padx=10)
+
+       ctk.CTkLabel(changelog_frame,
+                     justify="left",
+                     anchor="center",
+                     wraplength=400,
+                     text = "- Removed folder map debug log spam on startup\n" \
+                              "- Greatly improved auto-name logic\n" \
+                              "- New companies added to database\n" \
+                              "- Each autoname function has been split into their own scripts\n" \
+                              "- Autoname now saves data to file metadata\n" \
+                              "- Added startup checks to fix missing or nonconforming values in spreadsheet.json\n" \
+                              "- Added column keys to default spreadsheet.json file\n" \
+                              "- User can now choose the order autoname adds components to filenames\n" \
+                              "- Added Credit Card Number component to auto-name\n" \
+                              "- Added OCR fallback for cases where a file returns nothing\n" \
+                              "- Updated dependencies").pack(fill="both", expand=True, padx=10, pady=10)
+
        # v0.1.3
        ctk.CTkLabel(changelog_frame,
                      text="v0.1.3",

@@ -1,7 +1,7 @@
 # Interface/Components/gui_actions.py
 import os, subprocess, logging, shutil
 from tkinter import filedialog, messagebox
-from Managers.pdfsearch import apply_auto_naming
+from Managers.Autoname.pdfsearch import apply_auto_naming
 from Managers.data_processing import parse_invoices, parse_credit_cards
 from Managers.file_management import move_files
 from Managers.history_manager import revert_moves
@@ -125,7 +125,7 @@ def pdf_button(globals, companies=None, directory=None, file_list=None):
         return
 
     search_dir = os.path.normpath(directory or globals.sources['inbox'])
-    changes = apply_auto_naming(search_dir, file_list)
+    changes = apply_auto_naming(globals, search_dir, file_list)
 
     if changes == 0:
         messagebox.showinfo("Nothing to Do", "Files already properly named or no matches found in file contents.")
