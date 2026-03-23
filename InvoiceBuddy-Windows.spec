@@ -1,12 +1,21 @@
 # -*- mode: python ; coding: utf-8 -*-
-import os
+
+# Hooks
+from PyInstaller.utils.hooks import collect_all
+
+ret_pyside = collect_all('PySide6')
+ret_shiboken = collect_all('shiboken6')
 
 a = Analysis(
     ['InvoiceBuddy.py'],
     pathex=[],
     binaries=[],
-    datas=[('defaults', 'defaults')],
-    hiddenimports=['PIL._tkinter_finder', 'openpyxl', 'getpass', 'shutil', 'watchdog', 'getpass', 'msoffcrypto', 'tkinter', '_tkinter', 'pytesseract', 'pdf2image', 'PIL', 'packaging', 'pkg_resources', 'pdfplumber'],
+    datas=[
+        ('defaults', 'defaults'),
+        ('CHANGELOG.md', '.'),
+        ('README.md', '.'),
+    ],
+    hiddenimports=['PIL._tkinter_finder', 'openpyxl', 'watchdog', 'msoffcrypto', 'tkinter', '_tkinter', 'pytesseract', 'pdf2image', 'PIL', 'packaging', 'pkg_resources', 'pdfplumber', 'PySide6', 'shiboken6'],
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],

@@ -1,13 +1,17 @@
 # Managers/file_management.py
-import logging, os, shutil
-from tkinter import messagebox
+import logging
+import os
+import shutil
 from Managers.history_manager import load_history, add_update_history
 from Utils.toast import show_toast
 
 move_log = []
 
+
 def count_files(directory, extension=None):
-    """Count files in the given directory, optionally filtering by extension."""
+    """
+    Count files in the given directory, optionally filtering by extension.
+    """
     try:
         files = [f for f in os.listdir(directory) if os.path.isfile(os.path.join(directory, f))]
         if extension:
@@ -16,6 +20,7 @@ def count_files(directory, extension=None):
     except Exception as e:
         logging.error(f"Error counting files in {directory}: {e}")
         return 0
+
 
 def move_files(globals, history_tree, directory, folder_map, oneoffs_folder, file_list=None):
     """Moves files from one directory to another."""
@@ -31,13 +36,13 @@ def move_files(globals, history_tree, directory, folder_map, oneoffs_folder, fil
 
     if file_list is None:
         file_list = [os.path.join(directory, filename) for filename in os.listdir(directory) if os.path.isfile(os.path.join(directory, filename))]
-    
+
     for src_file in file_list:
         filename = os.path.basename(src_file)
         first_word = os.path.splitext(filename)[0].split()[0].lower()
         logging.debug(f"First word of the filename: {first_word}")
 
-        file_type = globals.file_identity.get(src_file, "Invoice")  # default to Invoice if untagged
+        file_type = globals.file_identity.get(src_file, "Invoice")
         logging.debug(f"File identity for {src_file}: {file_type}")
 
         # Find matching subfolder
@@ -59,7 +64,12 @@ def move_files(globals, history_tree, directory, folder_map, oneoffs_folder, fil
         try:
             shutil.move(src_file, dst_file)
             moved_files += 1
-            add_update_history(filename=filename, src_folder=globals.inbox, dst_folder=dst_folder, file_type=file_type, moved=globals.user)
+            add_update_history(
+                filename=filename,
+                src_folder=globals.inbox,
+                dst_folder=dst_folder,
+                file_type=file_type,
+                moved=globals.user)
         except Exception as e:
             errors.append(f"Failed to move {filename} due to: {e}")
             logging.debug(f"Failed to move {filename} due to: {e}")

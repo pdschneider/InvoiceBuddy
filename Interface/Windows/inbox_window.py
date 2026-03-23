@@ -2,21 +2,24 @@
 import tkinter as tk
 from tkinter import messagebox
 import customtkinter as ctk
-from Interface.Components.gui_actions import open_workbook, open_directory, pdf_button
+from Interface.Components.gui_actions import (open_workbook,
+                                              open_directory,
+                                              pdf_button)
 from Managers.file_management import count_files
 from Managers.history_manager import load_history
 from Managers.file_management import move_files
 from Interface.Components.gui_actions import smart_spreadsheet_button, add_file
 from Interface.Components.treeview import Treeview
-import os, shutil, logging, threading
 import Utils.fonts as fonts
 from CTkToolTip import CTkToolTip
-from customtkinter import CTkImage
-from PIL import Image
 from send2trash import send2trash
-from Utils.load_settings import load_data_path
 from Utils.save_settings import save_metadata
 from Utils.toast import show_toast
+import os
+import shutil
+import logging
+import threading
+
 
 def create_inbox(globals, inbox_tab):
     """Initiates the Inbox tab."""
@@ -24,8 +27,8 @@ def create_inbox(globals, inbox_tab):
     globals.inbox_dir_var = tk.StringVar(value=globals.sources['inbox'])
     globals.inbox_count_var = tk.StringVar(value=f"Files in folder: {count_files(globals.sources['inbox'], '.pdf')}")
 
-    ctk.CTkLabel(inbox_tab, 
-             textvariable=globals.inbox_count_var).pack(pady=5)
+    ctk.CTkLabel(inbox_tab,
+                 textvariable=globals.inbox_count_var).pack(pady=5)
 
     # Tree Frame
     globals.inbox_tree = Treeview(globals, inbox_tab, get_dir=lambda: globals.sources['inbox'])
@@ -43,9 +46,11 @@ def create_inbox(globals, inbox_tab):
         return [os.path.join(directory, fname) for fname in selected_items]
 
     def start_pdf_thread():
+        """Starts the pdf search process in a thread."""
         directory = globals.sources['inbox']
         file_list = get_selected_files()
 
+        # Exit early if no files are selected
         if not file_list:
             show_toast(globals, "Please select one or more files before running the search.")
             logging.warning(f"PDF Search aborted. No files selected.")
@@ -66,10 +71,14 @@ def create_inbox(globals, inbox_tab):
         """Moves selected files to another chosen directory."""
         selected_files = get_selected_files()
         save_metadata(globals)
+
+        # Return early if nothing is selected
         if not selected_files:
             show_toast(globals, "Please select files to move.")
             return
-        if not os.path.exists(target_dir):
+
+        # Return early if target directory does not exist
+        if not os.path.isdir(target_dir):
             logging.error(f"Target directory does not exist: {target_dir}")
             show_toast(globals, "Target directory does not exist", _type="error")
             return
@@ -78,10 +87,20 @@ def create_inbox(globals, inbox_tab):
         errors = []
 
         for src_file in selected_files:
-            if not os.path.exists(src_file):
+            # Skip if file is not found in the inbox
+            if not os.path.isfile(src_file):
                 errors.append(f"File not found: {os.path.basename(src_file)}")
                 continue
+
+            # Generate destination path
             dst_file = os.path.join(target_dir, os.path.basename(src_file))
+
+            # Skip moving file if one already exists with that name
+            if os.path.isfile(dst_file):
+                errors.append(f"Filename already exists in target directory: {dst_file}")
+                continue
+
+            # Move files
             try:
                 shutil.move(src_file, dst_file)
                 moved_count += 1
@@ -93,43 +112,59 @@ def create_inbox(globals, inbox_tab):
         globals.update_file_counts()
         load_history(globals.history_tree)
         if errors:
-            logging.error("Move Errors", f'\n'.join(errors))
-            show_toast(globals, "Some file move errors occurred", _type="error")
+            logging.error(
+                "Move Errors - some files may have invalid paths or already exist in target directory")
+            logging.error(f"Errors: {errors}")
+            show_toast(
+                globals,
+                "Some files may have invalid paths or already exist in target directory",
+                _type="error")
         else:
             show_toast(globals, f"Moved {moved_count} files successfully!")
 
     # Process buttons frame (configure grid to allow dynamic columns)
-    process_buttons_frame.grid_columnconfigure((0,1,2,3,4,5,6,7,8,9), weight=0)  # Up to 10 columns should be plenty
+    process_buttons_frame.grid_columnconfigure(
+        (0, 1, 2, 3, 4, 5, 6, 7, 8, 9), weight=0)
     process_buttons_frame.pack(pady=10)
 
     # Fixed buttons on the left (columns 0 to 3)
-    add_file_button = ctk.CTkButton(process_buttons_frame, 
+    add_file_button = ctk.CTkButton(process_buttons_frame,
                                     image=globals.add_icon,
-                                    text=None, 
-                                    font=fonts.button_font, 
-                                    width=50, 
+                                    text=None,
+                                    font=fonts.button_font,
+                                    width=50,
                                     height=50,
                                     command=lambda: add_file(globals))
     add_file_button.grid(row=0, column=0, padx=5)
     ctk.CTkLabel(process_buttons_frame, text="Add").grid(row=1, column=0)
-    CTkToolTip(add_file_button, message="Add new files", delay=0.6, follow=True, padx=10, pady=5)
+    CTkToolTip(add_file_button,
+               message="Add new files",
+               delay=0.6,
+               follow=True,
+               padx=10,
+               pady=5)
 
-    autoname_button = ctk.CTkButton(process_buttons_frame, 
+    autoname_button = ctk.CTkButton(process_buttons_frame,
                                     image=globals.auto_icon,
-                                    text=None, 
-                                    font=fonts.button_font, 
-                                    width=50, 
+                                    text=None,
+                                    font=fonts.button_font,
+                                    width=50,
                                     height=50,
                                     command=start_pdf_thread)
     autoname_button.grid(row=0, column=1, padx=5)
     ctk.CTkLabel(process_buttons_frame, text="Auto-name").grid(row=1, column=1)
-    CTkToolTip(autoname_button, message="Auto-name selected files", delay=0.6, follow=True, padx=10, pady=5)
+    CTkToolTip(autoname_button,
+               message="Auto-name selected files",
+               delay=0.6,
+               follow=True,
+               padx=10,
+               pady=5)
 
-    enter_spreadsheet_button = ctk.CTkButton(process_buttons_frame, 
+    enter_spreadsheet_button = ctk.CTkButton(process_buttons_frame,
                                              image=globals.enter_icon,
-                                             text=None, 
-                                             font=fonts.button_font, 
-                                             width=50, 
+                                             text=None,
+                                             font=fonts.button_font,
+                                             width=50,
                                              height=50,
                                              command=lambda: [smart_spreadsheet_button(globals, file_list=get_selected_files()),
                                                               globals.update_file_counts()])
@@ -137,51 +172,64 @@ def create_inbox(globals, inbox_tab):
     ctk.CTkLabel(process_buttons_frame, text="Enter").grid(row=1, column=2)
     CTkToolTip(enter_spreadsheet_button, message="Enter selected items to spreadsheet", delay=0.6, follow=True, padx=10, pady=5)
 
-    archive_button = ctk.CTkButton(process_buttons_frame, 
+    archive_button = ctk.CTkButton(process_buttons_frame,
                                    image=globals.archive_icon,
-                                   text=None, 
-                                   font=fonts.button_font, 
-                                   width=50, 
+                                   text=None,
+                                   font=fonts.button_font,
+                                   width=50,
                                    height=50,
                                    command=lambda: [move_files(globals, globals.history_tree,
-                                                              globals.inbox_dir_var.get(), globals.folder_map,
-                                                              globals.oneoffs_folder, get_selected_files()),
-                                                   globals.update_file_counts()])
+                                                               globals.inbox_dir_var.get(), globals.folder_map,
+                                                               globals.oneoffs_folder, get_selected_files()),
+                                                               globals.update_file_counts()])
     archive_button.grid(row=0, column=3, padx=5)
     ctk.CTkLabel(process_buttons_frame, text="Archive").grid(row=1, column=3)
     CTkToolTip(archive_button, message="Archive selected files", delay=0.6, follow=True, padx=10, pady=5)
 
-    workbook_open_button = ctk.CTkButton(process_buttons_frame, 
+    workbook_open_button = ctk.CTkButton(process_buttons_frame,
                                          image=globals.workbook_icon,
-                                         text=None, 
-                                         font=fonts.button_font, 
-                                         width=50, 
+                                         text=None,
+                                         font=fonts.button_font,
+                                         width=50,
                                          height=50,
                                          command=lambda: open_workbook(globals))
     workbook_label = ctk.CTkLabel(process_buttons_frame, text="Workbook")
 
-    directory_open_button = ctk.CTkButton(process_buttons_frame, 
+    directory_open_button = ctk.CTkButton(process_buttons_frame,
                                           image=globals.inbox_folder_icon,
-                                          text=None, 
-                                          font=fonts.button_font, 
-                                          width=50, 
+                                          text=None,
+                                          font=fonts.button_font,
+                                          width=50,
                                           height=50,
                                           command=lambda: open_directory(globals.inbox))
     directory_label = ctk.CTkLabel(process_buttons_frame, text="Inbox")
 
-    delete_button = ctk.CTkButton(process_buttons_frame, 
+    delete_button = ctk.CTkButton(process_buttons_frame,
                                   image=globals.delete_icon,
-                                  text=None, 
-                                  font=fonts.button_font, 
-                                  width=50, 
+                                  text=None,
+                                  font=fonts.button_font,
+                                  width=50,
                                   height=50,
-                                  fg_color="#8B0000", hover_color="#A00000")  # Dark red for danger
+                                  fg_color="#8B0000", hover_color="#A00000")
     delete_label = ctk.CTkLabel(process_buttons_frame, text="Delete")
 
     # Tooltips
-    CTkToolTip(workbook_open_button, message="Open the workbook", delay=0.6, follow=True, padx=10, pady=5)
-    CTkToolTip(directory_open_button, message="Open the inbox directory", delay=0.6, follow=True, padx=10, pady=5)
-    CTkToolTip(delete_button, message="Move selected files to Trash", delay=0.6, follow=True)
+    CTkToolTip(workbook_open_button,
+               message="Open the workbook",
+               delay=0.6,
+               follow=True,
+               padx=10,
+               pady=5)
+    CTkToolTip(directory_open_button,
+               message="Open the inbox directory",
+               delay=0.6,
+               follow=True,
+               padx=10,
+               pady=5)
+    CTkToolTip(delete_button,
+               message="Move selected files to Trash",
+               delay=0.6,
+               follow=True)
 
     def delete_selected_to_trash(globals):
         """Safely move selected files to the system trash."""
@@ -201,9 +249,9 @@ def create_inbox(globals, inbox_tab):
         # If not on network drive, use safer deletion method
         if not globals.network_drive:
             if not messagebox.askyesno("Confirm Delete",
-                                    f"Move {count} file{'s' if count != 1 else ''} to the Recycle Bin?\n\n"
-                                    "You can recover them later from there.",
-                                    icon="warning"):
+                                       f"Move {count} file{'s' if count != 1 else ''} to the Recycle Bin?\n\n"
+                                       "You can recover them later from there.",
+                                       icon="warning"):
                 return
 
             # Send files safely to trash
@@ -215,13 +263,13 @@ def create_inbox(globals, inbox_tab):
                 except Exception as e:
                     errors.append(f"{os.path.basename(file_path)}: {str(e)}")
                     logging.error(f"Failed to trash {file_path}: {e}")
-        
+
         # If on network drive, fall back to permanent deletion method
         else:
             if not messagebox.askyesno("Confirm Delete",
-                                    f"Permanently delete {count} file{'s' if count != 1 else ''}?\n\n"
-                                    "You cannot recover them later.",
-                                    icon="warning"):
+                                       f"Permanently delete {count} file{'s' if count != 1 else ''}?\n\n"
+                                       "You cannot recover them later.",
+                                       icon="warning"):
                 return
 
             # Delete files permanently
@@ -239,19 +287,28 @@ def create_inbox(globals, inbox_tab):
 
         # Feedback
         if trashed_count == len(selected_files):
-            show_toast(globals, f"Moved {trashed_count} file{'s' if trashed_count != 1 else ''} to trash.")
+            show_toast(globals,
+                       f"Moved {trashed_count} file{'s' if trashed_count != 1 else ''} to trash.")
         elif trashed_count > 0:
-            logging.warning(f"Trashed {trashed_count} files.\n\nFailed:\n" + "\n".join(errors))
-            show_toast(globals, f"Trashed {trashed_count} files - Some Failed to Trash\n", _type="error")
+            logging.warning(f"Trashed {trashed_count} files.\n\nFailed: \n" + "\n".join(errors))
+            show_toast(globals,
+                       f"Trashed {trashed_count} files - Some Failed to Trash\n",
+                       _type="error")
         else:
-            logging.error(f"Could not move any files to trash.\n\n" + "\n".join(errors))
-            show_toast(globals, f"Could not move any files to trash.", _type="error")
+            logging.error(
+                f"Could not move any files to trash.\n\n" + "\n".join(errors))
+            show_toast(globals,
+                       f"Could not move any files to trash.",
+                       _type="error")
 
     # Attach command
     delete_button.configure(command=lambda: delete_selected_to_trash(globals))
 
     def refresh_send_buttons():
-        """Clear and rebuild only the dynamic buddy buttons, then reposition fixed right buttons."""
+        """
+        Clear and rebuild only the dynamic buddy buttons,
+        then reposition fixed right buttons.
+        """
         # --- Destroy only dynamic buddy widgets ---
         for widget in process_buttons_frame.winfo_children():
             if hasattr(widget, "is_buddy_button") or hasattr(widget, "is_buddy_label"):
@@ -268,7 +325,7 @@ def create_inbox(globals, inbox_tab):
             btn = ctk.CTkButton(
                 process_buttons_frame,
                 image=globals.send_icon,
-                text=None, 
+                text=None,
                 font=fonts.button_font,
                 width=50,
                 height=50,
@@ -276,7 +333,10 @@ def create_inbox(globals, inbox_tab):
             )
             btn.grid(row=0, column=col, padx=5)
             btn.is_buddy_button = True
-            CTkToolTip(btn, message=f"Send selected files to {name}", delay=0.6, follow=True)
+            CTkToolTip(btn,
+                       message=f"Send selected files to {name}",
+                       delay=0.6,
+                       follow=True)
 
             lbl = ctk.CTkLabel(process_buttons_frame, text=name.capitalize())
             lbl.grid(row=1, column=col)

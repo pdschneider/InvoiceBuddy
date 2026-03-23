@@ -1,10 +1,13 @@
 # Utils/observers.py
-import time, os, platform, ctypes, logging
+import time
+import os
+import platform
+import ctypes
+import logging
 from watchdog.observers import Observer
 from watchdog.observers.polling import PollingObserver
 from watchdog.events import FileSystemEventHandler
 
-logging.getLogger('watchdog').setLevel(logging.WARNING)
 
 class FolderEventHandler(FileSystemEventHandler):
     """Handles filesystem events for a single watched folder"""
@@ -18,13 +21,17 @@ class FolderEventHandler(FileSystemEventHandler):
     def on_any_event(self, event):
         """Ignores directories and irrelevant event types."""
         # Only proceed upon specific events
-        if event.is_directory or event.event_type not in ['created', 'deleted', 'modified', 'moved']:
+        if event.is_directory or event.event_type not in ['created',
+                                                          'deleted',
+                                                          'modified',
+                                                          'moved']:
             return
 
         # Only proceed if an event involves a pdf file
         if event.event_type == 'moved':
-            if not (event.src_path.lower().endswith('.pdf') or 
-                    (event.dest_path and event.dest_path.lower().endswith('.pdf'))):
+            if not (event.src_path.lower().endswith('.pdf') or
+                    (event.dest_path and
+                     event.dest_path.lower().endswith('.pdf'))):
                 return
         elif not event.src_path.lower().endswith('.pdf'):
             return
@@ -48,8 +55,12 @@ class FolderEventHandler(FileSystemEventHandler):
         self.update_callback()
         logging.debug(f"Watchdog: Folder change detected, updated counts.")
 
+
 def is_network_drive(globals, path):
-    """Check if a path is on a network drive (Windows only). Returns False on Linux."""
+    """
+    Check if a path is on a network drive (Windows only).
+    Returns False on Linux.
+    """
     if not platform.system().startswith("Windows"):
         return False
     drive, _ = os.path.splitdrive(path)
@@ -60,10 +71,13 @@ def is_network_drive(globals, path):
         return drive_type == 4  # DRIVE_REMOTE (network drive)
     return False
 
+
 def setup_observer(globals, direct, key):
+    """Sets up watchdog observers."""
     directory = direct
     if not directory or not os.path.isdir(directory):
-        logging.warning(f"Cannot setup observer for {key}: Invalid directory {directory}")
+        logging.warning(
+            f"Cannot setup observer for {key}: Invalid directory {directory}")
         return None
     if key in globals.observers and globals.observers[key] and globals.observers[key].is_alive():
         globals.observers[key].stop()
@@ -71,7 +85,8 @@ def setup_observer(globals, direct, key):
     handler = FolderEventHandler(globals, globals.update_file_counts)
     if is_network_drive(globals, directory):
         observer = PollingObserver(timeout=1)
-        logging.info(f"Using PollingObserver for network drive: {directory} (key: {key})")
+        logging.info(
+            f"Using PollingObserver for network drive: {directory} (key: {key})")
     else:
         observer = Observer()
     observer.schedule(handler, directory, recursive=False)

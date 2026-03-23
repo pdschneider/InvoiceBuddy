@@ -1,7 +1,19 @@
 # config.py
-import platform, getpass, os, sys, hashlib, json, logging
+import platform
+import getpass
+import os
+import sys
+import hashlib
+import json
+import logging
 import customtkinter as ctk
-from Utils.load_settings import load_settings, load_data_path, load_folder_map, load_paths, load_spreadsheet_specs
+from PySide6.QtWidgets import QApplication
+from Utils.load_settings import (load_settings,
+                                 load_data_path,
+                                 load_folder_map,
+                                 load_paths,
+                                 load_spreadsheet_specs)
+
 
 # Globals Class
 class Globals:
@@ -12,7 +24,7 @@ class Globals:
         self.observers = {}
 
         # Current Version
-        self.current_version = "v0.1.4"
+        self.current_version = "0.1.5"
 
         # Global Variables
         self.os_name = platform.system()
@@ -25,6 +37,9 @@ class Globals:
 
         # Folder mappings and paths from folder_maps.json
         self.sources, self.buddies = load_paths()
+
+        # PySide6 Widgets
+        self.app = QApplication(sys.argv)
 
         # UI variables
         self.root = None
@@ -61,17 +76,21 @@ class Globals:
         self.send_icon = None
         self.import_icon = None
         self.export_icon = None
+        self.theme_icon = None
+        self.preferences_icon = None
+        self.note_icon = None
+        self.config_icon = None
 
         self.icons_list = ["assets/invoice-1.png",
-                            "assets/invoice-2.png",
-                            "assets/invoice-3.png",
-                            "assets/card-1.png",
-                            "assets/card-2.png",
-                            "assets/cards-1.png",
-                            "assets/cards-2.png",
-                            "assets/money-1.png",
-                            "assets/money-2.png",
-                            "assets/money-bag.png",]
+                           "assets/invoice-2.png",
+                           "assets/invoice-3.png",
+                           "assets/card-1.png",
+                           "assets/card-2.png",
+                           "assets/cards-1.png",
+                           "assets/cards-2.png",
+                           "assets/money-1.png",
+                           "assets/money-2.png",
+                           "assets/money-bag.png"]
 
         self.invoice_icon = None
         self.card_icon = None
@@ -182,17 +201,19 @@ class Globals:
         self.po_component_c = spreadsheet_specs.get("po_component_c", "Invoice #")
         self.po_component_d = spreadsheet_specs.get("po_component_d", "")
 
+
 def apply_theme(name: str) -> None:
     """Loads the user's chosen theme and applies it to ctk widgets."""
     try:
-        globals.theme_path = os.path.normpath(os.path.join(load_data_path(direct="config"), f"themes/{globals.active_theme}.json"))
+        globals.theme_path = os.path.normpath(
+            os.path.join(
+                load_data_path(direct="config"), f"themes/{globals.active_theme}.json"))
         try:
             with open(globals.theme_path, 'r') as f:
                 globals.theme_dict = json.load(f)
         except:
             logging.warning(f"Unable to load theme into dictionary.")
         ctk.set_default_color_theme(globals.theme_path)
-        logging.debug(f"CTk theme found at: {globals.theme_path}")
     except Exception as e:
         logging.warning(f"Could not retrieve CTk active theme due to: {e}")
 

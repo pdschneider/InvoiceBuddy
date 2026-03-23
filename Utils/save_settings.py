@@ -1,17 +1,24 @@
 # Utils/save_settings.py
-import logging, json, os
-from Utils.load_settings import load_settings, load_paths, load_folder_map, load_data_path
+import logging
+import json
+import os
+from Utils.load_settings import (load_settings,
+                                 load_paths,
+                                 load_folder_map,
+                                 load_data_path)
 from Managers.history_manager import load_history
 from pypdf import PdfReader, PdfWriter
 from config import apply_theme
 from Utils.toast import show_toast
 
-def save_all_settings(globals):
+
+def save_all_settings(globals, reject_toast=False):
     """
     Save all settings to JSON files and update globals.
 
     Args:
-        globals (globals): The global configuration object containing UI variables and settings.
+        globals (globals): The global configuration
+        object containing UI variables and settings.
     """
 
     def _gather_buddy_info(globals):
@@ -23,9 +30,11 @@ def save_all_settings(globals):
             if name == "inbox":
                 buddy_counter += 1
                 name = f"inbox-{buddy_counter}"
-                logging.warning(f"Buddy name cannot be 'inbox'. Sanitizing....")
+                logging.warning(
+                    f"Buddy name cannot be 'inbox'. Sanitizing....")
             path = entry["path_var"].get().strip()
-            if name and path and os.path.isdir(path):  # Only save if both are filled
+            # Only save if both name and path are filled
+            if name and path and os.path.isdir(path):
                 buddy_map[name] = path
         return buddy_map
 
@@ -61,16 +70,12 @@ def save_all_settings(globals):
     logging_level = current_logging_level
 
     # Save Window Placement
-    logging.debug(f"Root state: {globals.root.state()}")
     if globals.root.state() != "zoomed":  # don't save if maximized
         try:
             current_width = globals.root.winfo_width()
             current_height = globals.root.winfo_height()
             current_horizontal_placement = globals.root.winfo_x()
             current_vertical_placement = globals.root.winfo_y()
-
-            logging.debug(f"Saving via winfo: {current_width}x{current_height}"
-                        f"+{current_horizontal_placement}+{current_vertical_placement}")
         except Exception as e:
             logging.debug(f"Could not save window placement due to {e}")
             return
@@ -79,13 +84,13 @@ def save_all_settings(globals):
 
     # Save settings with updated logging levels
     save_settings(
-        logging_level = logging_level,
-        active_theme = current_active_theme, 
-        history_path = current_history_path,
-        saved_width = current_width,
-        saved_height = current_height,
-        saved_x = current_horizontal_placement,
-        saved_y = current_vertical_placement)
+        logging_level=logging_level,
+        active_theme=current_active_theme,
+        history_path=current_history_path,
+        saved_width=current_width,
+        saved_height=current_height,
+        saved_x=current_horizontal_placement,
+        saved_y=current_vertical_placement)
 
     # Refresh globals
     globals.refresh_globals()
@@ -129,7 +134,6 @@ def save_all_settings(globals):
     globals.sources = sources
     if os.path.isfile(globals.history_path):
         globals.history_var.set(globals.history_path)
-        logging.debug(f"History path saved correctly.")
     else:
         globals.history_var.set("")
         logging.warning(f"History path is not a valid file path.")
@@ -150,7 +154,10 @@ def save_all_settings(globals):
             logging.error(f"Failed to refresh inbox send buttons: {e}")
 
     # Show success toast
-    show_toast(globals, "Saved!")
+    if not reject_toast:
+        show_toast(globals, "Saved!")
+    logging.info(f"Settings saved successfully!")
+
 
 def save_paths(globals, sources=None, buddies=None):
     """
@@ -183,7 +190,7 @@ def save_paths(globals, sources=None, buddies=None):
 
         logging.info(f"Saved paths to {file_path}")
 
-        # Update the live Globals object — now safe because we have the real one
+        # Update the live Globals object
         globals.sources = full_data["sources"]
         globals.buddies = full_data["buddies"]
         globals.inbox = full_data["sources"].get("inbox", "")
@@ -192,6 +199,7 @@ def save_paths(globals, sources=None, buddies=None):
 
     except Exception as e:
         logging.error(f"Failed to save paths.json: {e}")
+
 
 def save_settings(**kwargs):
     """Save settings to settings.json."""
@@ -205,10 +213,13 @@ def save_settings(**kwargs):
     except Exception as e:
         logging.error(f"Error saving settings to {file_path}: {e}")
 
+
 def save_spreadsheet_specs(globals):
-    """Save the current spreadsheet sheet and table names to spreadsheet.json."""
+    """
+    Save the current spreadsheet sheet and table names to spreadsheet.json.
+    """
     file_path = os.path.normpath(load_data_path("config", "spreadsheet.json"))
-    
+
     data = {
         "sheet_invoices": globals.sheet_invoices_var.get().strip() or "Invoices",
         "sheet_CreditCards": globals.sheet_CreditCards_var.get().strip() or "Credit Cards",
@@ -238,13 +249,14 @@ def save_spreadsheet_specs(globals):
         "po_component_c": globals.po_com_c_var.get() or "",
         "po_component_d": globals.po_com_d_var.get() or ""
         }
-    
+
     try:
         with open(file_path, 'w', encoding='utf-8') as f:
             json.dump(data, f, indent=4)
         logging.info(f"Spreadsheet specifications saved to {file_path}")
     except Exception as e:
         logging.error(f"Failed to save spreadsheet.json: {e}")
+
 
 def save_folder_map(globals):
     """
@@ -259,6 +271,7 @@ def save_folder_map(globals):
         logging.error(f"folder_maps.json not found at {file_path}")
     except Exception as e:
         logging.error(f"Failed to save folder_maps.json: {e}")
+
 
 def save_metadata(globals):
     # Save file identities to PDF metadata
@@ -283,15 +296,22 @@ def save_metadata(globals):
                             writer.write(f)
                         saved_count += 1
                     except Exception as e:
-                        logging.warning(f"Could not save identity to {filename}: {e}")
-                logging.info(f"Saved identity metadata to {saved_count} PDF files.")
+                        logging.warning(
+                            f"Could not save identity to {filename}: {e}")
+                logging.info(
+                    f"Saved identity metadata to {saved_count} PDF files.")
             except ImportError:
-                logging.warning("pypdf not available — skipping PDF metadata save.")
+                logging.warning(
+                    "pypdf not available — skipping PDF metadata save.")
             except Exception as e:
                 logging.error(f"Error saving PDF identities: {e}")
     logging.info(f"Settings saved successfully.")
 
+
 def configure_labels(globals):
-    globals.invoice_sheet_label.configure(text=globals.sheet_invoices or globals.sheet_invoices_var)
-    globals.card_sheet_label.configure(text=globals.sheet_CreditCards or globals.sheet_CreditCards_var)
-    globals.po_sheet_label.configure(text=globals.sheet_PurchaseOrders or globals.sheet_PurchaseOrders_var)
+    globals.invoice_sheet_label.configure(
+        text=globals.sheet_invoices or globals.sheet_invoices_var)
+    globals.card_sheet_label.configure(
+        text=globals.sheet_CreditCards or globals.sheet_CreditCards_var)
+    globals.po_sheet_label.configure(
+        text=globals.sheet_PurchaseOrders or globals.sheet_PurchaseOrders_var)

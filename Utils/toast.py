@@ -3,12 +3,14 @@ import tkinter as tk
 import Utils.fonts as fonts
 import logging
 
+
 def _place_toast(root, toast):
     """Reposition toast at the bottom right of *root*."""
     root.update_idletasks()
     x = root.winfo_x() + root.winfo_width() - toast.winfo_reqwidth() - 20
     y = root.winfo_y() + root.winfo_height() - toast.winfo_reqheight() - 20
     toast.geometry(f"+{x}+{y}")
+
 
 def show_toast(globals, message, duration=3000, _type=None):
     """Shows a toast notification at the bottom right of the screen."""

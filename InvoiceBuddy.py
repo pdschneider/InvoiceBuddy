@@ -1,60 +1,51 @@
 # InvoiceBuddy.py
-# v0.1.4
-
-# Sets up logging and settings files
-from Utils.setup import setup
-setup()
-
+import sys
+import logging
+from Utils.dependencies import check_dependencies
+check_dependencies()
+from Utils.startup import setup
 from config import globals
 from Utils.factory_reset import factory_reset
 from Interface.interface import create_interface
 from Utils.save_settings import save_all_settings
-import sys
+
+
+# Ensures settings files are usable
+setup(globals)
+
 
 def on_closing():
     """Closes observers when the program closes."""
-    if hasattr(globals, 'observers'): #  Checks if hasattr has the attribute 'observers' for watchdog
-        for observer in globals.observers.values(): #  If observers exists, loops through its values
-            if observer and observer.is_alive(): #  For each observer, checks that observer isn't None and is active
-                observer.stop() #  If an observer is alive, it stops it
-                observer.join() #  After stopping, waits for the observers thread to finish
+    if hasattr(globals, 'observers'):
+        for observer in globals.observers.values():
+            if observer and observer.is_alive():
+                observer.stop()
+                observer.join()
     try:
-        save_all_settings(globals)
-    except:
-        pass
-    globals.root.destroy() #  Closes the main graphical window of the program
+        save_all_settings(globals, reject_toast=True)
+    except Exception as e:
+        logging.error(f"Error occurred when saving settings: {e}")
+    logging.shutdown()
+    globals.root.quit()
+    globals.root.destroy()
 
-# Initialize GUI
-if getattr(sys, 'frozen', False):
-    try:
-        create_interface(globals) # Create the interface, passing the globals object
-        globals.root.protocol("WM_DELETE_WINDOW", on_closing) #  Closes the entire program, makes sure on_closing processes runs first
+if __name__ == "__main__":
+    # Initialize GUI
+    if getattr(sys, 'frozen', False):  # If bundled
+        try:
+            create_interface(globals)
+            globals.root.protocol("WM_DELETE_WINDOW", on_closing)
+            globals.root.mainloop()
+        except Exception as error:
+            if globals.root:
+                try:
+                    globals.root.quit()
+                    globals.root.destroy()
+                except Exception as e:
+                    logging.error(
+                        f"Unable to destroy window during exception: {e}")
+            factory_reset(error)
+    else:  # Not bundled
+        create_interface(globals)
+        globals.root.protocol("WM_DELETE_WINDOW", on_closing)
         globals.root.mainloop()
-    except Exception as error:
-        if globals.root:
-            try:
-                globals.root.destroy()
-            except:
-                pass
-        factory_reset(error)
-else:
-    create_interface(globals) # Create the interface, passing the globals object
-    globals.root.protocol("WM_DELETE_WINDOW", on_closing) # Closes the entire program, makes sure on_closing processes runs first
-    globals.root.mainloop()
-
-"""
-Changelog:
-
-- Removed folder map debug log spam on startup
-- Greatly improved auto-name logic
-- New companies added to database
-- Each autoname function has been split into their own scripts
-- Autoname now saves data to file metadata
-- Added startup checks to fix missing or nonconforming values in spreadsheet.json
-- Added column keys to default spreadsheet.json file
-- User can now choose the order autoname adds components to filenames
-- Added Credit Card Number component to auto-name
-- Added OCR fallback for cases when a file returns nothing
-- Updated dependencies
-
-"""

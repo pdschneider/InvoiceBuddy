@@ -7,13 +7,15 @@ from Interface.Settings.paths_settings import create_paths_settings_tab
 from Interface.Settings.advanced_settings import create_advanced_tab
 from Interface.Settings.spreadsheet_settings import create_spreadsheet_settings_tab
 
+
 def create_settings(globals, settings_frame):
     """
     Creates the settings tab and initializes widgets.
 
-            Parameters:
-                    globals: Global variables
-                    settings_frame: The main frame which holds the settings Tabview
+        Parameters:
+                globals: Global variables
+                settings_frame: The main frame =
+                which holds the settings Tabview
     """
 
     # Notebook tabs for settings

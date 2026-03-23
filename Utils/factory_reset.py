@@ -4,6 +4,7 @@ import tkinter as tk
 from tkinter import messagebox
 from Utils.load_settings import load_data_path
 
+
 def factory_reset(error):
     root = tk.Tk()
     root.withdraw()

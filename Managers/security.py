@@ -1,16 +1,24 @@
 # Managers/security.py
-from tkinter import simpledialog, messagebox
-import json, os, logging, hashlib
+from tkinter import simpledialog
+from tkinter import messagebox
+import json
+import os
+import logging
+import hashlib
 from Utils.load_settings import load_users_path
+
 
 # Password Check
 def load_users():
-    """Load authorized users from users.json, return default if file doesn't exist."""
+    """
+    Load authorized users from users.json,
+    return default if file doesn't exist.
+    """
     users_path = load_users_path()
     default_users = {"authorized_users": [
-        "056aefda718e5b3379e7e5e5c1e03810", #  Allen
-        "94a648b01b1d806a38cf0e60cd79d235", #  Phillip
-        "7e9d21dc407e7a42a259a0ac02da784c"]} #  Cassie
+        "056aefda718e5b3379e7e5e5c1e03810",
+        "94a648b01b1d806a38cf0e60cd79d235",
+        "7e9d21dc407e7a42a259a0ac02da784c"]}
     try:
         if os.path.exists(users_path):
             with open(users_path, 'r') as f:
@@ -18,8 +26,10 @@ def load_users():
         return default_users
     except Exception as e:
         logging.error(f"Error loading users from {users_path}: {e}")
-        messagebox.showwarning("Warning", f"Failed to load users: {e}. Using default users.")
+        messagebox.showwarning(
+            "Warning", f"Failed to load users: {e}. Using default users.")
         return default_users
+
 
 def save_users(users):
     """Save authorized users to users.json."""
@@ -37,6 +47,7 @@ def save_users(users):
         messagebox.showerror("Error", f"Failed to save users: {e}")
         raise
 
+
 def restrict_access(globals):
     """Allows access only to specific users or those with the password."""
     user = globals.hashed_user
@@ -52,5 +63,6 @@ def restrict_access(globals):
         save_users(users_data)
         messagebox.showinfo("Success", f"User added to authorized users.")
     else:
-        messagebox.showerror("Access Denied", "You are not authorized to use this program.")
+        messagebox.showerror(
+            "Access Denied", "You are not authorized to use this program.")
         exit()

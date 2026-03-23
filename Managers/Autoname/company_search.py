@@ -1,7 +1,11 @@
 # Managers/Autoname/company_search.py
-import logging, os, re
+import logging
+import os
+import re
 from Utils.load_settings import load_company_map
-from Managers.Autoname.search_helpers import extract_normalized_text, normalize_text
+from Managers.Autoname.search_helpers import (extract_normalized_text,
+                                              normalize_text)
+
 
 def company_search(companies=None, directory=None, file_list=None, normalized_texts=None):
     """
@@ -23,12 +27,14 @@ def company_search(companies=None, directory=None, file_list=None, normalized_te
             return {}
 
         filenames = [os.path.basename(f) for f in file_list]
-        logging.info(f"Processing {len(filenames)} selected PDF files for company name")
+        logging.info(
+            f"Processing {len(filenames)} selected PDF files for company name")
 
         results = {}
 
         for filename in filenames:
-            full_path = os.path.join(search_dir, filename) if search_dir else None
+            full_path = os.path.join(
+                search_dir, filename) if search_dir else None
             if full_path and not os.path.isfile(full_path):
                 results[filename] = None
                 continue
@@ -45,7 +51,7 @@ def company_search(companies=None, directory=None, file_list=None, normalized_te
                 results[filename] = None
                 continue
 
-            # Search text for any company keyword and return the company name and matched keyword if found
+            # Search text for any company keyword
             matched_keyword = None
             company = None
             for keyword_tuple, comp in company_map.items():

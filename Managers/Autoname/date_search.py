@@ -1,7 +1,11 @@
 # Managers/Autoname/date_search.py
-import logging, re, os
+import logging
+import re
+import os
 from Utils.load_settings import load_company_map
-from Managers.Autoname.search_helpers import extract_normalized_text, date_patterns
+from Managers.Autoname.search_helpers import (extract_normalized_text,
+                                              date_patterns)
+
 
 def date_search(companies=None, directory=None, file_list=None, normalized_texts=None):
     """

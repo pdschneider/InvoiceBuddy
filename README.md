@@ -1,93 +1,71 @@
 # InvoiceBuddy
-Invoice Buddy is a financial management app that makes data entry easier
+Invoice Buddy is a financial management app that makes data entry easier.
 
-# Welcome to Invoice Buddy!
+## Welcome to Invoice Buddy!
 
 Invoice Buddy is designed to make the invoice entry process easier. Instead of manually writing
 each filename and then entering the necessary data into your spreadsheet, the application takes
 care of it for you.
 
-# How to Use
+### ✨ Features
 
-## First Glance
+- Auto-name files based on file contents
+- Easy spreadsheet entry
+- Simple archiving with one button
 
-Upon opening the program, you will be asked to add the path to your inbox and archive folders as
-well as your workbook file.
+### ⚙️ Requirements
+
+- 4-Core CPU
+- 8GB RAM recommended
+- Linux Ubuntu 18.04 or later, or Windows 10/11
+- 10GB+ Disk Space recommended
+
+## 📸 View Screenshots
+<details>
+<summary>📸 Invoice Buddy 1</summary>
+
+![Invoice Buddy Screenshot](Screenshots/InvoiceBuddy-1.png)
+
+</details>
+
+<details>
+<summary>📸 Invoice Buddy 2</summary>
+
+![Invoice Buddy Screenshot](Screenshots/InvoiceBuddy-2.png)
+
+</details>
+
+## 🚀 Build
+
+### 🐧 Linux
+
+Invoice Buddy can be built from source via Pyinstaller & bundled into an AppImage for Linux:
 
 ```
-Workbook : This is the path to your spreadsheet file, which should be a ".xlsx" file type.
-Inbox : Your inbox should be the path to whichever folder you store the files which need to be
-processed.
-Archive : The archive is the top-level folder you will be storing all of the files which have
-already been processed.
+pip install -r requirements.txt
+
+pyinstaller InvoiceBuddy-Linux.spec
 ```
 
-## Inbox
+Set AppRun inside InvoiceBuddy.AppDir as an executable file prior to building the AppImage
 
 ```
-After completing on-boarding, you will find yourself at the main inbox page. This is where you will
-manage entering data and archiving files.
-(1) Inbox Button : In the top bar, you will find the button to navigate to your inbox.
-(2) Settings Button : Also in the top bar, this button will take you to the settings page.
-(3) Identity Button : This button cycles through three distinct types: Invoices, Card Receipts,
-and Purchase Orders. Choosing the Invoice or Card icon will determine whether the data is
-entered as an invoice or a card.
-```
-```
-(4) Filename : This is where the name of each individual file lives. Double click to edit
-individual file names.
-(5) Add : This button brings up a file selection window for moving files to your inbox. It will
-move the chosen files meaning they will no longer exist in the previous directory.
-(6) Auto-name : The auto-name button reads the contents of chosen files and, if there is a
-match within the Invoice Buddy database, automatically renames each file with this format:
-"Company Name, Date, Invoice Number"
-(7) Enter : The enter button will add the contents of each selected file's filename to the
-spreadsheet corresponding to its type indicated by the identity button's state, ignoring
-Purchase Orders. Each filename is broken into parts where separated by a space where each
-filename is entered into its own row and each part is entered into its own column. For
-example, the current file would be entered as follows:
-```
-```
-(8) Archive : Clicking the "Archive" button will send selected files to a sub folder within the
-archive path chosen earlier. Don't worry about creating each sub folder because Invoice
-Buddy will do that for you. Any companies not already in the Invoice Buddy database will
-default to a "Miscellaneous" folder.
-(9) Workbook : Opens the workbook file at your selected file path.
-(10) Inbox : Opens the inbox folder in your default file explorer application.
-(11) Delete : Sends selected files to trash (recoverable).
+./linuxdeploy-x86_64.AppImage --appdir InvoiceBuddy.AppDir --executable InvoiceBuddy.AppDir/usr/bin/InvoiceBuddy-Linux --desktop-file InvoiceBuddy.AppDir/invoicebuddy.desktop --icon-file InvoiceBuddy.AppDir/icon.png --output appimage
 ```
 
-## Settings
+### 🖥️ Windows
 
-Within settings, you have access to a variety of tools and configuration options.
+Building Invoice Buddy on Windows is simple as it only required running this command in the project root:
 
-**General** : In this tab, you can choose your theme.
+```
+pip install -r requirements.txt
 
-**Paths** : The paths tab allows you to choose your workbook file, inbox path, and archive just like the
-on-boarding page, as well as your history file which logs which files you have entered and archived
-and must be a ".csv". This is also where you are allowed to add buddies if you collaborate with
-others on the same file system.
+pyinstaller InvoiceBuddy-Linux.spec
+```
 
-**Spreadsheet** : The spreadsheet tab allows you to more finely tune how Invoice Buddy adds data to
-your spreadsheet. Here, you can choose the sheet name and optional table name for invoices,
-credit cards, and purchase orders, as well as the starting row and starting column for each sheet.
+## 🪲 Report Bugs
+Report bugs via GitHub Issues.
 
-**History** : This tab lets you see which files you have previously entered or archived, which user did
-the archiving and/or entering, and the ability to export or import log data.
+## ⚠️ Disclaimer - Always Verify Information
 
-**Advanced** : The advanced tab allows you to choose the logging level for the program. This is
-separate from history logging and is designed for debugging or getting more specific information
-about errors.
-
-**About** : This tab gives you a brief explanation of what Invoice Buddy does and allows you to view
-the change log.
-
-
-## Adding Buddies
-
-To add buddies, navigate to the Paths settings tab and click the "+" button underneath "Buddies".
-This allows you to pick each buddy name and inbox. You can add up to three buddies and each
-one will add a "Send to" button to your inbox page, allowing you to send files between members of
-an organization.
-
-
+Invoice Buddy scans file contents and applies that data to filenames using an algorithm. Always look over generated content to ensure its accuracy before continuing to enter data or pay invoices/receipts. The developer is not responsible for the accuracy of any generated output. The program is provided "AS-IS" with no warranties of any kind, express or implied. The use of Invoice Buddy is entirely the user's responsibility. By using Invoice Buddy, you acknowledge that any consequences arising from the use of this application are solely your own and you will not hold the developer liable for any damages or financial losses relating to its use.

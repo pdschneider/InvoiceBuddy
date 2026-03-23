@@ -1,13 +1,25 @@
 # Managers/history_manager.py
-import logging, csv, os, shutil
+import logging
+import csv
+import os
+import shutil
 from tkinter import messagebox
 from openpyxl import load_workbook
 from Utils.load_settings import load_history_path
 
-headers = ["File Name", "Source Folder", "Destination Folder", "Type", "Archived", "Entered"]
+headers = ["File Name",
+           "Source Folder",
+           "Destination Folder",
+           "Type",
+           "Archived",
+           "Entered"]
+
 
 def load_history(history_tree):
-    """Loads history from the history.csv file, return default headers if file doesn't exist."""
+    """
+    Loads history from the history.csv file,
+    return default headers if file doesn't exist.
+    """
     path = load_history_path()
     try:
         os.makedirs(os.path.dirname(path), exist_ok=True)
@@ -22,23 +34,30 @@ def load_history(history_tree):
                     with open(path, "w", newline="", encoding="utf-8") as history:
                         writer = csv.writer(history)
                         writer.writerow(headers)
-                    logging.info(f"Added headers to empty history file at {path}")
+                    logging.info(
+                         f"Added headers to empty history file at {path}")
         # Loads data into the treeview
         history_tree.delete(*history_tree.get_children())
         with open(path, "r", newline="", encoding="utf-8") as file:
                 reader = csv.reader(file)
-                next(reader, None) #  Skips the header row
+                next(reader, None)
                 for row in reader:
                     if len(row) == 6:
                         history_tree.insert("", "end", values=tuple(row))
                     else:
-                            logging.warning(f"Skipping invalid row in history.csv: {row}")
-        logging.info(f"Loaded {len(history_tree.get_children())} entries from {path}")
+                        logging.warning(
+                            f"Skipping invalid row in history.csv: {row}")
+        logging.debug(
+            f"Loaded {len(history_tree.get_children())} entries from {path}")
     except Exception as e:
             logging.error(f"Could not load history file due to: {e}")
 
+
 def add_update_history(filename, src_folder, dst_folder=None, file_type=None, moved=None, entered=None):
-    """Adds or updates a history entry. Only changes fields that are provided (not None)."""
+    """
+    Adds or updates a history entry.
+    Only changes fields that are provided (not None).
+    """
     path = load_history_path()
     rows = []
 
@@ -96,25 +115,27 @@ def add_update_history(filename, src_folder, dst_folder=None, file_type=None, mo
     except Exception as e:
         logging.error(f"Failed to update history.csv for {filename}: {e}")
 
+
 def revert_moves(history_tree):
     """Reverts files back to their previous directory location."""
     selected_ids = history_tree.selection()
     if not selected_ids:
-         logging.warning(f"Attempted to revert moves with no selection in history treeview.")
-         return
+        logging.warning(
+            "Attempted to revert moves with no selection in history treeview.")
+        return
     path = load_history_path()
     rows = []
     errors = []
 
     # Load CSV rows
     with open(path, "r", newline="", encoding="utf-8") as file:
-         reader = csv.reader(file)
-         rows = list(reader)
+        reader = csv.reader(file)
+        rows = list(reader)
 
     selected_filenames = [history_tree.item(item_id)["values"][0] for item_id in selected_ids]
 
     for filename in selected_filenames:
-        for row in rows[1:]: #  Skips the header
+        for row in rows[1:]:
             if row[0] == filename and row[4] == "Yes":
                 src_folder = row[1]
                 dst_folder = row[2]
@@ -126,10 +147,12 @@ def revert_moves(history_tree):
                             row[4] = "No"
                             row[2] = "N/A"
                     except Exception as e:
-                            errors.append(f"Failed to revert {filename} due to: {e}")
+                            errors.append(
+                                f"Failed to revert {filename} due to: {e}")
                 else:
                     errors.append(f"File not found at {dst_path}")
                 break
+
     # Writes updated rows back to CSV
     with open(path, "w", newline="", encoding="utf-8") as file:
         writer = csv.writer(file)
@@ -143,11 +166,13 @@ def revert_moves(history_tree):
     else:
         messagebox.showinfo("Success", "Selected file moves reverted.")
 
+
 def remove_spreadsheet_entries(history_tree, globals):
     """Removes selected entries from the spreadsheet."""
     selected_ids = history_tree.selection()
     if not selected_ids:
-        logging.warning(f"Attmpted to remove spreadsheet entries without selecting anything.")
+        logging.warning(
+            "Attmpted to remove spreadsheet entries without selecting anything.")
         return
 
     path = load_history_path()
@@ -196,12 +221,17 @@ def remove_spreadsheet_entries(history_tree, globals):
             if removed:
                 messagebox.showinfo("Success", "Spreadsheet entries removed!")
             else:
-                messagebox.showwarning("Warning", "No matching spreadsheet entries found to remove.")
+                messagebox.showwarning(
+                    "Warning",
+                    "No matching spreadsheet entries found to remove.")
         else:
-            raise PermissionError(f"Permission denied to write to {globals.workbook}")
+            raise PermissionError(
+                f"Permission denied to write to {globals.workbook}")
     except Exception as e:
         logging.error(f"Failed to remove spreadsheet entries due to: {e}")
-        messagebox.showerror("Error", f"Failed to remove spreadsheet entries due to: {e}")
+        messagebox.showerror(
+            "Error", f"Failed to remove spreadsheet entries due to: {e}")
+
 
 def remove_from_history(history_tree):
     """Removes reverted entries from the history treeview."""

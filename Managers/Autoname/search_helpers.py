@@ -1,12 +1,15 @@
 # Managers/Autoname/search_helpers.py
-import logging, pdfplumber, os
+import logging
+import pdfplumber
+import os
 try:
     from pdf2image import convert_from_path
     import pytesseract
     OCR_AVAILABLE = True
 except ImportError:
     OCR_AVAILABLE = False
-    logging.warning("OCR libraries (pdf2image/pytesseract) not found. Fallback disabled.")
+    logging.warning(
+        "OCR libraries (pdf2image/pytesseract) not found. Fallback disabled.")
 
 month_map = {
     'jan': '01', 'january': '01', 'feb': '02', 'february': '02',
@@ -27,15 +30,20 @@ date_patterns = [
     (r'\b(\d{1,2})[/-](\d{1,2})[/-](\d{2,4})\b', lambda m: f"{m.group(1).zfill(2)}-{m.group(2).zfill(2)}-{m.group(3).zfill(4)[-2:]}"),
 ]
 
+
 def normalize_text(text):
-    """Normalize text by removing commas, extra spaces, and converting to lowercase."""
+    """
+    Normalize text by removing commas, extra spaces, and converting to lowercase.
+    """
     text = text.replace(',', '')  # Remove commas
     return ' '.join(text.split()).lower()  # Returns normalized text
+
 
 def extract_text_with_ocr(full_path):
     """Fallback OCR: Convert PDF to images and extract text page-by-page."""
     if not OCR_AVAILABLE:
-        logging.warning(f"OCR not available for {full_path}. Skipping fallback.")
+        logging.warning(
+            f"OCR not available for {full_path}. Skipping fallback.")
         return ""
     try:
         images = convert_from_path(full_path)  # Convert PDF to list of images
@@ -50,6 +58,7 @@ def extract_text_with_ocr(full_path):
         logging.error(f"OCR error on {full_path}: {e}")
         return ""
 
+
 def extract_normalized_text(full_path):
     """Extract and normalize text from a single PDF file."""
     text = ""
@@ -62,18 +71,23 @@ def extract_normalized_text(full_path):
                 if len(text) > 5000:
                     break
     except Exception as e:
-        logging.warning(f"pdfplumber failed on {os.path.basename(full_path)}: {e}")
+        logging.warning(
+            f"pdfplumber failed on {os.path.basename(full_path)}: {e}")
         text = extract_text_with_ocr(full_path)
 
     if not text.strip():
-        logging.warning(f"No text extracted from {os.path.basename(full_path)} Trying OCR...")
+        logging.warning(
+            f"No text extracted from {os.path.basename(full_path)} Trying OCR...")
         text = extract_text_with_ocr(full_path)
 
-    
     return normalize_text(text)
 
+
 def write_pdf_metadata(file_metadata_dict: dict[str, dict], inbox_dir: str):
-    """file_metadata_dict: {filename: {"Company": "Acme", "InvoiceDate": "2025-01-15", ...}}"""
+    """
+    file_metadata_dict: 
+    {filename: {"Company": "Acme", "InvoiceDate": "2025-01-15", ...}}
+    """
     import os
     from pypdf import PdfReader, PdfWriter
     updated = 0
@@ -84,9 +98,9 @@ def write_pdf_metadata(file_metadata_dict: dict[str, dict], inbox_dir: str):
         try:
             reader = PdfReader(path)
             writer = PdfWriter()
-            writer.append(reader)               # copies all pages + forms + attachments etc.
+            writer.append(reader)
             meta = reader.metadata or {}
-            meta.update(new_fields)             # merge / overwrite
+            meta.update(new_fields)
             writer.add_metadata(meta)
             with open(path, "wb") as f:
                 writer.write(f)
@@ -95,6 +109,7 @@ def write_pdf_metadata(file_metadata_dict: dict[str, dict], inbox_dir: str):
             logging.warning(f"Metadata write failed {filename}: {e}")
     logging.info(f"Updated metadata on {updated} files")
     return updated
+
 
 def get_field_order(globals, identity="Invoice", filename=None):
     """Returns list of field names in user-chosen order for this identity."""
@@ -121,7 +136,8 @@ def get_field_order(globals, identity="Invoice", filename=None):
         ]
     else:
         # Fallback — use invoice order or log warning
-        logging.warning(f"Unknown identity '{identity}' for {filename}, falling back to Invoice order")
+        logging.warning(
+            f"Unknown identity '{identity}' for {filename}, falling back to Invoice order")
         return [
             globals.invoice_com_a_var.get().strip(),
             globals.invoice_com_b_var.get().strip(),

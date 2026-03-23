@@ -6,21 +6,25 @@ from Utils.load_settings import load_data_path
 from .Windows.inbox_window import create_inbox
 from Interface.Components.top_bar import create_top_bar
 from Interface.Settings.settings import create_settings
-from Interface.Windows.changelog import create_changelog
+from Interface.changelog import create_changelog
 from Managers.file_management import count_files
 from Utils.observers import setup_observer
 from Interface.Windows.onboarding import create_onboarding_page
-import logging, os
-from customtkinter import CTkImage
-from PIL import Image
+from Utils.icons import load_icons
+import logging
+import os
+
 
 def create_interface(globals):
     """Creates the core GUI interface."""
     # Set up main window
+    logging.debug(f"Building GUI...")
     globals.root = ctk.CTk()
     globals.root.title("Invoice Buddy")
+    globals.root.withdraw()
 
     def draw_window():
+        """Draws the window with default values."""
         screen_width = globals.root.winfo_screenwidth()
         screen_height = globals.root.winfo_screenheight()
         x = (screen_width - 900) // 2
@@ -29,103 +33,28 @@ def create_interface(globals):
 
     if globals.saved_width and globals.saved_height and globals.saved_x and globals.saved_y:
         try:
-            globals.root.geometry(f"{globals.saved_width}x{globals.saved_height}+{globals.saved_x}+{globals.saved_y}")
+            globals.root.geometry(
+                f"{globals.saved_width}x{globals.saved_height}+{globals.saved_x}+{globals.saved_y}")
         except:
             draw_window()
     else:
         draw_window()
-    globals.root.minsize(width=500, height=500)
 
-    # Log GUI path
-    logging.debug(f"CustomTkinter package path: {ctk.__file__}")
+    globals.root.minsize(width=750, height=675)
 
     # Configure styles
     apply_theme(globals.active_theme)
     globals.root.configure(fg_color=globals.theme_dict["CTkFrame"]["fg_color"])
 
     # Get Icons
-    globals.icon = load_data_path("config", "assets/icon.png")
-    icon_image = tk.PhotoImage(file=str(globals.icon))
-    globals.root.iconphoto(False, icon_image)
+    try:
+        globals.icon = load_data_path("config", "assets/icon.png")
+        icon_image = tk.PhotoImage(file=str(globals.icon))
+        globals.root.iconphoto(False, icon_image)
+    except Exception as e:
+        logging.error(f"Failed to load icon due to: {e}")
 
-    def load_icons():
-        """Loads icons."""
-        globals.add_icon = CTkImage(
-        light_image=Image.open(load_data_path("config", "assets/add-2.png")),
-        dark_image=Image.open(load_data_path("config", "assets/add-2.png")),
-        size=(40, 40))
-
-        globals.auto_icon = CTkImage(
-        light_image=Image.open(load_data_path("config", "assets/auto.png")),
-        dark_image=Image.open(load_data_path("config", "assets/auto.png")),
-        size=(40, 40))
-        
-        globals.enter_icon = CTkImage(
-        light_image=Image.open(load_data_path("config", "assets/pen-2.png")),
-        dark_image=Image.open(load_data_path("config", "assets/pen-2.png")),
-        size=(40, 40))
-
-        globals.archive_icon = CTkImage(
-        light_image=Image.open(load_data_path("config", "assets/archive.png")),
-        dark_image=Image.open(load_data_path("config", "assets/archive.png")),
-        size=(40, 40))
-
-        globals.workbook_icon = CTkImage(
-        light_image=Image.open(load_data_path("config", "assets/workbook-1.png")),
-        dark_image=Image.open(load_data_path("config", "assets/workbook-1.png")),
-        size=(40, 40))
-
-        globals.inbox_folder_icon = CTkImage(
-        light_image=Image.open(load_data_path("config", "assets/inbox-1.png")),
-        dark_image=Image.open(load_data_path("config", "assets/inbox-1.png")),
-        size=(40, 40))
-
-        globals.delete_icon = CTkImage(
-        light_image=Image.open(load_data_path("config", "assets/delete-4.png")),
-        dark_image=Image.open(load_data_path("config", "assets/delete-4.png")),
-        size=(40, 40))
-
-        globals.send_icon = CTkImage(
-        light_image=Image.open(load_data_path("config", "assets/send.png")),
-        dark_image=Image.open(load_data_path("config", "assets/send.png")),
-        size=(40, 40))
-
-        globals.settings_icon = CTkImage(
-        light_image=Image.open(load_data_path("config", "assets/settings.png")),
-        dark_image=Image.open(load_data_path("config", "assets/settings.png")),
-        size=(40, 40))
-
-        globals.import_icon = CTkImage(
-        light_image=Image.open(load_data_path("config", "assets/upload.png")),
-        dark_image=Image.open(load_data_path("config", "assets/upload.png")),
-        size=(40, 40))
-
-        globals.export_icon = CTkImage(
-        light_image=Image.open(load_data_path("config", "assets/download.png")),
-        dark_image=Image.open(load_data_path("config", "assets/download.png")),
-        size=(40, 40))
-
-        globals.inbox_icon = CTkImage(
-        light_image=Image.open(load_data_path("config", "assets/mail.png")),
-        dark_image=Image.open(load_data_path("config", "assets/mail.png")),
-        size=(40, 40))
-
-        globals.invoice_icon = CTkImage(
-        light_image=Image.open(load_data_path("config", globals.invoice_icon_path)),
-        dark_image=Image.open(load_data_path("config", globals.invoice_icon_path)),
-        size=(30, 30))
-
-        globals.card_icon = CTkImage(
-        light_image=Image.open(load_data_path("config", globals.card_icon_path)),
-        dark_image=Image.open(load_data_path("config", globals.card_icon_path)),
-        size=(30, 30))
-
-        globals.po_icon = CTkImage(
-        light_image=Image.open(load_data_path("config", globals.po_icon_path)),
-        dark_image=Image.open(load_data_path("config", globals.po_icon_path)),
-        size=(30, 30))
-
-    load_icons()
+    load_icons(globals)
 
     # Add Navigation
     create_top_bar(globals)
@@ -201,13 +130,23 @@ def create_interface(globals):
         create_changelog(globals, globals.changelog)
         create_onboarding_page(globals, globals.onboarding_page)
 
+        # Display window after widgets have built
+        globals.root.after(1500, lambda: [  # 1.5 seconds
+            globals.root.update_idletasks(),
+            globals.root.deiconify(),
+            globals.root.focus_set()])
+
         def update_treeview(tree, extension=None):
-            """Refreshes a custom treeview to show the correct current files in the directory."""
+            """
+            Refreshes a custom treeview to show the correct
+            current files in the directory.
+            """
             tree.refresh(extension=extension)
 
         def update_file_counts():
             """Monitors folder changes and keeps file count labels current."""
-            globals.inbox_count_var.set(f"Files in folder: {count_files(globals.sources['inbox'], '.pdf')}")
+            globals.inbox_count_var.set(
+                f"Files in folder: {count_files(globals.sources['inbox'], '.pdf')}")
             if hasattr(globals, 'inbox_tree') and globals.inbox_tree:
                 update_treeview(globals.inbox_tree, extension='.pdf')
             globals.root.update_idletasks()
@@ -215,8 +154,11 @@ def create_interface(globals):
         globals.update_file_counts = update_file_counts
         globals.observers = {}
         if globals.sources["inbox"]:
-            globals.observers['inbox'] = setup_observer(globals, globals.inbox, key='inbox')
+            globals.observers['inbox'] = setup_observer(
+                globals,
+                globals.inbox,
+                key='inbox')
         globals.update_file_counts()
 
+    # Creates tabs then shows the window
     create_tabs()
-

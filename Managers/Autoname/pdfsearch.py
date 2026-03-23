@@ -1,12 +1,19 @@
 # Managers/pdfsearch.py
-import re, logging, os
+import re
+import logging
+import os
 from Utils.load_settings import load_company_map
-from Managers.Autoname.search_helpers import extract_normalized_text, normalize_text, write_pdf_metadata, get_field_order, date_patterns
+from Managers.Autoname.search_helpers import (extract_normalized_text,
+                                              normalize_text,
+                                              write_pdf_metadata,
+                                              get_field_order,
+                                              date_patterns)
 from Managers.Autoname.company_search import company_search
 from Managers.Autoname.date_search import date_search
 from Managers.Autoname.inv_num_search import invoice_number_search
 from Managers.Autoname.card_num_search import card_number_search
 from pypdf import PdfReader
+
 
 def apply_auto_naming(globals, directory, file_list=None):
     """
@@ -18,7 +25,7 @@ def apply_auto_naming(globals, directory, file_list=None):
     # Return if no files are sent
     if not file_list:
         return 0
-    
+
     # Create metadata dictionary
     metadata_to_write = {}
 
@@ -43,11 +50,14 @@ def apply_auto_naming(globals, directory, file_list=None):
         return 0
 
     # Step 1: Search for companies (always, no skips)
-    company_results = company_search(directory=search_dir, file_list=file_list, normalized_texts=normalized_texts)
+    company_results = company_search(
+        directory=search_dir,
+        file_list=file_list,
+        normalized_texts=normalized_texts)
 
     # Step 2: Apply company results, build initial new_parts, scrub if applied
     renamed = 0
-    valid_companies = {normalize_text(c) for c in load_company_map().values()}  # For checking existing
+    valid_companies = {normalize_text(c) for c in load_company_map().values()}
 
     for full_path in file_list:
         filename = os.path.basename(full_path)
@@ -61,11 +71,14 @@ def apply_auto_naming(globals, directory, file_list=None):
             reader = PdfReader(full_path)
             if reader.metadata and "/Identity" in reader.metadata:
                 identity = reader.metadata["/Identity"]
-                logging.info(f"Identity read from metadata for {filename}: {identity}")
+                logging.info(
+                    f"Identity read from metadata for {filename}: {identity}")
             else:
-                logging.debug(f"No /Identity metadata found for {filename}, using default 'Invoice'")
+                logging.debug(
+                    f"No /Identity metadata found for {filename}, using default 'Invoice'")
         except Exception as e:
-            logging.warning(f"Could not read /Identity from {filename}: {e}, using default 'Invoice'")
+            logging.warning(
+                f"Could not read /Identity from {filename}: {e}, using default 'Invoice'")
 
         # Pick apart base name from filename
         base_name = os.path.splitext(filename)[0]
@@ -87,22 +100,29 @@ def apply_auto_naming(globals, directory, file_list=None):
 
                     # Scrub all keywords from the text
                     for kw in keyword_tuple:
-                        if kw.lower() in ['llc', 'inc']: continue
+                        if kw.lower() in ['llc', 'inc']:
+                            continue
                         normalized_kw = normalize_text(kw)
                         if normalized_kw:
                             new_text = re.sub(
-                                rf'\b{re.escape(normalized_kw)}\b', 
-                                '', 
+                                rf'\b{re.escape(normalized_kw)}\b',
+                                '',
                                 normalized_texts[filename])
 
                             if new_text != normalized_texts[filename]:
                                 normalized_texts[filename] = new_text
-                                logging.debug(f"  Scrubbed matched company keyword: {normalized_kw}")
-                                logging.debug(f"\nCurrent Normalized Text: {normalized_texts[filename]}\n")
-                                logging.debug(f"Normalized text length: {len(normalized_texts[filename])}\n")
+                                logging.debug(
+                                    f"  Scrubbed matched company keyword: {normalized_kw}")
+                                logging.debug(
+                                    f"\nCurrent Normalized Text: {normalized_texts[filename]}\n")
+                                logging.debug(
+                                    f"Normalized text length: {len(normalized_texts[filename])}\n")
 
         # Step 3: Now search for dates using updated texts
-        date_results = date_search(directory=search_dir, file_list=file_list, normalized_texts=normalized_texts)
+        date_results = date_search(
+            directory=search_dir,
+            file_list=file_list,
+            normalized_texts=normalized_texts)
 
         # Apply date if we have exactly company so far
         if len(new_parts) == 1:
@@ -124,19 +144,25 @@ def apply_auto_naming(globals, directory, file_list=None):
 
                 # 2. Exhaustively scrub ALL possible dates using all patterns
                 scrubbed_any = False
-                for pattern, _ in date_patterns:  # date_patterns must be in scope — see below
-                    new_text = re.sub(pattern, ' ', normalized_texts[filename])  # replace with space to avoid merging words
+                for pattern, _ in date_patterns:
+                    new_text = re.sub(pattern, ' ', normalized_texts[filename])
                     if new_text != normalized_texts[filename]:
-                        normalized_texts[filename] = new_text.strip()  # clean up extra spaces
-                        logging.debug(f"  Scrubbed additional dates with pattern: {pattern}")
+                        normalized_texts[filename] = new_text.strip()
+                        logging.debug(
+                            f"  Scrubbed additional dates with pattern: {pattern}")
                         scrubbed_any = True
 
                 if scrubbed_any:
-                    logging.debug(f"\nCurrent Normalized Text after all date scrubs:\n{normalized_texts[filename]}\n")
-                    logging.debug(f"Normalized text length after date scrubs: {len(normalized_texts[filename])}\n")
+                    logging.debug(
+                        f"\nCurrent Normalized Text after all date scrubs: \n{normalized_texts[filename]}\n")
+                    logging.debug(
+                        f"Normalized text length after date scrubs: {len(normalized_texts[filename])}\n")
 
         # Step 4: Now search for invoices using updated texts
-        invoice_results = invoice_number_search(directory=search_dir, file_list=file_list, normalized_texts=normalized_texts)
+        invoice_results = invoice_number_search(
+            directory=search_dir,
+            file_list=file_list,
+            normalized_texts=normalized_texts)
 
         # Apply invoice if we have exactly company + date
         if len(new_parts) == 2:
@@ -146,14 +172,20 @@ def apply_auto_naming(globals, directory, file_list=None):
                 new_parts.append(invoice)
                 logging.info(f"  Applied invoice: {invoice}")
                 if matched:
-                    normalized_texts[filename] = re.sub(rf'\b{re.escape(matched)}\b', '', normalized_texts[filename])
+                    normalized_texts[filename] = re.sub(
+                        rf'\b{re.escape(matched)}\b', '', normalized_texts[filename])
                     logging.debug(f"  Scrubbed matched invoice: {matched}")
 
-                    logging.debug(f"\nCurrent Normalized Text: {normalized_texts[filename]}\n")
-                    logging.debug(f"Normalized text length: {len(normalized_texts[filename])}\n")
+                    logging.debug(
+                        f"\nCurrent Normalized Text: {normalized_texts[filename]}\n")
+                    logging.debug(
+                        f"Normalized text length: {len(normalized_texts[filename])}\n")
 
         # Step 5: Search for the last 4 digits of a card number if present
-        card_results = card_number_search(directory=search_dir, file_list=file_list, normalized_texts=normalized_texts)
+        card_results = card_number_search(
+            directory=search_dir,
+            file_list=file_list,
+            normalized_texts=normalized_texts)
 
         # Get user-defined field order based on the file's Identity
         order = get_field_order(globals, identity, filename)
@@ -209,7 +241,8 @@ def apply_auto_naming(globals, directory, file_list=None):
 
         # Write metadata before rename (still using old filename)
         if filename in metadata_to_write:
-            write_pdf_metadata({filename: metadata_to_write[filename]}, search_dir)
+            write_pdf_metadata(
+                {filename: metadata_to_write[filename]}, search_dir)
             del metadata_to_write[filename]
 
         # Finally rename

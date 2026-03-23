@@ -1,6 +1,9 @@
 # Managers/Autoname/inv_num_search.py
-import re, os, logging
+import re
+import os
+import logging
 from Managers.Autoname.search_helpers import extract_normalized_text
+
 
 def invoice_number_search(directory=None, file_list=None, normalized_texts=None):
     """
@@ -66,7 +69,8 @@ def invoice_number_search(directory=None, file_list=None, normalized_texts=None)
                 results[filename] = None
                 continue
 
-            logging.debug(f"Contains 'order number': {'order number' in normalized}")
+            logging.debug(
+                f"Contains 'order number': {'order number' in normalized}")
 
             invoice = None
             matched_inv = None
@@ -75,7 +79,8 @@ def invoice_number_search(directory=None, file_list=None, normalized_texts=None)
                 match = re.search(pattern, normalized)
                 if match:
                     candidate = match.group(1).strip().upper()
-                    logging.info(f"Pattern matched: {pattern} → candidate: {candidate}")
+                    logging.info(
+                        f"Pattern matched: {pattern} → candidate: {candidate}")
                     if re.match(r'^[A-Z0-9\-_]{2,20}$', candidate):
                         invoice = candidate
                         matched_inv = match.group(0)
@@ -83,9 +88,11 @@ def invoice_number_search(directory=None, file_list=None, normalized_texts=None)
                         break
 
             if invoice:
-                logging.info(f"Final invoice for {filename}: {invoice} from pattern: {matched_pattern}")
+                logging.info(
+                    f"Final invoice for {filename}: {invoice} from pattern: {matched_pattern}")
             else:
-                logging.info(f"No valid invoice found for {filename} - checked all patterns")
+                logging.info(
+                    f"No valid invoice found for {filename} - checked all patterns")
 
             results[filename] = (invoice, matched_inv) if invoice else None
 

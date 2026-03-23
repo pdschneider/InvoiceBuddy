@@ -1,12 +1,11 @@
 # Interface/Components/treeview.py
-import os, logging
+import os
+import logging
 from pypdf import PdfReader
 import customtkinter as ctk
 if not hasattr(ctk, "CTkScrollableFrame"):
     logging.critical(f"CTkScrollableFrame missing.")
-from Utils.load_settings import load_data_path
-from customtkinter import CTkImage
-from PIL import Image
+
 
 class Treeview:
     def __init__(self, globals_obj, parent, get_dir=None):
@@ -28,26 +27,33 @@ class Treeview:
         self._build_ui()
 
     def _build_ui(self):
+        """Build the treeview GUI."""
         try:
             self.selection_frame = ctk.CTkScrollableFrame(self.parent)
-            self.selection_frame.pack(fill="both", expand=True, pady=0, padx=10)
+            self.selection_frame.pack(
+                fill="both", expand=True, pady=0, padx=10)
         except Exception as e:
             self.selection_frame = ctk.CTkFrame(self.parent)
-            self.selection_frame.pack(fill="both", expand=True, pady=0, padx=10)
-            logging.critical(f"Could not create scrollable frame: {e}. Using regular CTkFrame instead.")
+            self.selection_frame.pack(
+                fill="both", expand=True, pady=0, padx=10)
+            logging.critical(
+                f"Could not create scrollable frame: {e}. Using regular CTkFrame instead.")
 
         folder_path = self.get_dir().strip()
         if folder_path:
             files = sorted(
-                [f  for f in os.listdir(folder_path)
-                    if os.path.isfile(os.path.join(folder_path, f))
-                    and f.lower().endswith(".pdf")])
+                [f for f in os.listdir(folder_path)
+                 if os.path.isfile(
+                     os.path.join(folder_path, f)) and f.lower().endswith(
+                         ".pdf")])
         else:
             logging.info(f"Inbox folder not found.")
             return
 
         for idx, file in enumerate(files):
-            row = ctk.CTkFrame(self.selection_frame, height=42, corner_radius=8)
+            row = ctk.CTkFrame(self.selection_frame,
+                               height=42,
+                               corner_radius=8)
             row.pack(fill="x", padx=8, pady=3)
 
             base_name = os.path.splitext(file)[0]
@@ -63,9 +69,15 @@ class Treeview:
                 identity_state["cycle"] = types.index(saved_type)
             self.globals.file_identity[file] = saved_type
 
-            identity = ctk.CTkButton(row, image=icons[identity_state["cycle"]], text=None, width=40)
-            identity.configure(command=lambda s=identity_state, b=identity, f=file: 
-                               self._cycle_identity(s, b, icons, f))
+            identity = ctk.CTkButton(
+                row,
+                image=icons[identity_state["cycle"]],
+                text=None,
+                width=40)
+            identity.configure(
+                command=lambda s=identity_state,
+                b=identity,
+                f=file: self._cycle_identity(s, b, icons, f))
             identity.pack(side="left", padx=12, pady=8)
 
             label = ctk.CTkLabel(row, text=base_name, anchor="w")
@@ -73,19 +85,53 @@ class Treeview:
             self._rows.append((row, file))
 
             # Button Bindings
-            row.bind("<Button-1>", lambda e, i = idx, f = file: self._on_row_click(e, i, f)) # Single Click
-            label.bind("<Button-1>", lambda e, i = idx, f = file: self._on_row_click(e, i, f)) # Single Click
 
-            row.bind("<Shift-Button-1>", lambda e, i = idx, f = file: self._on_shift_click(e, i, f), add = "+") # Shift Click
-            label.bind("<Shift-Button-1>", lambda e, i = idx, f = file: self._on_shift_click(e, i, f), add = "+") # Shift Click
+            # Single Click
+            row.bind("<Button-1>",
+                     lambda e,
+                     i=idx,
+                     f=file: self._on_row_click(e, i, f))
 
-            row.bind("<Control-Button-1>",   lambda e, i=idx, f=file: self._on_ctrl_click(e, i, f), add="+") # Ctr Click
-            label.bind("<Control-Button-1>", lambda e, i=idx, f=file: self._on_ctrl_click(e, i, f), add="+") # Ctr Click
+            # Single Click
+            label.bind("<Button-1>",
+                       lambda e,
+                       i=idx,
+                       f=file: self._on_row_click(e, i, f))
 
-            label.bind("<Double-1>",lambda e, l=label, f=file: self._start_rename(e, l, f, folder_path)) # Double click outside
+            # Shift Click
+            row.bind("<Shift-Button-1>",
+                     lambda e,
+                     i=idx,
+                     f=file: self._on_shift_click(e, i, f), add="+")
+
+            # Shift Click
+            label.bind("<Shift-Button-1>",
+                       lambda e,
+                       i=idx,
+                       f=file: self._on_shift_click(e, i, f), add="+")
+
+            # Ctr Click
+            row.bind("<Control-Button-1>",
+                     lambda e,
+                     i=idx,
+                     f=file: self._on_ctrl_click(e, i, f), add="+")
+
+            # Ctr Click
+            label.bind("<Control-Button-1>",
+                       lambda e,
+                       i=idx,
+                       f=file: self._on_ctrl_click(e, i, f), add="+")
+
+            # Double click outside
+            label.bind(
+                "<Double-1>",
+                lambda e,
+                l=label,
+                f=file: self._start_rename(e, l, f, folder_path))
 
     def _load_identity(self, filepath):
-        """Read the Identity metadata from a PDF using pypdf. Returns 'Invoice' if missing."""
+        """Read the Identity metadata from a PDF using pypdf.
+        Returns 'Invoice' if missing."""
         try:
             reader = PdfReader(filepath)
             if reader.metadata:
@@ -99,7 +145,8 @@ class Treeview:
                     return str(subject)
             return "Invoice"  # Default
         except Exception as e:
-            logging.debug(f"Could not read metadata from {os.path.basename(filepath)}: {e}")
+            logging.debug(
+                f"Could not read metadata from {os.path.basename(filepath)}: {e}")
             return "Invoice"
 
     def _cycle_identity(self, state, button, icons, filename):
@@ -107,13 +154,15 @@ class Treeview:
         new_icon = icons[state["cycle"]]
         button.configure(image=new_icon, text=None)
 
-        types =["Invoice", "Card", "Purchase"]
+        types = ["Invoice", "Card", "Purchase"]
         current_type = types[state["cycle"]]
         self.globals.file_identity[filename] = current_type
         logging.info(f"{filename} changed to {current_type}")
 
-        self.selection_frame.bind("<Control-a>", lambda e: self._select_all(), add="+") # Ctr a
-        self.selection_frame.bind("<Control-A>", lambda e: self._select_all(), add="+") # Ctr A
+        self.selection_frame.bind(
+            "<Control-a>", lambda e: self._select_all(), add="+")  # Ctr a
+        self.selection_frame.bind(
+            "<Control-A>", lambda e: self._select_all(), add="+")  # Ctr A
 
         self.selection_frame.focus_set()
 
@@ -123,7 +172,8 @@ class Treeview:
         width = label.winfo_width()
         height = label.winfo_height()
 
-        edit = ctk.CTkEntry(self.selection_frame, width=width - 20, height=height)
+        edit = ctk.CTkEntry(
+            self.selection_frame, width=width - 20, height=height)
         edit.place(x=x + 0, y=y)
         base_name = os.path.splitext(filename)[0]
         edit.insert(0, base_name)
@@ -166,11 +216,13 @@ class Treeview:
             try:
                 os.rename(src_path, dst_path)
                 label.configure(text=new_base_name)
+
                 # Update the stored filename to the new full name
                 for i, (row, old_file) in enumerate(self._rows):
                     if old_file == filename:
                         self._rows[i] = (row, new_name)
                         break
+
                 # Update selected set if this file was selected
                 if filename in self._selected:
                     self._selected.remove(filename)
@@ -185,7 +237,9 @@ class Treeview:
 
         edit.bind("<Return>", _finish)
         edit.bind("<FocusOut>", _finish)
-        edit.bind("<Escape>", lambda e: (root.unbind("<Button-1>", bind_id), edit.destroy()))
+        edit.bind("<Escape>",
+                  lambda e: (root.unbind("<Button-1>", bind_id),
+                             edit.destroy()))
 
     def _apply_highlight(self, row, on=True):
         row.configure(fg_color="white" if on else "transparent")
@@ -234,7 +288,7 @@ class Treeview:
         self.selection_clear()
         for row, name in self._rows:
             self._selected.add(name)
-            self._apply_highlight(row,on=True)
+            self._apply_highlight(row, on=True)
         self._last_idx = len(self._rows) - 1 if self._rows else None
 
     def refresh(self, extension=None):
@@ -248,13 +302,14 @@ class Treeview:
             return
         files = [
             f for f in os.listdir(folder_path)
-            if os.path.isfile(os.path.join(folder_path, f))
-            and f.lower().endswith('.pdf')]
+            if os.path.isfile(
+                os.path.join(folder_path, f)) and f.lower().endswith('.pdf')]
         if extension:
             files = [f for f in files if f.lower().endswith(extension)]
 
         for idx, file in enumerate(files):
-            row = ctk.CTkFrame(self.selection_frame, height=42, corner_radius=8)
+            row = ctk.CTkFrame(
+                self.selection_frame, height=42, corner_radius=8)
             row.pack(fill="x", padx=8, pady=3)
 
             base_name = os.path.splitext(file)[0]
@@ -270,22 +325,55 @@ class Treeview:
                 identity_state["cycle"] = types.index(saved_type)
             self.globals.file_identity[file] = saved_type
 
-            identity = ctk.CTkButton(row, image=icons[identity_state["cycle"]], text=None, width=40)
-            identity.configure(command=lambda s=identity_state, b=identity, f=file: 
-                               self._cycle_identity(s, b, icons, f))
+            identity = ctk.CTkButton(
+                row,
+                image=icons[identity_state["cycle"]],
+                text=None,
+                width=40)
+            identity.configure(
+                command=lambda s=identity_state, b=identity, f=file:
+                self._cycle_identity(s, b, icons, f))
             identity.pack(side="left", padx=12, pady=8)
 
             label = ctk.CTkLabel(row, text=base_name, anchor="w")
             label.pack(side="left", padx=12, pady=8, fill="x", expand=True)
             self._rows.append((row, file))
 
-            row.bind("<Button-1>", lambda e, i=idx, f=file: self._on_row_click(e, i, f))
-            label.bind("<Button-1>", lambda e, i=idx, f=file: self._on_row_click(e, i, f))
-            row.bind("<Shift-Button-1>", lambda e, i=idx, f=file: self._on_shift_click(e, i, f), add="+")
-            label.bind("<Shift-Button-1>", lambda e, i=idx, f=file: self._on_shift_click(e, i, f), add="+")
-            row.bind("<Control-Button-1>", lambda e, i=idx, f=file: self._on_ctrl_click(e, i, f), add="+")
-            label.bind("<Control-Button-1>", lambda e, i=idx, f=file: self._on_ctrl_click(e, i, f), add="+")
-            label.bind("<Double-1>", lambda e, l=label, f=file: self._start_rename(e, l, f, folder_path))
+            row.bind(
+                "<Button-1>",
+                lambda e,
+                i=idx,
+                f=file: self._on_row_click(e, i, f))
+            label.bind(
+                "<Button-1>",
+                lambda e,
+                i=idx,
+                f=file: self._on_row_click(e, i, f))
+            row.bind(
+                "<Shift-Button-1>",
+                lambda e,
+                i=idx,
+                f=file: self._on_shift_click(e, i, f), add="+")
+            label.bind(
+                "<Shift-Button-1>",
+                lambda e,
+                i=idx,
+                f=file: self._on_shift_click(e, i, f), add="+")
+            row.bind(
+                "<Control-Button-1>",
+                lambda e,
+                i=idx,
+                f=file: self._on_ctrl_click(e, i, f), add="+")
+            label.bind(
+                "<Control-Button-1>",
+                lambda e,
+                i=idx,
+                f=file: self._on_ctrl_click(e, i, f), add="+")
+            label.bind(
+                "<Double-1>",
+                lambda e,
+                l=label,
+                f=file: self._start_rename(e, l, f, folder_path))
 
             self.selection_frame.focus_set()
 

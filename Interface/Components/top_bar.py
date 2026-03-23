@@ -1,18 +1,17 @@
 # Interface/Components/top_bar.py
 import customtkinter as ctk
-import tkinter as tk
 from CTkToolTip import CTkToolTip
-from Utils.load_settings import load_data_path
+
 
 def create_top_bar(globals):
     """
     Creates the top bar for navigation.
 
-            Parameters:
-                    globals: Global variables
+        Parameters:
+                globals: Global variables
 
-            Returns:
-                    top_bar: The top_bar frame and its child widgets
+        Returns:
+                top_bar: The top_bar frame and its child widgets
     """
     def toggle_inbox():
         globals.main_page.pack(fill="both", expand=True, padx=10, pady=0)
@@ -44,7 +43,12 @@ def create_top_bar(globals):
         height=45)
     globals.inbox_button.pack(side="left", padx=10, pady=5)
     globals.inbox_button.configure(command=toggle_inbox)
-    CTkToolTip(globals.inbox_button, message="Inbox", delay=0.6, follow=True, padx=10, pady=5)
+    CTkToolTip(globals.inbox_button,
+               message="Inbox",
+               delay=0.6,
+               follow=True,
+               padx=10,
+               pady=5)
 
     # Title / App name (center)
     title = ctk.CTkLabel(
@@ -63,6 +67,12 @@ def create_top_bar(globals):
         height=45)
     globals.settings_button.pack(side="right", padx=10, pady=0)
     globals.settings_button.configure(command=toggle_settings)
-    CTkToolTip(globals.settings_button, message="Settings", delay=0.6, follow=True, padx=10, pady=5)
+    CTkToolTip(
+        globals.settings_button,
+        message="Settings",
+        delay=0.6,
+        follow=True,
+        padx=10,
+        pady=5)
 
     return top_bar
