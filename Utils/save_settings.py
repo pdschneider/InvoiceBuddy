@@ -12,7 +12,7 @@ from config import apply_theme
 from Utils.toast import show_toast
 
 
-def save_all_settings(globals, reject_toast=False):
+def save_all_settings(globals, reject_toast=False, reject_metadata=False):
     """
     Save all settings to JSON files and update globals.
 
@@ -38,7 +38,8 @@ def save_all_settings(globals, reject_toast=False):
                 buddy_map[name] = path
         return buddy_map
 
-    save_metadata(globals)
+    if not reject_metadata:
+        save_metadata(globals)
 
     if hasattr(globals, "archive_path_var"):
         save_folder_map(globals)
@@ -309,9 +310,12 @@ def save_metadata(globals):
 
 
 def configure_labels(globals):
-    globals.invoice_sheet_label.configure(
-        text=globals.sheet_invoices or globals.sheet_invoices_var)
-    globals.card_sheet_label.configure(
-        text=globals.sheet_CreditCards or globals.sheet_CreditCards_var)
-    globals.po_sheet_label.configure(
-        text=globals.sheet_PurchaseOrders or globals.sheet_PurchaseOrders_var)
+    if globals.invoice_sheet_label:
+        globals.invoice_sheet_label.configure(
+            text=globals.sheet_invoices or globals.sheet_invoices_var)
+    if globals.card_sheet_label:
+        globals.card_sheet_label.configure(
+            text=globals.sheet_CreditCards or globals.sheet_CreditCards_var)
+    if globals.po_sheet_label:
+        globals.po_sheet_label.configure(
+            text=globals.sheet_PurchaseOrders or globals.sheet_PurchaseOrders_var)

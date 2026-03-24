@@ -47,15 +47,35 @@ pip install -r requirements.txt
 pyinstaller InvoiceBuddy-Linux.spec
 ```
 
-Set AppRun inside InvoiceBuddy.AppDir as an executable file prior to building the AppImage
+Copy the InvoiceBuddy-Linux to subdirectory InvoiceBuddy.AppDir/usr/bin
+
+Set AppRun inside InvoiceBuddy.AppDir as an executable file prior to building the AppImage and run:
 
 ```
-./linuxdeploy-x86_64.AppImage --appdir InvoiceBuddy.AppDir --executable InvoiceBuddy.AppDir/usr/bin/InvoiceBuddy-Linux --desktop-file InvoiceBuddy.AppDir/invoicebuddy.desktop --icon-file InvoiceBuddy.AppDir/icon.png --output appimage
+appimagetool InvoiceBuddy.AppDir InvoiceBuddy-Linux.AppImage -v
 ```
+
+Alternatively, building with Nuitka is also possible.
+
+```
+pip install -r requirements.txt
+
+nuitka \
+    --standalone \
+    --onefile \
+    --remove-output \
+    --output-dir=dist \
+    --enable-plugin=pyside6 \
+    --enable-plugin=tk-inter \
+    --include-data-dir=defaults=defaults \
+    --include-data-files=CHANGELOG.md=CHANGELOG.md \
+    --include-data-files=README.md=README.md \
+    invoicebuddy.py
+```    
 
 ### 🖥️ Windows
 
-Building Invoice Buddy on Windows is simple as it only required running this command in the project root:
+Building Invoice Buddy on Windows only requires running this command in the project root:
 
 ```
 pip install -r requirements.txt

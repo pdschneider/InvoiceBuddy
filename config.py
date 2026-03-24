@@ -6,7 +6,9 @@ import sys
 import hashlib
 import json
 import logging
+import threading
 import customtkinter as ctk
+from version import __version__
 from PySide6.QtWidgets import QApplication
 from Utils.load_settings import (load_settings,
                                  load_data_path,
@@ -24,7 +26,7 @@ class Globals:
         self.observers = {}
 
         # Current Version
-        self.current_version = "0.1.5"
+        self.current_version = __version__
 
         # Global Variables
         self.os_name = platform.system()
@@ -41,8 +43,11 @@ class Globals:
         # PySide6 Widgets
         self.app = QApplication(sys.argv)
 
+        # Locks
+        self.edit_lock = threading.Lock()
+
         # UI variables
-        self.root = None
+        self.root = ctk.CTk()
         self.notebook = None
         self.main_frame = None
         self.main_page = None
@@ -80,6 +85,7 @@ class Globals:
         self.preferences_icon = None
         self.note_icon = None
         self.config_icon = None
+        self.garbage_icon = None
 
         self.icons_list = ["assets/invoice-1.png",
                            "assets/invoice-2.png",

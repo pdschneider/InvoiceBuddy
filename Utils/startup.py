@@ -7,6 +7,7 @@ import csv
 import hashlib
 from logging.handlers import TimedRotatingFileHandler
 from Utils.load_settings import load_data_path, load_settings
+from Utils.vars import create_vars
 
 
 def setup(globals):
@@ -24,6 +25,7 @@ def setup(globals):
     setup_themes()
     company_map_check()
     folder_maps_check()
+    create_vars(globals)
 
 
 def setup_logging():

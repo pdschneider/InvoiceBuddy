@@ -1,5 +1,8 @@
 # -*- mode: python ; coding: utf-8 -*-
 
+import subprocess
+subprocess.run(['python', 'Utils.version_gen.py'], check=True, capture_output=True)
+
 # Hooks
 from PyInstaller.utils.hooks import collect_all
 
@@ -45,4 +48,6 @@ exe = EXE(
     codesign_identity=None,
     entitlements_file=None,
     onefile=True,
+    icon='defaults/assets/icon.ico',
+    version='version.txt'
 )

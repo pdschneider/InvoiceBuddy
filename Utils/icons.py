@@ -101,5 +101,11 @@ def load_icons(globals):
             light_image=Image.open(load_data_path("config", "assets/settings-2.png")),
             dark_image=Image.open(load_data_path("config", "assets/settings-2.png")),
             size=(40, 40))
+
+        globals.garbage_icon = CTkImage(
+            light_image=Image.open(load_data_path("config", "assets/delete-1.png")),
+            dark_image=Image.open(load_data_path("config", "assets/delete-1.png")),
+            size=(40, 40))
+
     except Exception as e:
         logging.error(f"Failed to load icons due to: {e}")

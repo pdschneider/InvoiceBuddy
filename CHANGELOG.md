@@ -2,6 +2,29 @@
 
 All notable changes to **Invoice Buddy** will be located in this file.
 
+## [0.1.6] - 2026-03-24
+
+This version of Invoice Buddy begins the transition to the much more modern and versatile GUI framework PySide6 and improves desktop integration for Linux and Windows.
+
+### Added
+- Added app icon for windows users
+- Added XML file to AppImage for better Linux desktop integration
+- Added factory reset button to advanced settings
+- Added experimental wizard for later implementation
+- Added view wizard button to about settings
+- Added version file with metadata & a helper script to simplify the build process + improve Windows desktop integration
+
+### Changed
+- Improved configuration folder deletion pop-up box in case of critical GUI failure
+- Switched some message boxes to toasts and others to the new PySide6 GUI framework
+- Updated file and directory selection boxes
+- Updated ReadMe
+
+### Fixed
+- Fixed error where a separate blank window was popping up during auto-name/data entry
+- Removed deprecated security script from pre-release builds
+- Removed deprecated 'revert moves/remove spreadsheet entries' functions from pre-release
+
 ## [0.1.5] - 2026-03-22
 
 This version of Invoice Buddy focuses on documentation and bug fixes. 
@@ -81,7 +104,7 @@ This version supports icon selection for Invoices, Credit Cards, or Purchase Ord
 - New icons added
 
 ### Changed
-- Switched some warning messageboxes to toasts
+- Switched some warning message boxes to toasts
 - Icons now visible in spreadsheet settings
 - Changing the sheet name now changes its label
 - Updated logging with new sheet labels
