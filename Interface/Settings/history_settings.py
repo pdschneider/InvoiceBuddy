@@ -103,7 +103,7 @@ def create_history_tab(globals, history_tab):
         font=fonts.button_font,
         width=50,
         height=50,
-        command=lambda: import_history(globals.history_tree))
+        command=lambda: import_history(globals, globals.history_tree))
     import_button.grid(row=0, column=2, padx=5)
     ctk.CTkLabel(button_frame, text="Import").grid(row=1, column=2)
     CTkToolTip(import_button,
@@ -119,7 +119,7 @@ def create_history_tab(globals, history_tab):
         font=fonts.button_font,
         width=50,
         height=50,
-        command=lambda: export_history(globals.history_tree))
+        command=lambda: export_history(globals, globals.history_tree))
     export_button.grid(row=0, column=3, padx=5)
     ctk.CTkLabel(button_frame, text="Export").grid(row=1, column=3)
     CTkToolTip(export_button,

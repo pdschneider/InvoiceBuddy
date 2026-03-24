@@ -4,12 +4,10 @@ import subprocess
 import logging
 import shutil
 import threading
-from tkinter import filedialog, messagebox
-from tkinter import messagebox
+from PySide6.QtWidgets import QFileDialog
 from Managers.Autoname.pdfsearch import apply_auto_naming
 from Managers.data_processing import parse_invoices, parse_credit_cards
 from Managers.file_management import move_files
-from Managers.history_manager import revert_moves
 from Managers.import_export import export_history, import_history
 from Utils.save_settings import save_metadata
 from Utils.toast import show_toast
@@ -26,10 +24,12 @@ def add_file(globals):
 
     # Add files if path is valid
     if os.path.isdir(globals.inbox) and os.path.isdir(globals.inbox):
-        new_file = filedialog.askopenfilenames(
-            title="Select Files",
-            filetypes=[("PDF files", "*.pdf")],
-            multiple=True)
+        new_file, filter = QFileDialog.getOpenFileNames(
+            None,
+            "Attach File",
+            "",
+            "PDF Files (*.pdf)",
+            options=QFileDialog.Option.DontUseNativeDialog)
         try:
             if new_file:
                 files_list = []
@@ -40,7 +40,7 @@ def add_file(globals):
                 for file in files_list:
                     filename = os.path.basename(file)
                     # Exit early if files are not .pdf format
-                    if not file.lower().endswith(".pdf"):
+                    if not str(file).lower().endswith(".pdf"):
                         logging.warning(f"Only PDF files can be added.")
                         show_toast(globals,
                                    "Only PDF files can be added.",
@@ -72,23 +72,41 @@ def add_file(globals):
             _type="error")
 
 
+def browse_directory(var):
+    """Open a directory dialog and set the path into either QLineEdit or ctk.StringVar"""
+    dir_path = QFileDialog.getExistingDirectory(
+        None,
+        "Choose Directory",
+        "",
+        options=QFileDialog.Option.DontUseNativeDialog)
+
+    if dir_path:
+        _set_value(var, dir_path)
+        logging.info(f"Selected directory: {dir_path}")
+
+
 def browse_file(var):
-    """Open a file dialog to select a file and set the variable."""
-    file_path = filedialog.askopenfilename(
-        filetypes=[("All files", "*.*"),
-                   ("CSV files", "*.csv"),
-                   ("Excel files", "*.xlsx")])
+    """Open a file dialog and set the path into either QLineEdit or ctk.StringVar"""
+    file_path, _ = QFileDialog.getOpenFileName(
+        None,
+        "Browse for File",
+        "",
+        "Excel files (*.xlsx);;CSV files (*.csv);;All files (*.*)",
+        options=QFileDialog.Option.DontUseNativeDialog)
+
     if file_path:
-        var.set(file_path)
+        _set_value(var, file_path)
         logging.info(f"Selected file: {file_path}")
 
 
-def browse_directory(var):
-    """Open a directory dialog to select a directory and set the variable."""
-    dir_path = filedialog.askdirectory()
-    if dir_path:
-        var.set(dir_path)
-        logging.info(f"Selected directory: {dir_path}")
+def _set_value(var, value: str):
+    """Helper that works with both QLineEdit and ctk.StringVar"""
+    if hasattr(var, "setText"):           # PySide6 QLineEdit
+        var.setText(value)
+    elif hasattr(var, "set"):             # CustomTkinter StringVar
+        var.set(value)
+    else:
+        logging.error(f"Unsupported variable type for browse: {type(var)}")
 
 
 def open_workbook(globals):
@@ -159,34 +177,20 @@ def open_selected_folders(globals):
     logging.info(f"Opened {len(folders)} unique destination folders.")
 
 
-def revert_button(history_tree):
-    """
-    Initiates the reversion of selected files which
-    have been moved or entered into the spreadsheet.
-    """
-    revert_moves(history_tree)
-
-
 def pdf_button(globals, companies=None, directory=None, file_list=None):
     """One-click auto-naming — all logic in apply_auto_naming."""
     save_metadata(globals)
     if not file_list:
-        messagebox.showinfo(
-            "Nothing Selected",
-            "Please select one or more files to auto-name.")
+        logging.debug("One or more files must be selected")
         return
 
     search_dir = os.path.normpath(directory or globals.sources['inbox'])
     changes = apply_auto_naming(globals, search_dir, file_list)
 
     if changes == 0:
-        messagebox.showinfo(
-            "Nothing to Do",
-            "Files already properly named or no matches found in file contents.")
+        logging.warning("Files already properly named or no matches found in file contents")
     else:
-        messagebox.showinfo(
-            "Complete",
-            f"Auto-Name Complete. Updated {changes} file(s).")
+        logging.info(f"Auto-Name Complete! Updated {changes} file(s)")
 
     globals.root.after(100, globals.update_file_counts)
 
@@ -205,9 +209,6 @@ def parse_to_spreadsheet(globals, file_type, file_list=None):
         "Credit Cards": parse_credit_cards}
 
     if file_type not in parsers:
-        show_toast(globals,
-                   f"Unsupported file type: {file_type}",
-                   _type="error")
         logging.error(f"Unsupported file type: {file_type}")
         return
 
@@ -227,7 +228,7 @@ def smart_spreadsheet_button(globals, file_list=None):
 
     def _add_in_thread(globals, file_list):
         if not file_list:
-            show_toast(globals, "Please select one or more files to enter.")
+            logging.warning("Please select one or more files to enter.")
             return
 
         # Split files by type
@@ -262,15 +263,10 @@ def smart_spreadsheet_button(globals, file_list=None):
         skipped = len(purchases) + len(unknown)
 
         if skipped == 0 and (os.path.isfile(globals.workbook) or os.path.isfile(globals.workbook_var.get().strip())):
-            show_toast(globals, f"Entered {processed} files into the spreadsheet.")
+            logging.warning(f"Entered {processed} files into the spreadsheet.")
         elif skipped != 0 and (os.path.isfile(globals.workbook) or os.path.isfile(globals.workbook_var.get().strip())):
-            show_toast(globals,
-                    f"Entered {processed} files.\n"
-                    f"Skipped {skipped} files (tagged as Purchase or unknown).")
+            logging.warning(f"Skipped {skipped} files (tagged as Purchase or unknown).")
         else:
-            show_toast(globals,
-                    f"No valid workbook path. Skipping entering data.",
-                    _type="error")
             logging.warning(f"No valid workbook path. Skipping entering data.")
     
     threading.Thread(target=_add_in_thread, args=(globals, file_list), daemon=True).start()
@@ -335,7 +331,7 @@ def export_button(globals):
     current historylog to a chosen location.
     """
     save_metadata(globals)
-    export_history(globals.history_tree)
+    export_history(globals, globals.history_tree)
 
 
 def import_button(globals):
@@ -344,4 +340,4 @@ def import_button(globals):
     exported log into the History tab's treeview.
     """
     save_metadata(globals)
-    import_history(globals.history_tree)
+    import_history(globals, globals.history_tree)

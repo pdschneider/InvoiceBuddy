@@ -1,6 +1,5 @@
 # Interface/Settings/paths_settings.py
 import customtkinter as ctk
-import tkinter as tk
 from Interface.Components.gui_actions import browse_directory, browse_file
 from Utils.save_settings import save_all_settings
 import Utils.fonts as fonts
@@ -80,8 +79,8 @@ def create_paths_settings_tab(globals, settings_tab):
     def add_buddy():
         """Add a buddy to the buddies list."""
         if len(globals.buddy_pairs) >= globals.max_buddies: return
-        name_var = tk.StringVar(value=f"Buddy {len(globals.buddy_entries) + 1}")
-        path_var = tk.StringVar()
+        name_var = ctk.StringVar(value=f"Buddy {len(globals.buddy_entries) + 1}")
+        path_var = ctk.StringVar()
 
         buddy_subframe = ctk.CTkFrame(buddies_frame)
         buddy_subframe.pack(fill="x", pady=5)

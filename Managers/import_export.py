@@ -1,23 +1,23 @@
 # Managers/import_export.py
-from tkinter import messagebox
-from tkinter import filedialog
-import datetime
+from PySide6.QtWidgets import QFileDialog
+from Utils.toast import show_toast
 import csv
 import logging
 
 
-def export_history(history_tree):
+def export_history(globals, history_tree):
     """Exports history as a csv file to the users desired location."""
     if not history_tree.get_children():
-        messagebox.showwarning("Warning", "No log entries to export.")
+        show_toast(globals, message="No log entries to export")
         logging.warning(f"No log entries to export.")
         return
 
-    #  Opens up a window to save the file as a memory object called file_path
-    file_path = filedialog.asksaveasfilename(
-        defaultextension=".csv",
-        filetypes=[("CSV files", "*.csv")],
-        initialfile=f"invoice_log_{datetime.datetime.now().strftime('%Y-%m-%d_%H-%M')}.csv")
+    #  Opens up a window to select the filepath for saving
+    file_path, filter = QFileDialog.getSaveFileName(
+        None,
+        "Export",
+        "",
+        options=QFileDialog.Option.DontUseNativeDialog)
 
     if file_path:
         try:
@@ -33,26 +33,29 @@ def export_history(history_tree):
                                      "Entered"])
                     for item_id in history_tree.get_children():
                         writer.writerow(history_tree.item(item_id)["values"])
-                    messagebox.showinfo(
-                        "Success", f"Log exported to {file_path}")
+                    show_toast(globals, message="Log exported!")
                     logging.info(f"History imported to {file_path}")
 
                 # Shows an error if the file was partially written
                 except Exception as e:
-                    messagebox.showerror(
-                        "Error", f"Export failed mid-write. Partial file written. {e}")
+                    show_toast(globals, message="Export failed mid-write - Partial file written", _type="error")
                     logging.error(
                         f"Export failed mid-write and partial file was written due to {e}")
 
         # Shows an error if the file was not created
         except Exception as e:
-            messagebox.showerror("Export failed", f"{e}")
+            show_toast(globals, message="Export failed - check logs for details", _type="error")
             logging.error(f"Could not export as csv file due to {e}")
 
 
-def import_history(history_tree):
+def import_history(globals, history_tree):
     """Imports a previously exported csv file to the history treeview."""
-    file_path = filedialog.askopenfilename(filetypes=[("CSV files", "*.csv")])
+    file_path, filter = QFileDialog.getOpenFileName(
+            None,
+            "Import",
+            "",
+            "CSV files (*.csv);;All files (*.*)",
+            options=QFileDialog.Option.DontUseNativeDialog)
     if file_path and file_path.lower().endswith(".csv"):
         try:
             with open(file_path, 'r', newline='') as csvfile:
@@ -67,8 +70,7 @@ def import_history(history_tree):
                                                                 "type",
                                                                 "archived",
                                                                 "entered"]:
-                    messagebox.showerror(
-                        "Error", "Invalid CSV format. Expected headers: File Name, Source Folder, Destination Folder, Type, Archived, Entered")
+                    show_toast(globals, message="Import Failed - Invalid headers", _type="error")
                     logging.error(
                         "Invalid CSV format. Expected headers: File Name, Source Folder, Destination Folder, Type, Archived, Entered")
                     return
@@ -91,31 +93,26 @@ def import_history(history_tree):
             # Handles error and success messages in any scenario
             if logged_rows == 0:
                 if skipped_rows == 0:
-                    messagebox.showerror(
-                        "No Data", f"No data rows found in the CSV file at {file_path}.")
+                    show_toast(globals, message="No data rows found in the CSV file")
                     logging.error(
                         f"No data written from CSV file at {file_path}.")
                 else:
-                    messagebox.showerror(
-                        "Error", f"No rows imported from {file_path}: All {skipped_rows} rows have incorrect column count (expected 6).")
+                    show_toast(globals, message="All rows have incorrect column count (expected 6)")
                     logging.error(
                         f"No rows imported from {file_path}: Skipped {skipped_rows} rows due to incorrect column count.")
             elif skipped_rows == 0:
-                messagebox.showinfo(
-                    "Success", f"History imported from {file_path}. Imported {logged_rows} rows.")
+                show_toast(globals, message="History imported successfully!")
                 logging.info(
                     f"History imported from {file_path}. Imported {logged_rows} rows and skipped {skipped_rows} rows.")
             else:
-                messagebox.showwarning(
-                    "Partial Success", f"History imported from {file_path}. Imported {logged_rows} rows and skipped {skipped_rows} rows.")
+                show_toast(globals, message=f"Partial Success - Imported {logged_rows} rows and skipped {skipped_rows} rows")
                 logging.warning(
                     f"History imported from {file_path}. Imported {logged_rows} rows and skipped {skipped_rows} rows.")
 
         except Exception as e:
-            messagebox.showerror(
-                "Error", f"Could not import CSV file due to {e}")
+            show_toast(globals, message="Could not import CSV file", _type="error")
             logging.error(f"Could not import CSV file due to {e}")
+
     elif file_path and not file_path.lower().endswith(".csv"):
-        logging.warning(f"File path is either not existant or not a CSV.")
-        messagebox.showerror(
-            "Error", f"File path is either not existant or not a CSV.")
+        show_toast(globals, message="File path either doesn't exist or is not a CSV")
+        logging.warning(f"Attempted import filepath either doesn't exist or is not a CSV.")

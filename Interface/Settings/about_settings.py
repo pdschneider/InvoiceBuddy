@@ -1,15 +1,16 @@
 # Interface/Settings/about_settings.py
 import customtkinter as ctk
 import Utils.fonts as fonts
+from Interface.Setup.setup_wizard import create_wizard
 
 
 def create_about_tab(globals, about_tab):
     """
     Creates the about tab and initializes widgets.
 
-            Parameters:
-                    globals: Global variables
-                    about_frame: The main frame of the about tab
+        Parameters:
+                globals: Global variables
+                about_frame: The main frame of the about tab
     """
     ctk.CTkLabel(about_tab,
                  font=fonts.title_font,
@@ -38,11 +39,17 @@ def create_about_tab(globals, about_tab):
     ctk.CTkButton(
         buttons_frame,
         text="View Changelog",
-        command=lambda: show_changelog()).grid(row=0, column=1, padx=5)
+        command=lambda: show_changelog()).grid(row=0, column=0, padx=5)
+
+    ctk.CTkButton(buttons_frame,
+                  text="Open Wizard",
+                  command=lambda: create_wizard(globals)).grid(
+                      row=0, column=1, padx=5)
 
     def show_changelog():
         """Brings up the changelog window."""
-        globals.main_page.pack_forget()
-        globals.settings_page.pack_forget()
+        pages = [globals.settings_page, globals.main_page, globals.onboarding_page]
+        for page in pages:
+            page.pack_forget()
         globals.changelog.pack(fill="both", expand=True, padx=10, pady=0)
         globals.title.configure(text="Changelog")

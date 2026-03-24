@@ -9,7 +9,7 @@ from Interface.Settings.settings import create_settings
 from Interface.changelog import create_changelog
 from Managers.file_management import count_files
 from Utils.observers import setup_observer
-from Interface.Windows.onboarding import create_onboarding_page
+from Interface.Setup.onboarding import create_onboarding_page
 from Utils.icons import load_icons
 import logging
 import os
@@ -19,7 +19,6 @@ def create_interface(globals):
     """Creates the core GUI interface."""
     # Set up main window
     logging.debug(f"Building GUI...")
-    globals.root = ctk.CTk()
     globals.root.title("Invoice Buddy")
     globals.root.withdraw()
 
@@ -69,8 +68,6 @@ def create_interface(globals):
     if not os.path.isfile(globals.workbook) or not os.path.isdir(globals.inbox) or not os.path.isdir(globals.archive):
         globals.main_page.pack_forget()
         globals.title.configure(text="Welcome!")
-        globals.inbox_button.configure(state="disabled")
-        globals.settings_button.configure(state="disabled")
 
     # Onboarding Page
     globals.onboarding_page = ctk.CTkFrame(globals.main_frame)
@@ -89,42 +86,6 @@ def create_interface(globals):
 
     def create_tabs():
         """Initiates critical UI functionality."""
-        globals.file_var = tk.StringVar(value=globals.workbook)
-        globals.logging_level_var = tk.StringVar(value=globals.logging_level)
-        globals.theme_var = tk.StringVar(value=globals.active_theme)
-        globals.history_var = tk.StringVar(value=globals.history_path)
-        globals.inbox_dir_var = tk.StringVar(value=globals.inbox)
-        globals.workbook_var = tk.StringVar(value=globals.workbook)
-        globals.sheet_invoices_var = tk.StringVar(value=globals.sheet_invoices)
-        globals.sheet_CreditCards_var = tk.StringVar(value=globals.sheet_CreditCards)
-        globals.sheet_PurchaseOrders_var = tk.StringVar(value=globals.sheet_PurchaseOrders)
-        globals.table_InvoiceTable_var = tk.StringVar(value=globals.table_InvoiceTable)
-        globals.table_CreditCards_var = tk.StringVar(value=globals.table_CreditCards)
-        globals.table_PurchaseOrders_var = tk.StringVar(value=globals.table_PurchaseOrders)
-        globals.invoice_starting_row_var = tk.IntVar(value=globals.invoice_starting_row)
-        globals.card_starting_row_var = tk.IntVar(value=globals.card_starting_row)
-        globals.po_starting_row_var = tk.IntVar(value=globals.po_starting_row)
-        globals.archive_path_var = tk.StringVar(value=globals.archive)
-        globals.invoice_starting_column_var = tk.IntVar(value=globals.invoice_starting_column)
-        globals.card_starting_column_var = tk.IntVar(value=globals.card_starting_column)
-        globals.po_starting_column_var = tk.IntVar(value=globals.po_starting_column)
-
-        # Component Vars
-        globals.invoice_com_a_var = tk.StringVar(value=globals.invoice_component_a)
-        globals.invoice_com_b_var = tk.StringVar(value=globals.invoice_component_b)
-        globals.invoice_com_c_var = tk.StringVar(value=globals.invoice_component_c)
-        globals.invoice_com_d_var = tk.StringVar(value=globals.invoice_component_d)
-
-        globals.card_com_a_var = tk.StringVar(value=globals.card_component_a)
-        globals.card_com_b_var = tk.StringVar(value=globals.card_component_b)
-        globals.card_com_c_var = tk.StringVar(value=globals.card_component_c)
-        globals.card_com_d_var = tk.StringVar(value=globals.card_component_d)
-
-        globals.po_com_a_var = tk.StringVar(value=globals.po_component_a)
-        globals.po_com_b_var = tk.StringVar(value=globals.po_component_b)
-        globals.po_com_c_var = tk.StringVar(value=globals.po_component_c)
-        globals.po_com_d_var = tk.StringVar(value=globals.po_component_d)
-
         create_inbox(globals, globals.main_page)
         create_settings(globals, globals.settings_page)
         create_changelog(globals, globals.changelog)
@@ -138,7 +99,7 @@ def create_interface(globals):
 
         def update_treeview(tree, extension=None):
             """
-            Refreshes a custom treeview to show the correct
+            Refreshes the custom treeview to show the correct
             current files in the directory.
             """
             tree.refresh(extension=extension)
@@ -158,7 +119,7 @@ def create_interface(globals):
                 globals,
                 globals.inbox,
                 key='inbox')
-        globals.update_file_counts()
+            globals.update_file_counts()
 
     # Creates tabs then shows the window
     create_tabs()

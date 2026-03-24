@@ -14,18 +14,18 @@ def create_top_bar(globals):
                 top_bar: The top_bar frame and its child widgets
     """
     def toggle_inbox():
+        pages = [globals.settings_page, globals.onboarding_page, globals.changelog]
+        for page in pages:
+            page.pack_forget()
         globals.main_page.pack(fill="both", expand=True, padx=10, pady=0)
-        globals.changelog.pack_forget()
-        globals.settings_page.pack_forget()
-        globals.main_page.tkraise()
         globals.title.configure(text="Inbox")
 
     def toggle_settings():
         """Shows and hides the settings window when the button is clicked."""
+        pages = [globals.onboarding_page, globals.main_page, globals.changelog]
+        for page in pages:
+            page.pack_forget()
         globals.settings_page.pack(fill="both", expand=True, padx=10, pady=0)
-        globals.changelog.pack_forget()
-        globals.main_page.pack_forget()
-        globals.settings_page.tkraise()
         globals.title.configure(text="Settings")
 
     # Main top bar

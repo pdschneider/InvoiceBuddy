@@ -2,7 +2,7 @@
 import customtkinter as ctk
 from Utils.save_settings import save_all_settings
 from Utils.load_settings import load_data_path
-from Interface.Components.gui_actions import open_directory
+from Utils.factory_reset import total_factory_reset
 import Utils.fonts as fonts
 from CTkToolTip import CTkToolTip
 import logging
@@ -112,6 +112,33 @@ def create_advanced_tab(globals, advanced_frame):
                                 width=20,
                                 command=lambda: open_config())
     open_config_button.pack(side="left", padx=(0, 12))
+
+    # Deletion
+    ctk.CTkLabel(advanced_frame,
+                text="DANGER ZONE",
+                font=fonts.title_font,
+                fg_color="#d62828",
+                anchor="center").pack(fill="x", pady=20, padx=10)
+
+    top_deletion_frame = ctk.CTkFrame(advanced_frame,
+                            bg_color="transparent",
+                            fg_color="transparent")
+    top_deletion_frame.pack(anchor="w", pady=5)
+
+    ctk.CTkLabel(top_deletion_frame,
+                text=None,
+                image=globals.garbage_icon).pack(side="left", padx=6, pady=0)
+
+    ctk.CTkLabel(top_deletion_frame,
+                text="Factory Reset",
+                font=fonts.heading_font).pack(side="left", padx=(0, 12))
+    
+    reset_pearl_button = ctk.CTkButton(top_deletion_frame,
+                                text="Reset",
+                                width=20,
+                                command=lambda: total_factory_reset(globals))
+    reset_pearl_button.pack(side="left", padx=(0, 12))
+    reset_pearl_button.configure(fg_color="#d62828", hover_color="#ff3b30")
 
     # Save Button Frame
     save_button_frame = ctk.CTkFrame(advanced_frame, fg_color="transparent")

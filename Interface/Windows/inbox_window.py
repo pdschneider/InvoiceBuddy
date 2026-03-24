@@ -1,7 +1,6 @@
 # Interface/Windows/inbox_window.py
-import tkinter as tk
-from tkinter import messagebox
 import customtkinter as ctk
+from PySide6.QtWidgets import QMessageBox
 from Interface.Components.gui_actions import (open_workbook,
                                               open_directory,
                                               pdf_button)
@@ -24,8 +23,8 @@ import threading
 def create_inbox(globals, inbox_tab):
     """Initiates the Inbox tab."""
 
-    globals.inbox_dir_var = tk.StringVar(value=globals.sources['inbox'])
-    globals.inbox_count_var = tk.StringVar(value=f"Files in folder: {count_files(globals.sources['inbox'], '.pdf')}")
+    globals.inbox_dir_var = ctk.StringVar(value=globals.sources['inbox'])
+    globals.inbox_count_var = ctk.StringVar(value=f"Files in folder: {count_files(globals.sources['inbox'], '.pdf')}")
 
     ctk.CTkLabel(inbox_tab,
                  textvariable=globals.inbox_count_var).pack(pady=5)
@@ -248,10 +247,14 @@ def create_inbox(globals, inbox_tab):
 
         # If not on network drive, use safer deletion method
         if not globals.network_drive:
-            if not messagebox.askyesno("Confirm Delete",
-                                       f"Move {count} file{'s' if count != 1 else ''} to the Recycle Bin?\n\n"
-                                       "You can recover them later from there.",
-                                       icon="warning"):
+            reply = QMessageBox.question(
+                None,
+                "Confirm Delete",
+                f"Move {count} file{'s' if count != 1 else ''} to the Recycle Bin?",
+                QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+                QMessageBox.StandardButton.No)
+
+            if reply == QMessageBox.StandardButton.No:
                 return
 
             # Send files safely to trash
@@ -266,10 +269,14 @@ def create_inbox(globals, inbox_tab):
 
         # If on network drive, fall back to permanent deletion method
         else:
-            if not messagebox.askyesno("Confirm Delete",
-                                       f"Permanently delete {count} file{'s' if count != 1 else ''}?\n\n"
-                                       "You cannot recover them later.",
-                                       icon="warning"):
+            reply = QMessageBox.question(
+                None,
+                "Confirm Delete",
+                f"Permanently delete {count} file{'s' if count != 1 else ''}?",
+                QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+                QMessageBox.StandardButton.No)
+
+            if reply == QMessageBox.StandardButton.No:
                 return
 
             # Delete files permanently

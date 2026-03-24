@@ -34,7 +34,7 @@ def create_general_settings_tab(globals, settings_tab):
     theme_labels = [entry["label"] for entry in themes_dict]
     label_to_theme = {entry["label"]: entry["theme"] for entry in themes_dict}
 
-    label_var = tk.StringVar()
+    label_var = ctk.StringVar()
 
     def update_theme_var(*args):
         selected_label = label_var.get()
