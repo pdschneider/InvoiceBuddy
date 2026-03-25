@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>io.github.pdschneider.invoicebuddy</id>
+  <metadata_license>MIT</metadata_license>
+  <project_license>Apache-2.0</project_license>
+  <name>Invoice Buddy</name>
+  <summary>Easy Receipt Entry with Invoice Buddy</summary>
+  <developer id="io.github.pdschneider">
+    <name>Phillip Schneider</name>
+  </developer>
+  <description>
+    <p>Invoice Buddy is designed to make the invoice entry process easier. Instead of manually writing each filename and then entering the necessary data into your spreadsheet, Invoice Buddy takes care of it for you.</p>
+  </description>
+  <content_rating type="oars-1.1" />
+  <launchable type="desktop-id">io.github.pdschneider.invoicebuddy.desktop</launchable>
+  <url type="homepage">https://github.com/pdschneider/InvoiceBuddy</url>
+  <screenshots>
+    <screenshot type="default">
+      <image>https://raw.githubusercontent.com/pdschneider/InvoiceBuddy/main/Screenshots/InvoiceBuddy-1.png</image>
+    </screenshot>
+  </screenshots>
+</component>

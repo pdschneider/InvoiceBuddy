@@ -1,0 +1,28 @@
+
+# Build and distribution folders
+dist/
+build/
+
+# Nuitka / PyInstaller outputs
+*.AppImage
+InvoiceBuddy-Linux
+InvoiceBuddy.bin
+
+# Virtual environments
+venv/
+env/
+ENV/
+.venv/
+invoice_venv/
+
+# All __pycache__ folders (recursive)
+__pycache__/
+
+# Specific project excludes
+Notes.txt
+backburner/
+data/
+FY25/
+FY26/
+.vscode/
+build_linux.sh
