@@ -1,4 +1,4 @@
-# InvoiceBuddy
+# Invoice Buddy
 Invoice Buddy is a financial management app that makes data entry easier.
 
 ## Welcome to Invoice Buddy!

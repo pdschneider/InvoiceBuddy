@@ -25,4 +25,5 @@ data/
 FY25/
 FY26/
 .vscode/
-build_linux.sh
+build.sh
+.git/

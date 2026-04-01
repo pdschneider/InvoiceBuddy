@@ -1,11 +1,11 @@
-# BuildTools/version_gen.py
+# packaging/version_gen.py
 # Auto-generates version.txt from version.py for PyInstaller Windows builds
 
 import sys
 from pathlib import Path
 
 # Add the project root to Python path so we can import "version" reliably
-project_root = Path(__file__).parent.parent.resolve()   # Goes up from Utils/ to root
+project_root = Path(__file__).parent.parent.resolve()   # Goes up from packaging/ to root
 if str(project_root) not in sys.path:
     sys.path.insert(0, str(project_root))
 
@@ -55,7 +55,7 @@ VSVersionInfo(
 '''
 
 # Always write version.txt to the project root
-version_txt_path = project_root / 'BuildTools' / 'version.txt'
+version_txt_path = project_root / 'packaging' / 'version.txt'
 
 with open(version_txt_path, 'w', encoding='utf-8') as f:
     f.write(content)

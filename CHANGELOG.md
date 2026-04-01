@@ -10,10 +10,11 @@ This version
 - Added .gitignore for faster releases
 
 ### Changed
-- 
+- Reorganized project structure
+- Updated dependencies
 
 ### Fixed
-- 
+- Fixed dependency chain issue resulting in failed builds using requirements.txt
 
 ## [0.1.6] - 2026-03-24
 
