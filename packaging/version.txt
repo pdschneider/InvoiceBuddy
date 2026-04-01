@@ -1,34 +1,35 @@
 # UTF-8
-# Auto-generated from version.py - DO NOT EDIT MANUALLY
+  # Auto-generated from version.py - DO NOT EDIT MANUALLY
 
-VSVersionInfo(
-  ffi=FixedFileInfo(
-    filevers=(0, 1, 7, 0),
-    prodvers=(0, 1, 7, 0),
-    mask=0x3f,
-    flags=0x0,
-    OS=0x40004,
-    fileType=0x1,
-    subtype=0x0,
-    date=(0, 0)
-    ),
-  kids=[
-    StringFileInfo(
-      [
-      StringTable(
-        '040904B0',
+  VSVersionInfo(
+    ffi=FixedFileInfo(
+      filevers=(0, 1, 7, 0),
+      prodvers=(0, 1, 7, 0),
+      mask=0x3f,
+      flags=0x0,
+      OS=0x40004,
+      fileType=0x1,
+      subtype=0x0,
+      date=(0, 0)
+      ),
+    kids=[
+      StringFileInfo(
         [
-          StringStruct('CompanyName', 'Phillip Schneider'),
-          StringStruct('FileDescription', 'Simplified invoice and receipt management.'),
-          StringStruct('FileVersion', '0.1.7'),
-          StringStruct('InternalName', 'InvoiceBuddy'),
-          StringStruct('LegalCopyright', 'Copyright © 2026 Phillip Schneider. Apache 2.0.'),
-          StringStruct('OriginalFilename', 'InvoiceBuddy.exe'),
-          StringStruct('ProductName', 'Invoice Buddy'),
-          StringStruct('ProductVersion', '0.1.7'),
-          StringStruct('Comments', 'Makes invoice and financial data entry easier.'),
-        ])
-      ]),
-    VarFileInfo([VarStruct('Translation', [0x409, 1200])])
-  ]
-)
+        StringTable(
+          '040904B0',
+          [
+            StringStruct('CompanyName', 'Phillip Schneider'),
+            StringStruct('FileDescription', 'Simplified invoice and receipt management.'),
+            StringStruct('FileVersion', '0.1.7'),
+            StringStruct('InternalName', 'InvoiceBuddy'),
+            StringStruct('LegalCopyright', 'Copyright © 2026 Phillip Schneider. Apache 2.0.'),
+            StringStruct('OriginalFilename', 'InvoiceBuddy.exe'),
+            StringStruct('ProductName', 'Invoice Buddy'),
+            StringStruct('ProductVersion', '0.1.7'),
+            StringStruct('Comments', 'Makes invoice and financial data entry easier.'),
+          ])
+        ]),
+      VarFileInfo([VarStruct('Translation', [0x409, 1200])])
+    ]
+  )
+  

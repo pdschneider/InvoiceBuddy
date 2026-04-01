@@ -1,0 +1,13 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=Invoice Buddy
+GenericName=Invoice Management
+Comment=Automates invoice file naming and spreadsheet entry
+Exec=/usr/bin/invoicebuddy.bin
+Icon=icon
+Terminal=false
+Categories=Office;Finance;Utility;
+Keywords=invoice;receipt;spreadsheet;finance;accounting;
+StartupNotify=true
+Name[en_US]=invoice-buddy.desktop

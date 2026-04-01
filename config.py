@@ -10,7 +10,7 @@ import threading
 import customtkinter as ctk
 from version import __version__
 from PySide6.QtWidgets import QApplication
-from Utils.load_settings import (load_settings,
+from src.utils.load_settings import (load_settings,
                                  load_data_path,
                                  load_folder_map,
                                  load_paths,

@@ -1,0 +1,12 @@
+Package: invoice-buddy
+Version: 0.1.7
+Architecture: amd64
+Maintainer: Phillip Schneider <bugs@phillipplays.com>
+Section: utils
+Priority: optional
+Homepage: https://github.com/pdschneider/InvoiceBuddy
+Description: Invoice Buddy is a financial management app that makes data entry easier.
+ It automates invoice file naming and populates spreadsheets based on file contents.
+ .
+ Features include auto-naming files, easy spreadsheet entry, and one-button archiving.
+ 

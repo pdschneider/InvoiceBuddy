@@ -4,17 +4,26 @@ All notable changes to **Invoice Buddy** will be located in this file.
 
 ## [0.1.7] - 2026-00-00
 
-This version 
+This version adds greater desktop integration for Windows users and speed for Linux. The entire top-level project structure has been redesigned to fit more with convention and various bugs & vulnerabilities have been patched.
 
 ### Added
+- Built via Nuitka on Linux, dramatically speeding up performance
+- Full desktop integration for Windows
 - Added .gitignore for faster releases
+- Added new documentation: architecture, build, roadmap, companies, & usage + updated ReadMe
 
 ### Changed
+- Reintroduced messageboxes to alert user when auto-name is complete
 - Reorganized project structure
 - Updated dependencies
 
 ### Fixed
 - Fixed dependency chain issue resulting in failed builds using requirements.txt
+- Fixed crash caused by PySide file browse boxes
+
+### Security
+- Updated several dependencies with low to moderate security vulnerabilities
+- Removed logging with references to sheet names
 
 ## [0.1.6] - 2026-03-24
 

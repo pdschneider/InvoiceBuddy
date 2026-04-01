@@ -1,0 +1,19 @@
+#!/bin/sh
+# postinst script for invoice-buddy
+
+set -e
+
+# Refresh desktop database so the app appears correctly in menu
+if [ -x /usr/bin/update-desktop-database ]; then
+    update-desktop-database /usr/share/applications
+fi
+
+# Refresh icon cache (this fixes "Pin to panel" and icon visibility)
+if [ -x /usr/bin/gtk-update-icon-cache ]; then
+    gtk-update-icon-cache -q -t -f /usr/share/icons/hicolor || true
+fi
+
+# Make sure the binary is executable (just in case)
+chmod +x /usr/bin/invoicebuddy.bin
+
+exit 0

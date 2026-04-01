@@ -8,6 +8,7 @@ customtkinter==5.2.2
 darkdetect==0.8.0
 et_xmlfile==2.0.0
 idna==3.11
+iniconfig==2.3.0
 msoffcrypto-tool==6.0.0
 Nuitka==4.0.7
 olefile==0.47
@@ -19,8 +20,10 @@ pdfminer.six==20251230
 pdfplumber==0.11.9
 pep8==1.7.1
 pillow==12.1.1
+pluggy==1.6.0
 psutil==7.2.2
 pycparser==3.0
+Pygments==2.20.0
 pyinstaller==6.16.0
 pyinstaller-hooks-contrib==2026.4
 pypdf==6.9.2
@@ -29,6 +32,7 @@ PySide6==6.11.0
 PySide6_Addons==6.11.0
 PySide6_Essentials==6.11.0
 pytesseract==0.3.13
+pytest==9.0.2
 requests==2.33.1
 Send2Trash==2.1.0
 setuptools==82.0.1

@@ -7,7 +7,7 @@ ret_pyside = collect_all('PySide6')
 ret_shiboken = collect_all('shiboken6')
 
 a = Analysis(
-    ['../InvoiceBuddy.py'],
+    ['../invoicebuddy.py'],
     pathex=[],
     binaries=[],
     datas=[
@@ -45,6 +45,6 @@ exe = EXE(
     codesign_identity=None,
     entitlements_file=None,
     onefile=True,
-    icon='defaults/assets/icon.ico',
+    icon='../defaults/assets/icon.ico',
     version='version.txt'
 )

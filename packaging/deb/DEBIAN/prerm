@@ -1,0 +1,9 @@
+#!/bin/sh
+# prerm script for invoice-buddy
+
+set -e
+
+# Stop any running instance if possible (optional)
+pkill -x invoicebuddy.bin || true
+
+exit 0
