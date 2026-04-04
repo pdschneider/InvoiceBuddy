@@ -9,7 +9,7 @@ import logging
 import threading
 import customtkinter as ctk
 from version import __version__
-from PySide6.QtWidgets import QApplication
+from PySide6.QtWidgets import QApplication, QMainWindow
 from src.utils.load_settings import (load_settings,
                                  load_data_path,
                                  load_folder_map,
@@ -42,6 +42,7 @@ class Globals:
 
         # PySide6 Widgets
         self.app = QApplication(sys.argv)
+        self.window = QMainWindow()
 
         # Locks
         self.edit_lock = threading.Lock()
@@ -86,6 +87,8 @@ class Globals:
         self.note_icon = None
         self.config_icon = None
         self.garbage_icon = None
+        self.print_icon = None
+        self.printer_icon = None
 
         self.icons_list = ["assets/invoice-1.png",
                            "assets/invoice-2.png",
@@ -113,6 +116,7 @@ class Globals:
         # Temporary UI Variables
         self.workbook_var = ""
         self.history_var = ""
+        self.default_printer_var = ""
 
         # Inbox Temporary Vars
         self.inbox_dir_var = ""
@@ -172,6 +176,7 @@ class Globals:
         self.saved_height = settings.get("saved_height", 850)
         self.saved_x = settings.get("saved_x", -1)
         self.saved_y = settings.get("saved_y", -1)
+        self.default_printer = settings.get("default_printer", "")
 
         # Paths
         self.inbox = sources.get("inbox", "")

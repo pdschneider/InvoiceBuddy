@@ -2,9 +2,8 @@
 from tkinter import ttk
 import customtkinter as ctk
 from CTkToolTip import CTkToolTip
-from src.interface.components.gui_actions import (open_selected_folders,
-                                              open_workbook)
 from src.managers.import_export import export_history, import_history
+from src.managers.file_management import open_workbook, open_selected_folders
 from src.managers.history_manager import load_history
 import src.utils.fonts as fonts
 

@@ -107,5 +107,15 @@ def load_icons(globals):
             dark_image=Image.open(load_data_path("config", "assets/delete-1.png")),
             size=(40, 40))
 
+        globals.print_icon = CTkImage(
+            light_image=Image.open(load_data_path("config", "assets/printer-1.png")),
+            dark_image=Image.open(load_data_path("config", "assets/printer-1.png")),
+            size=(40, 40))
+
+        globals.printer_icon = CTkImage(
+            light_image=Image.open(load_data_path("config", "assets/printer-2.png")),
+            dark_image=Image.open(load_data_path("config", "assets/printer-2.png")),
+            size=(40, 40))
+
     except Exception as e:
         logging.error(f"Failed to load icons due to: {e}")

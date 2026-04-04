@@ -1,116 +1,13 @@
 # Interface/Components/gui_actions.py
-import os, subprocess, logging, shutil
-from tkinter import filedialog, messagebox
+import os, subprocess, logging
+from tkinter import messagebox
 from src.managers.autoname.pdfsearch import apply_auto_naming
 from src.managers.data_processing import parse_invoices, parse_credit_cards
-from src.managers.file_management import move_files
+from src.managers.file_management import archive_files
 from src.managers.import_export import export_history, import_history
 from src.utils.save_settings import save_metadata
 from src.utils.toast import show_toast
 
-def add_file(globals):
-    """Moves a file to the inbox."""
-    if not os.path.isdir(globals.inbox) and os.path.isdir(globals.inbox_dir_var.get().strip()):
-        globals.inbox = globals.inbox_dir_var.get().strip()
-        logging.debug(f"Inbox not a valid path. Using path from paths settings.")
-    if os.path.isdir(globals.inbox) and os.path.isdir(globals.inbox):
-        new_file = filedialog.askopenfilenames(title="Select Files", filetypes=[("PDF files", "*.pdf")], multiple=True)
-        try:
-            if new_file:
-                files_list = []
-                for file in new_file:
-                    files_list.append(file)
-                    logging.debug(f"Attempting to add files: {files_list}")
-                for file in files_list:
-                    if not file.lower().endswith(".pdf"):
-                        logging.warning(f"Only PDF files can be added.")
-                        show_toast(globals, "Only PDF files can be added.", _type="error")
-                        return
-                for file in new_file:
-                        save_metadata(globals)
-                        shutil.copy2(file, globals.inbox)
-                logging.info(f"Added files!")
-        except Exception as e:
-            for file in new_file:
-                logging.error(f"Could not add {file} to inbox due to: {e}")
-            show_toast(globals, f"Unable to add files.", _type="error")
-    else:
-        logging.error(f"Cannot add files to an invalid inbox path.")
-        show_toast(globals, f"Unable to add file - Select a valid inbox path first", _type="error")
-
-def browse_file(var):
-    """Open a file dialog to select a file and set the variable."""
-    file_path = filedialog.askopenfilename(filetypes=[("All files", "*.*"), ("CSV files", "*.csv"), ("Excel files", "*.xlsx")])
-    if file_path:
-        var.set(file_path)
-        logging.info(f"Selected file: {file_path}")
-
-def browse_directory(var):
-    """Open a directory dialog to select a directory and set the variable."""
-    dir_path = filedialog.askdirectory()
-    if dir_path:
-        var.set(dir_path)
-        logging.info(f"Selected directory: {dir_path}")
-
-def open_workbook(globals):
-    """Opens the Excel workbook at the initiated file path."""
-    if os.path.isfile(globals.workbook):
-        try:
-            if globals.os_name.startswith("Windows"):
-                os.startfile(globals.workbook)
-            else:
-                subprocess.run(['xdg-open', globals.workbook], check=True)
-            logging.info(f"Opened workbook: {globals.workbook}")
-        except PermissionError as e:
-            show_toast(globals, f"Permission Error. Is the workbook already open?", _type="error")
-            logging.error(f"Permission Error accessing {globals.workbook}: {e}")
-            return
-        except Exception as e:
-            show_toast(globals, "Failed to open workbook", _type="error")
-            logging.error(f"Error opening workbook {globals.workbook}: {e}")
-            return
-    else:
-        show_toast(globals, f"Invalid workbook path", _type="error")
-        logging.error(f"Cannot open workbook. Invalid file path {globals.workbook}")
-        return
-
-def open_directory(directory):
-    """Opens the directory of the current tab."""
-    try:
-        if not directory or not os.path.isdir(directory):
-            show_toast(globals, "Invalid directory", _type="error")
-            logging.error(f"Cannot open directory: Invalid path {directory}")
-            return
-        try:
-            os.startfile(directory)
-        except:
-            subprocess.run(['xdg-open', directory], check=True)
-        logging.info(f"Opened directory: {directory}")
-    except Exception as e:
-        show_toast(globals, f"Failed to open directory", _type="error")
-        logging.error(f"Error opening directory {directory}: {e}")
-
-def open_selected_folders(globals):
-    """Opens the folders that the files at selected treeview rows are located in."""
-    selected_items = globals.history_tree.selection()
-    if not selected_items:
-        show_toast(globals, "No items selected to open folders.")
-        return
-    folders = set()
-    for item_id in selected_items:
-        values = globals.history_tree.item(item_id)['values']
-        dst_folder = values[2]
-        src_folder= values[1]
-        if dst_folder != "N/A" and os.path.isdir(dst_folder):
-            folders.add(dst_folder)
-        if not os.path.isdir(dst_folder):
-            folders.add(src_folder)
-    if not folders:
-        show_toast(globals, "No valid folders found for selected items.")
-        return
-    for folder in folders:
-        open_directory(folder)
-    logging.info(f"Opened {len(folders)} unique destination folders.")
 
 def pdf_button(globals, companies=None, directory=None, file_list=None):
     """One-click auto-naming — all logic in apply_auto_naming."""
@@ -213,7 +110,7 @@ def credit_button(globals, file_list=None):
     parse_to_spreadsheet(globals, "Credit Cards", file_list)
 
 def move_button(globals):
-    """Initiates move_files and moves the files associated with selected treeview rows to their destination folders."""
+    """Initiates archive_files and moves the files associated with selected treeview rows to their destination folders."""
     save_metadata(globals)
     selected_items = globals.history_tree.selection()
     if not selected_items:
@@ -236,7 +133,7 @@ def move_button(globals):
         return
 
     for (directory, file_type), file_list in groups.items():
-        move_files(globals, globals.history_tree, directory, file_type, globals.folder_map, globals.oneoffs_folder, file_list)
+        archive_files(globals, globals.history_tree, directory, file_type, globals.folder_map, globals.oneoffs_folder, file_list)
 
 def export_button(globals):
     """Initiates export_history to export the current history log to a chosen location."""

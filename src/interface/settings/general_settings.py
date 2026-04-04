@@ -2,6 +2,7 @@
 import tkinter as tk
 import customtkinter as ctk
 from src.utils.save_settings import save_all_settings
+from src.managers.printers import query_printers
 import src.utils.fonts as fonts
 
 
@@ -34,20 +35,20 @@ def create_general_settings_tab(globals, settings_tab):
     theme_labels = [entry["label"] for entry in themes_dict]
     label_to_theme = {entry["label"]: entry["theme"] for entry in themes_dict}
 
-    label_var = ctk.StringVar()
+    theme_label_var = ctk.StringVar()
 
     def update_theme_var(*args):
-        selected_label = label_var.get()
+        selected_label = theme_label_var.get()
         theme_name = label_to_theme.get(selected_label, "Cosmic Sky")
         globals.theme_var.set(theme_name)
 
-    label_var.trace("w", update_theme_var)
+    theme_label_var.trace("w", update_theme_var)
 
     initial_theme = globals.theme_var.get()
     initial_label = next(
         (label for label,
          theme in label_to_theme.items() if theme == initial_theme), "Cosmic Sky")
-    label_var.set(initial_label)
+    theme_label_var.set(initial_label)
 
     ctk.CTkLabel(theme_frame,
                  text=None,
@@ -58,8 +59,28 @@ def create_general_settings_tab(globals, settings_tab):
                  font=fonts.heading_font).pack(side="left", padx=(0, 12))
 
     ctk.CTkComboBox(theme_frame,
-                    variable=label_var,
+                    variable=theme_label_var,
                     values=theme_labels,
+                    state="readonly",
+                    width=150).pack(side="left")
+    
+    # Printer Selection Frame
+    printer_frame = ctk.CTkFrame(settings_tab,
+                                bg_color="transparent",
+                                fg_color="transparent")
+    printer_frame.pack(fill="x", pady=10, padx=10)
+
+    ctk.CTkLabel(printer_frame,
+                text=None,
+                image=globals.printer_icon).pack(side="left", padx=6, pady=0)
+
+    ctk.CTkLabel(printer_frame,
+                text="Printer",
+                font=fonts.heading_font).pack(side="left", padx=(0, 12))
+
+    ctk.CTkComboBox(printer_frame,
+                    variable=globals.default_printer_var,
+                    values=query_printers(),
                     state="readonly",
                     width=150).pack(side="left")
 

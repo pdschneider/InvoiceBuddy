@@ -68,6 +68,7 @@ def save_all_settings(globals, reject_toast=False, reject_metadata=False):
     current_logging_level = globals.logging_level_var.get()
     current_active_theme = globals.theme_var.get()
     current_history_path = globals.history_var.get()
+    current_default_printer = globals.default_printer_var.get()
     logging_level = current_logging_level
 
     # Save Window Placement
@@ -91,7 +92,8 @@ def save_all_settings(globals, reject_toast=False, reject_metadata=False):
         saved_width=current_width,
         saved_height=current_height,
         saved_x=current_horizontal_placement,
-        saved_y=current_vertical_placement)
+        saved_y=current_vertical_placement,
+        default_printer=current_default_printer)
 
     # Refresh globals
     globals.refresh_globals()
@@ -189,8 +191,6 @@ def save_paths(globals, sources=None, buddies=None):
         with open(file_path, 'w', encoding='utf-8') as f:
             json.dump(full_data, f, indent=4)
 
-        logging.info(f"Saved paths to {file_path}")
-
         # Update the live Globals object
         globals.sources = full_data["sources"]
         globals.buddies = full_data["buddies"]
@@ -210,7 +210,6 @@ def save_settings(**kwargs):
     try:
         with open(file_path, 'w') as f:
             json.dump(settings, f, indent=4)
-        logging.info(f"Saving settings to: {file_path}")
     except Exception as e:
         logging.error(f"Error saving settings to {file_path}: {e}")
 
@@ -254,7 +253,6 @@ def save_spreadsheet_specs(globals):
     try:
         with open(file_path, 'w', encoding='utf-8') as f:
             json.dump(data, f, indent=4)
-        logging.info(f"Spreadsheet specifications saved to {file_path}")
     except Exception as e:
         logging.error(f"Failed to save spreadsheet.json: {e}")
 
@@ -306,7 +304,6 @@ def save_metadata(globals):
                     "pypdf not available — skipping PDF metadata save.")
             except Exception as e:
                 logging.error(f"Error saving PDF identities: {e}")
-    logging.info(f"Settings saved successfully.")
 
 
 def configure_labels(globals):

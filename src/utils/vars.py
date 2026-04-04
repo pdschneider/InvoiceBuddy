@@ -22,6 +22,7 @@ def create_vars(globals):
     globals.invoice_starting_column_var = ctk.IntVar(value=globals.invoice_starting_column)
     globals.card_starting_column_var = ctk.IntVar(value=globals.card_starting_column)
     globals.po_starting_column_var = ctk.IntVar(value=globals.po_starting_column)
+    globals.default_printer_var = ctk.StringVar(value=globals.default_printer)
 
     # Component Vars
     globals.invoice_com_a_var = ctk.StringVar(value=globals.invoice_component_a)

@@ -103,11 +103,12 @@ def create_interface(globals):
 
         def update_file_counts():
             """Monitors folder changes and keeps file count labels current."""
-            globals.inbox_count_var.set(
-                f"Files in folder: {count_files(globals.sources['inbox'], '.pdf')}")
-            if hasattr(globals, 'inbox_tree') and globals.inbox_tree:
-                update_treeview(globals.inbox_tree, extension='.pdf')
-            globals.root.update_idletasks()
+            if globals.inbox:
+                globals.inbox_count_var.set(
+                    f"Files in folder: {count_files(globals.inbox, '.pdf')}")
+                if hasattr(globals, 'inbox_tree') and globals.inbox_tree:
+                    update_treeview(globals.inbox_tree, extension='.pdf')
+                globals.root.update_idletasks()
 
         globals.update_file_counts = update_file_counts
         globals.observers = {}

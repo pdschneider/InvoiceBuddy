@@ -1,4 +1,5 @@
 # Interface/Settings/about_settings.py
+import webbrowser
 import customtkinter as ctk
 import src.utils.fonts as fonts
 from src.interface.setup.setup_wizard import create_wizard
@@ -45,6 +46,12 @@ def create_about_tab(globals, about_tab):
                   text="Open Wizard",
                   command=lambda: create_wizard(globals)).grid(
                       row=0, column=1, padx=5)
+    
+    github_button = ctk.CTkButton(buttons_frame,
+                                  text="View Github",
+                                  command=lambda: webbrowser.open(
+                                      url="https://github.com/pdschneider/InvoiceBuddy"))
+    github_button.grid(row=0, column=2, padx=5)
 
     def show_changelog():
         """Brings up the changelog window."""

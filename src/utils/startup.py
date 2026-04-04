@@ -194,6 +194,11 @@ def setup_settings():
             changed = True
             logging.info(
                 f"Added missing or nonconforming 'saved_y' key to settings.json")
+        if "default_printer" not in data or not isinstance(data["default_printer"], str):
+            data["default_printer"] = ""
+            changed = True
+            logging.info(
+                f"Added missing or nonconforming 'default_printer' key to settings.json")
 
         # Check to make sure paths are valid
         if not os.path.isfile(data["history_path"]):
@@ -272,17 +277,17 @@ def setup_paths():
             changed = False
 
         # Check to make sure paths are valid
-        if not os.path.exists(data["sources"]["inbox"]):
+        if data["sources"]["inbox"] and not os.path.exists(data["sources"]["inbox"]):
             logging.warning(f"Inbox is not a valid path.")
             data["sources"]["inbox"] = ""
             changed = True
             logging.info(f"Sanitizing incorrect path 'inbox'")
-        if not os.path.exists(data["sources"]["workbook"]):
+        if data["sources"]["workbook"] and not os.path.exists(data["sources"]["workbook"]):
             logging.warning(f"Workbook is not a valid path.")
             data["sources"]["workbook"] = ""
             changed = True
             logging.info(f"Sanitizing incorrect path 'workbook'")
-        if not os.path.exists(data["sources"]["archive"]):
+        if data["sources"]["archive"] and not os.path.exists(data["sources"]["archive"]):
             logging.warning(f"Archive is not a valid path.")
             data["sources"]["archive"] = ""
             changed = True

@@ -1,6 +1,6 @@
 # Interface/Settings/paths_settings.py
 import customtkinter as ctk
-from src.interface.components.gui_actions import browse_directory, browse_file
+from src.managers.file_management import browse_directory, browse_file
 from src.utils.save_settings import save_all_settings
 import src.utils.fonts as fonts
 
@@ -41,7 +41,7 @@ def create_paths_settings_tab(globals, settings_tab):
     ctk.CTkButton(paths_section,
                   text="Browse",
                   width=140,
-                  command=lambda: browse_file(globals.workbook_var)
+                  command=lambda: browse_file(globals.workbook_var, _type="workbook")
                   ).grid(row=0, column=2, pady=5)
 
     # Inbox
@@ -198,7 +198,7 @@ def create_paths_settings_tab(globals, settings_tab):
                   text="Browse",
                   width=140,
                   command=lambda: browse_file(
-                      globals.history_var)).grid(row=0, column=2, pady=5)
+                      globals.history_var, _type="history")).grid(row=0, column=2, pady=5)
 
     # Save Button Frame
     save_button_frame = ctk.CTkFrame(settings_tab, fg_color="transparent")

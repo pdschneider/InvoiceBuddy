@@ -1,0 +1,13 @@
+#!/bin/sh
+# postrm script for invoice-buddy
+
+set -e
+
+# Clean up desktop and icon cache after removal
+update-desktop-database /usr/share/applications 2>/dev/null || true
+gtk-update-icon-cache -q -t -f /usr/share/icons/hicolor 2>/dev/null || true
+
+# Remove any leftover menu items (Cinnamon/Mint sometimes needs this)
+rm -f /usr/share/applications/invoice-buddy.desktop 2>/dev/null || true
+
+exit 0

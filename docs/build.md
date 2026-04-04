@@ -4,7 +4,7 @@ Invoice Buddy can be built from source code via Pyinstaller on both Windows and 
 
 ## 🐧 Linux
 
-Open your IDE (VSCode recommended) and create a virtual environment using hese commands:
+Open your IDE (VSCode recommended) and create a virtual environment using these commands:
 
 ```
 python3 -m venv invoice_venv
@@ -26,6 +26,17 @@ pyinstaller packaging/InvoiceBuddy-Linux.spec --clean
 
 Alternatively, run these commands to build with Nuitka:
 
+**IMPORTANT: Must have patchelf installed: `sudo apt patchelf`**
+
+Install appimagetool if not already installed:
+```
+wget https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-x86_64.AppImage
+
+chmod +x appimagetool-x86_64.AppImage
+sudo mv appimagetool-x86_64.AppImage /usr/local/bin/appimagetool
+```
+
+Build the App:
 ```
 pip install -r packaging/requirements.txt
 
@@ -52,7 +63,7 @@ After building, copy InvoiceBuddy-Linux to packaging/InvoiceBuddy.AppDir/usr/bin
 Run this command from the root directory:
 
 ```
-appimagetool InvoiceBuddy.AppDir InvoiceBuddy-Linux.AppImage -v
+appimagetool packaging/InvoiceBuddy.AppDir InvoiceBuddy-Linux.AppImage -v
 ```
 
 ## 🖥️ Windows
@@ -73,6 +84,7 @@ Next, run these commands to install dependencies and build the file:
 
 ```
 pip install -r packaging/requirements.txt
+pip install pywin32
 
 pyinstaller packaging/InvoiceBuddy-Linux.spec --clean
 ```

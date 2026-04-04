@@ -129,4 +129,21 @@ deb/
 
 ---
 
+## Important Variables
+
+### Paths
+- globals.inbox: The path to the user's chosen inbox directory
+- globals.workbook: The path to the user's chosen workbook file
+- globals.archive: The path to the user's chosen top-level archive directory
+
+### UI
+- globals.history_tree: The tkinter treeview for viewing past actions
+- globals.inbox_tree: Custom treeview used for the inbox
+
+### Configuration
+- globals.os_name: The name of the user's operating system
+- globals.user: The name of the currently logged in user
+
+---
+
 **Maintained by**: Phillip Schneider

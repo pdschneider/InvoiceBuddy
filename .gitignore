@@ -5,6 +5,7 @@ build/
 
 # Nuitka / PyInstaller outputs
 *.AppImage
+*.deb
 InvoiceBuddy-Linux
 invoicebuddy.bin
 
@@ -26,5 +27,6 @@ FY26/
 .vscode/
 build.sh
 build.ps1
+build_deb.sh
 .git/
 .Diricon

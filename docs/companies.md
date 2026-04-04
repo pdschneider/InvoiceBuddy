@@ -94,6 +94,7 @@ This document lists every currently supported company with its **full official/l
 - 76 (Phillips 66)
 - AGCEducation (AGC Education Foundation)
 - Buenos Diaz Coffee Company
+- Seoul Bowl
 
 ## Miscellaneous / Technology & Services
 
@@ -128,6 +129,7 @@ This document lists every currently supported company with its **full official/l
 - TruBlu
 - Steam (Valve Corporation)
 - Papercut MF
+- SSL.com
 
 ---
 

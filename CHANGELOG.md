@@ -2,7 +2,24 @@
 
 All notable changes to **Invoice Buddy** will be located in this file.
 
-## [0.1.7] - 2026-00-00
+## [0.2.0] - 2026-04-08
+
+This version kicks off printer support. Users can now select their default printer and print PDF documents from right inside Invoice Buddy!
+
+### Added
+- Added support for printing files from selected printer
+- New companies added to database: SSL.com, Seoul Bowl
+- Added github button in about settings
+
+### Changed
+- General stability & UI improvements and code refinements
+- Updated dependencies
+
+### Fixed
+- Invoice Buddy now correctly supports password protected notebooks
+- Archival now skips moving files that already exist in their destination folder
+
+## [0.1.7] - 2026-04-02
 
 This version adds greater desktop integration for Windows users and speed for Linux. The entire top-level project structure has been redesigned to fit more with convention and various bugs & vulnerabilities have been patched.
 

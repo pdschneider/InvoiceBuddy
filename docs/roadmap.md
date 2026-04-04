@@ -19,29 +19,29 @@ Invoice Buddy is an invoice and receipt management app designed to simplify fina
 
 The roadmap for Invoice Buddy includes several planned features prior to the official 1.0 release. Each minor release follows a general theme and is always subject to change.
 
-## 0.2.x - Networking (Google Sheets)
+## 0.2.x - Printer Support
 
-Updates in the 0.2.x series will focus on adding support for Google Sheets to give users more spreadsheet options.
+This series of updates will focus on adding support for printers in order to save physical copies of invoices/receipts upon archival.
+
+### Major Improvements
+- [X] Add support for printer selection
+- [ ] Include support for OCR fallback on Windows
+- [X] Full Windows desktop integration
+
+### Minor Improvements
+- [ ] Keyboard shortcuts
+
+## 0.3.x - Networking (Google Sheets)
+
+Updates in the 0.3.x series will focus on adding support for Google Sheets to give users more spreadsheet options.
 
 ### Major Improvements
 - [ ] Add initial support for Google Sheets
-- [ ] Include support for OCR fallback on Windows
-- [ ] Full Windows desktop integration
 
 ### Other Improvements
 - [ ] Support writing to document while open
 - [ ] Support individual archive paths for different types
 - [ ] Improved data entry readability
-
-## 0.3.x - Printer Support
-
-This series of updates will focus on adding support for printers in order to save physical copies of invoices/receipts upon archival.
-
-### Major Improvements
-- [ ] Add support for printer selection
-
-### Minor Improvements
-- [ ] Keyboard shortcuts
 
 ## 0.4.x - Auto-Name
 

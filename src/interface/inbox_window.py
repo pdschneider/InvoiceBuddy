@@ -1,13 +1,12 @@
 # Interface/Windows/inbox_window.py
 import customtkinter as ctk
 from PySide6.QtWidgets import QMessageBox
-from src.interface.components.gui_actions import (open_workbook,
-                                              open_directory,
-                                              pdf_button)
+from src.interface.components.gui_actions import (pdf_button)
 from src.managers.file_management import count_files
 from src.managers.history_manager import load_history
-from src.managers.file_management import move_files
-from src.interface.components.gui_actions import smart_spreadsheet_button, add_file
+from src.managers.file_management import archive_files, add_files, open_workbook, open_directory
+from src.interface.components.gui_actions import smart_spreadsheet_button
+from src.managers.printers import print_selected_files
 from src.interface.components.treeview import Treeview
 import src.utils.fonts as fonts
 from CTkToolTip import CTkToolTip
@@ -21,16 +20,22 @@ import threading
 
 
 def create_inbox(globals, inbox_tab):
-    """Initiates the Inbox tab."""
+    """
+    Initiates the Inbox tab.
+    
+        globals:        Global variables
+        inbox_tab:      Frame to hold inbox
+                        ex: globals.main_page
+    """
 
-    globals.inbox_dir_var = ctk.StringVar(value=globals.sources['inbox'])
-    globals.inbox_count_var = ctk.StringVar(value=f"Files in folder: {count_files(globals.sources['inbox'], '.pdf')}")
+    globals.inbox_dir_var = ctk.StringVar(value=globals.inbox)
+    globals.inbox_count_var = ctk.StringVar(value=f"Files in folder: {count_files(globals.inbox, '.pdf')}")
 
     ctk.CTkLabel(inbox_tab,
                  textvariable=globals.inbox_count_var).pack(pady=5)
 
     # Tree Frame
-    globals.inbox_tree = Treeview(globals, inbox_tab, get_dir=lambda: globals.sources['inbox'])
+    globals.inbox_tree = Treeview(globals, inbox_tab, get_dir=lambda: globals.inbox)
 
     # Frames
     process_buttons_frame = ctk.CTkFrame(inbox_tab, fg_color="transparent")
@@ -41,12 +46,12 @@ def create_inbox(globals, inbox_tab):
         selected_items = globals.inbox_tree.selection()
         if not selected_items:
             return []  # Empty list if no selection
-        directory = globals.sources['inbox']
+        directory = globals.inbox
         return [os.path.join(directory, fname) for fname in selected_items]
 
     def start_pdf_thread():
         """Starts the pdf search process in a thread."""
-        directory = globals.sources['inbox']
+        directory = globals.inbox
         file_list = get_selected_files()
 
         # Exit early if no files are selected
@@ -133,7 +138,7 @@ def create_inbox(globals, inbox_tab):
                                     font=fonts.button_font,
                                     width=50,
                                     height=50,
-                                    command=lambda: add_file(globals))
+                                    command=lambda: add_files(globals))
     add_file_button.grid(row=0, column=0, padx=5)
     ctk.CTkLabel(process_buttons_frame, text="Add").grid(row=1, column=0)
     CTkToolTip(add_file_button,
@@ -177,13 +182,23 @@ def create_inbox(globals, inbox_tab):
                                    font=fonts.button_font,
                                    width=50,
                                    height=50,
-                                   command=lambda: [move_files(globals, globals.history_tree,
-                                                               globals.inbox_dir_var.get(), globals.folder_map,
-                                                               globals.oneoffs_folder, get_selected_files()),
-                                                               globals.update_file_counts()])
+                                   command=lambda: [archive_files(globals, get_selected_files())])
+
     archive_button.grid(row=0, column=3, padx=5)
     ctk.CTkLabel(process_buttons_frame, text="Archive").grid(row=1, column=3)
     CTkToolTip(archive_button, message="Archive selected files", delay=0.6, follow=True, padx=10, pady=5)
+
+    print_button = ctk.CTkButton(process_buttons_frame,
+                                   image=globals.print_icon,
+                                   text=None,
+                                   font=fonts.button_font,
+                                   width=50,
+                                   height=50,
+                                   command=lambda: [print_selected_files(globals, get_selected_files())])
+
+    print_button.grid(row=0, column=4, padx=5)
+    ctk.CTkLabel(process_buttons_frame, text="Print").grid(row=1, column=4)
+    CTkToolTip(print_button, message="Print selected files", delay=0.6, follow=True, padx=10, pady=5)
 
     workbook_open_button = ctk.CTkButton(process_buttons_frame,
                                          image=globals.workbook_icon,
@@ -325,7 +340,7 @@ def create_inbox(globals, inbox_tab):
         valid_buddies = [(name, folder) for name, folder in globals.buddies.items()
                          if name != "inbox" and folder and os.path.isdir(folder)]
 
-        col = 4  # After Archive
+        col = 5  # After Print
 
         # Create buddy buttons
         for name, folder in valid_buddies:

@@ -1,4 +1,4 @@
-# InvoiceBuddy.py
+# invoicebuddy.py
 import sys
 import logging
 from src.utils.dependencies import check_dependencies
@@ -31,11 +31,9 @@ def on_closing():
         logging.error(f"Error occurred when saving settings: {e}")
     
     # Properly shut down
-    logging.debug(f"Quitting GUI...")
+    logging.debug(f"Shutting down...")
     globals.root.quit()
-    logging.debug(f"Destroying root...")
     globals.root.destroy()
-    logging.debug(f"Shutting down logging...")
     logging.shutdown()
 
 if __name__ == "__main__":

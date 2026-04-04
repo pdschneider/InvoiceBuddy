@@ -8,7 +8,7 @@ import customtkinter as ctk
 from src.utils.load_settings import load_data_path
 from src.utils.save_settings import save_paths, save_all_settings
 from src.utils.observers import setup_observer
-from src.interface.components.gui_actions import browse_file, browse_directory
+from src.managers.file_management import browse_file, browse_directory
 import logging
 import shutil
 import os
@@ -109,7 +109,7 @@ def create_wizard(globals):
 
     workbook_browse = QPushButton()
     workbook_browse.setText("Browse")
-    workbook_browse.clicked.connect(lambda: browse_file(workbook_entry))
+    workbook_browse.clicked.connect(lambda: browse_file(workbook_entry, _type="workbook"))
     workbook_entry_layout.addWidget(workbook_browse)
     workbook_browse.setFixedWidth(150)
 

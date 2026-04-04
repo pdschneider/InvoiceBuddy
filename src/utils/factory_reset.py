@@ -53,8 +53,6 @@ Do you wish to completely wipe all Invoice Buddy-related data?""",
         try:
             if os.path.isdir(load_data_path("config")):
                 shutil.rmtree(load_data_path("config"))
-            if os.path.isdir(load_data_path("local")):
-                shutil.rmtree(load_data_path("local"))
             if os.path.isdir(load_data_path("cache")):
                 shutil.rmtree(load_data_path("cache"))
 

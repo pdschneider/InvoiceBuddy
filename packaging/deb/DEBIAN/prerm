@@ -3,7 +3,7 @@
 
 set -e
 
-# Stop any running instance if possible (optional)
-pkill -x invoicebuddy.bin || true
+# Stop any running instance (use -f for safety — works even if process name is long)
+pkill -f "/usr/bin/invoice-buddy" || true
 
 exit 0

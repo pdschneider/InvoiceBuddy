@@ -4,7 +4,7 @@ import src.utils.fonts as fonts
 import shutil
 import logging
 import os
-from src.interface.components.gui_actions import browse_file, browse_directory
+from src.managers.file_management import browse_file, browse_directory
 from src.utils.save_settings import save_all_settings
 from src.utils.load_settings import load_data_path
 from src.utils.observers import setup_observer
@@ -44,7 +44,7 @@ def create_onboarding_page(globals, onboarding_page):
 
     # Helper Functions
     def on_browse_workbook():
-        browse_file(globals.workbook_var)
+        browse_file(globals.workbook_var, _type="workbook")
 
     def on_browse_inbox():
         browse_directory(globals.inbox_dir_var)
@@ -123,7 +123,7 @@ def create_onboarding_page(globals, onboarding_page):
 
         try:
             src_dir = os.path.normpath(
-                load_data_path("local", "Welcome to Invoice Buddy.pdf"))
+                load_data_path("local", "Welcome to Invoice Buddy.pdf", default=True))
             if not os.path.isfile(load_data_path(globals.inbox, os.path.basename(src_dir))):
                 shutil.copy2(src_dir, globals.inbox)
                 logging.debug(f"Copied welcome document to inbox successfully!")
