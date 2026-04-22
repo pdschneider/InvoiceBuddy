@@ -51,6 +51,7 @@ InvoiceBuddy/
 │   │   ├── components/       # Reusable  UI components
 │   │   ├── settings/         # Settings pages
 │   │   └── setup/            # Initial setup wizard and onboarding screen
+│   ├── connections/          # Connections to external API's or domains (ex: GitHub)
 │   ├── managers/             # Core business logic managers
 │   │   └── autoname/         # Logic for auto-generating filenames
 │   └── utils/                # Utility functions, helpers, and shared tools

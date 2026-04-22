@@ -6,6 +6,7 @@ build/
 # Nuitka / PyInstaller outputs
 *.AppImage
 *.deb
+*.bin
 InvoiceBuddy-Linux
 invoicebuddy.bin
 

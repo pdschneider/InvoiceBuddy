@@ -32,6 +32,7 @@ def on_closing():
     
     # Properly shut down
     logging.debug(f"Shutting down...")
+    globals.root.withdraw()
     globals.root.quit()
     globals.root.destroy()
     logging.shutdown()

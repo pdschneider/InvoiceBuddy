@@ -9,6 +9,9 @@ from src.utils.startup import setup
 
 setup(globals)
 
+globals.qt_mode = True
 
-create_interface(globals)
-sys.exit(globals.app.exec())
+if __name__ == "__main__":
+    # Initialize GUI
+    create_interface(globals)
+    sys.exit(globals.app.exec())

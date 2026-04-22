@@ -23,6 +23,7 @@ def create_vars(globals):
     globals.card_starting_column_var = ctk.IntVar(value=globals.card_starting_column)
     globals.po_starting_column_var = ctk.IntVar(value=globals.po_starting_column)
     globals.default_printer_var = ctk.StringVar(value=globals.default_printer)
+    globals.github_check_var = ctk.BooleanVar(value=globals.github_check)
 
     # Component Vars
     globals.invoice_com_a_var = ctk.StringVar(value=globals.invoice_component_a)

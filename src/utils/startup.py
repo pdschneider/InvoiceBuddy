@@ -9,6 +9,7 @@ from logging.handlers import TimedRotatingFileHandler
 from src.utils.load_settings import load_data_path, load_settings
 from src.utils.vars import create_vars
 from src.utils.icons import load_icons
+from src.connections.github import version_check
 
 
 def setup(globals):
@@ -16,6 +17,7 @@ def setup(globals):
     setup_logging()
     logging.info(f"Python Version: {sys.version}")
     logging.info(f"Invoice Buddy Version: {globals.current_version}")
+    version_check(globals)
     setup_company_map()
     setup_folder_maps()
     setup_settings()
@@ -38,6 +40,8 @@ def setup_logging():
     logging.basicConfig(level=logging.INFO, format='%(message)s')
 
     # Silence Dependencies
+    logging.getLogger('webbrowser').setLevel(logging.WARNING)
+    logging.getLogger("urllib3").setLevel(logging.WARNING)
     logging.getLogger('pdfplumber').setLevel(logging.WARNING)
     logging.getLogger('pdfminer').setLevel(logging.WARNING)
     logging.getLogger('pdfminer.six').setLevel(logging.WARNING)
@@ -199,9 +203,14 @@ def setup_settings():
             changed = True
             logging.info(
                 f"Added missing or nonconforming 'default_printer' key to settings.json")
+        if "github_check" not in data or not isinstance(data["github_check"], bool):
+            data["github_check"] = False
+            changed = True
+            logging.info(
+                f"Added missing or nonconforming 'github_check' key to settings.json")
 
         # Check to make sure paths are valid
-        if not os.path.isfile(data["history_path"]):
+        if not os.path.isfile(data["history_path"]) and data["history_path"]:
             logging.warning(
                 f"History Path not a valid path. Defaulting to default history file.")
             try:

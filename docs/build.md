@@ -51,6 +51,7 @@ nuitka \
     --include-data-dir=defaults=defaults \
     --include-data-files=CHANGELOG.md=CHANGELOG.md \
     --include-data-files=README.md=README.md \
+    --include-data-files=LICENSE.txt=LICENSE.txt \
     invoicebuddy.py
 ```
 

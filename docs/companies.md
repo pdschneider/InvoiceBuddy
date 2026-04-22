@@ -60,6 +60,7 @@ This document lists every currently supported company with its **full official/l
 - VECA Electric
 - Westview Productions
 - Wolfe Fire Protection
+- Everything John Deere Gator
 
 ## Government, Utilities & Public Agencies
 
@@ -95,6 +96,13 @@ This document lists every currently supported company with its **full official/l
 - AGCEducation (AGC Education Foundation)
 - Buenos Diaz Coffee Company
 - Seoul Bowl
+- 7-Eleven
+- Head to Toe Workwear
+- Fred Meyer
+- Haggen
+- Kitanda
+- Shell USA, Inc.
+- SKECHERS USA, Inc.
 
 ## Miscellaneous / Technology & Services
 
@@ -130,6 +138,9 @@ This document lists every currently supported company with its **full official/l
 - Steam (Valve Corporation)
 - Papercut MF
 - SSL.com
+- Logical Operations, Inc.
+- Independent Publishers Group
+- Ascend Education
 
 ---
 

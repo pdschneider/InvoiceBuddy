@@ -2,6 +2,27 @@
 
 All notable changes to **Invoice Buddy** will be located in this file.
 
+## [0.2.1] - 2026-04-22
+
+This version adds an automatic update check on startup so you don't have to manually search for new updates to Invoice Buddy. It also supports 9 new companies and is the first version of Invoice Buddy for Windows to be correctly signed with an official certificate!
+
+### Added
+- Added Tesseract check for Windows users to prompt for download if missing
+- Added optional update check on startup
+- New companies supported: &-Eleven, Everything John Deere Gator, Logical Operations, Independent Publishers Group, Fred Meyer, Haggen, Kitanda, Shell USA, Inc., SKECHERS USA, Inc.
+
+### Changed
+- Added restart prompt when saving settings which require app restart to apply
+- Invoice Buddy shuts down much faster on app close
+- Various UI improvements
+- Updated dependencies
+
+### Fixed
+- Properly signed Windows app with official SSL.com certificate
+
+### Security
+- Patched several pypdf-related exploits by updating to v6.10.2
+
 ## [0.2.0] - 2026-04-08
 
 This version kicks off printer support. Users can now select their default printer and print PDF documents from right inside Invoice Buddy!
@@ -10,6 +31,7 @@ This version kicks off printer support. Users can now select their default print
 - Added support for printing files from selected printer
 - New companies added to database: SSL.com, Seoul Bowl
 - Added github button in about settings
+- The windows app is signed with a self-signed certificate - moving to official certificate next release
 
 ### Changed
 - General stability & UI improvements and code refinements

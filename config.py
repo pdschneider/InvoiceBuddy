@@ -43,6 +43,10 @@ class Globals:
         # PySide6 Widgets
         self.app = QApplication(sys.argv)
         self.window = QMainWindow()
+        self.qt_mode = False
+
+        # App Path
+        self.app_path = get_executable_path()
 
         # Locks
         self.edit_lock = threading.Lock()
@@ -89,6 +93,7 @@ class Globals:
         self.garbage_icon = None
         self.print_icon = None
         self.printer_icon = None
+        self.notification_icon = None
 
         self.icons_list = ["assets/invoice-1.png",
                            "assets/invoice-2.png",
@@ -117,6 +122,7 @@ class Globals:
         self.workbook_var = ""
         self.history_var = ""
         self.default_printer_var = ""
+        self.github_check_var = None
 
         # Inbox Temporary Vars
         self.inbox_dir_var = ""
@@ -177,6 +183,7 @@ class Globals:
         self.saved_x = settings.get("saved_x", -1)
         self.saved_y = settings.get("saved_y", -1)
         self.default_printer = settings.get("default_printer", "")
+        self.github_check = settings.get("github_check", False)
 
         # Paths
         self.inbox = sources.get("inbox", "")
@@ -227,5 +234,25 @@ def apply_theme(name: str) -> None:
         ctk.set_default_color_theme(globals.theme_path)
     except Exception as e:
         logging.warning(f"Could not retrieve CTk active theme due to: {e}")
+
+
+def get_executable_path():
+    """Get the correct path to the app file."""
+    
+    # Check if AppImage
+    if 'APPIMAGE' in os.environ:
+        print(f"Path to executable (AppImage): {os.environ['APPIMAGE']}")
+        return os.environ['APPIMAGE']
+
+    # Check if running in frozen/compiled mode
+    elif getattr(sys, 'frozen', False):
+        print(f"Path to executable (frozen / Inno Setup): {sys.executable}")
+        return sys.executable
+    
+    # Development mode
+    else:
+        script_path = os.path.abspath(sys.argv[0])
+        print(f"Path to executable: {script_path}")
+        return [sys.executable, script_path]
 
 globals = Globals()

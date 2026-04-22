@@ -75,7 +75,7 @@ Open Settings from the top menu button. Key areas include:
 - **Files not appearing in inbox** → Make sure the file types are supported (PDF only)
 - **Files only partially renamed** → Try higher-resolution scans or download documents directly
 - **Spreadsheet not updating** → Check that the spreadsheet path in Settings is correct and the file is not open in another program (shared spreadsheets often have this problem)
-- **Auto-naming looks wrong** → Edit the company/folder mappings in Settings
+- **Auto-naming looks wrong** → Manually edit by double clicking the filename in the inbox window
 - **App feels slow** → Close large spreadsheets before processing and ensure you meet the recommended 8 GB RAM
 - **Company not supported yet** → Open a GitHub issue and send your invoice in (no personal info required)!
 

@@ -26,6 +26,7 @@ def load_data_path(direct=None, filename=None, default=False):
         "assets/download.png", "assets/upload.png", "assets/money-1.png", "assets/money-2.png",
         "assets/money-bag.png", "assets/theme.png", "assets/preferences.png", "assets/note.png",
         "assets/settings-2.png", "assets/printer-1.png", "assets/printer-2.png",
+        "assets/notification-1.png", "assets/notification-2.png", "assets/notification-3.png",
         "themes/cosmic_sky.json", "themes/pastel_green.json", "themes/trojan_red.json",
         "themes/dark_cloud.json", "themes/soft_light.json"
     ]

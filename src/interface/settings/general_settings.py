@@ -1,9 +1,14 @@
 # Interface/Settings/general_settings.py
-import tkinter as tk
+from tkinter import messagebox
 import customtkinter as ctk
 from src.utils.save_settings import save_all_settings
 from src.managers.printers import query_printers
+from PySide6.QtWidgets import QMessageBox
 import src.utils.fonts as fonts
+from CTkToolTip import CTkToolTip
+import subprocess
+import logging
+import sys
 
 
 def create_general_settings_tab(globals, settings_tab):
@@ -64,6 +69,10 @@ def create_general_settings_tab(globals, settings_tab):
                     state="readonly",
                     width=150).pack(side="left")
     
+    ctk.CTkLabel(theme_frame,
+                 text="*Requires restart",
+                 font=fonts.body_font).pack(side="left", padx=6, pady=0)
+    
     # Printer Selection Frame
     printer_frame = ctk.CTkFrame(settings_tab,
                                 bg_color="transparent",
@@ -83,6 +92,38 @@ def create_general_settings_tab(globals, settings_tab):
                     values=query_printers(),
                     state="readonly",
                     width=150).pack(side="left")
+    
+    # Version Check
+    version_frame = ctk.CTkFrame(settings_tab,
+                                 bg_color="transparent",
+                                 fg_color="transparent")
+    version_frame.pack(fill="x", pady=10, padx=10)
+
+    ctk.CTkLabel(version_frame,
+                 text=None,
+                 image=globals.notification_icon).pack(side="left", padx=6, pady=0)
+
+    version_check_label = ctk.CTkLabel(version_frame,
+                                    text="Check for Updates",
+                                    font=fonts.heading_font)
+    version_check_label.pack(side="left", padx=(0, 12))
+    CTkToolTip(version_check_label,
+               message="When on, pings github for the\nthe latest version of Pearl\non startup",
+               delay=0.8,
+               follow=True,
+               padx=10,
+               pady=5)
+
+    ctk.CTkCheckBox(version_frame,
+                    variable=globals.github_check_var,
+                    onvalue=True,
+                    text=None,
+                    width=0,
+                    offvalue=False).pack(side="left")
+    
+    ctk.CTkLabel(version_frame,
+                 text="*Requires restart",
+                 font=fonts.body_font).pack(side="left", padx=6, pady=0)
 
     # Save Button Frame
     save_button_frame = ctk.CTkFrame(settings_tab, fg_color="transparent")
@@ -90,4 +131,36 @@ def create_general_settings_tab(globals, settings_tab):
 
     ctk.CTkButton(save_button_frame,
                   text="Save Settings",
-                  command=lambda: save_all_settings(globals)).pack()
+                  command=lambda: save_button(globals)).pack()
+
+    def save_button(globals):
+        """Saves and prompts for restart if required."""
+        prompt_restart = False
+        if globals.github_check != globals.github_check_var.get():
+            prompt_restart = True
+        elif globals.active_theme != globals.theme_var.get():
+            prompt_restart = True
+        save_all_settings(globals)
+
+        if prompt_restart:
+            if globals.qt_mode:
+                reply = QMessageBox.question(
+                    None,
+                    "Restart Pearl?",
+                    f"Would you like to restart Pearl to apply all changes?",
+                    QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+                    QMessageBox.StandardButton.Yes)
+                if reply == QMessageBox.StandardButton.Yes:
+                    subprocess.Popen(globals.app_path)
+                    sys.exit(0)
+            else:
+                    reply = messagebox.askyesno(
+                        parent=globals.root,
+                        title="Restart Pearl",
+                        message="Would you like restart Pearl to apply all changes?")
+                    if reply:
+                        try:
+                            subprocess.Popen(globals.app_path)
+                        except Exception as e:
+                            logging.error(f"Unable to open program due to: {e}")
+                        sys.exit(0)

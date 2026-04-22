@@ -5,6 +5,10 @@ import tkinter as tk
 from tkinter import messagebox
 import subprocess
 import sys
+import pytesseract
+import getpass
+import os
+import webbrowser
 
 def check_dependencies():
     if platform.platform().startswith("Linux"):
@@ -55,5 +59,36 @@ def check_dependencies():
 
             root.destroy()
             sys.exit(0)
-    else:
-        print(f"Windows user - dependency check skipped.")
+
+    else:  # Pytesseract download for Windows users
+        username = getpass.getuser()
+        download_url = "https://github.com/tesseract-ocr/tesseract/releases/download/5.5.0/tesseract-ocr-w64-setup-5.5.0.20241111.exe"
+
+        if os.path.isfile(r'C:\Program Files\Tesseract-OCR\tesseract.exe'):
+            pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
+        elif os.path.isfile(f'C:\\Users\\{username}\\AppData\\Local\\Programs\\Tesseract-OCR\\tesseract.exe'):
+            pytesseract.pytesseract.tesseract_cmd = f'C:\\Users\\{username}\\AppData\\Local\\Programs\\Tesseract-OCR\\tesseract.exe'
+
+        try:
+            print(f"Pytesseract Version: {pytesseract.get_tesseract_version()}")
+            download_needed = False
+        except:
+            print(f"OCR not yet installed - prompting for download.")
+            download_needed = True
+
+        if download_needed:
+            root = tk.Tk()
+            root.withdraw()
+            answer = messagebox.askyesno(
+                parent=root,
+                title=f"Dependency Missing",
+                message=f"Pytesseract is missing, which is required for OCR. Would you like to install it?")
+
+            if answer:
+                try:
+                    webbrowser.open(url=download_url)
+                except Exception as e:
+                    print(f"Error: {e}")
+
+            root.destroy()
+            sys.exit(0)
