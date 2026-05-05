@@ -220,6 +220,8 @@ def create_paths_settings_tab(globals, settings_tab):
             prompt_restart = True
         elif globals.active_theme != globals.theme_var.get():
             prompt_restart = True
+        elif globals.beta != globals.beta_var.get():
+            prompt_restart = True
         save_all_settings(globals)
 
         if prompt_restart:

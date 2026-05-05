@@ -1,5 +1,6 @@
 #!/bin/sh
-# postrm script for invoice-buddy
+# Runs after files have been removed
+# This script cleans up remaining configuration files
 
 set -e
 

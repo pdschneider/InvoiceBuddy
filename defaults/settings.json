@@ -7,5 +7,6 @@
     "saved_x": 0,
     "saved_y": 0,
     "default_printer": "",
-    "github_check": false
+    "github_check": false,
+    "beta": false
 }

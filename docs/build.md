@@ -57,15 +57,58 @@ nuitka \
 
 *Note: Nuitka builds can take significantly longer than Pyinstaller. Assume 5-10 minutes to complete.*
 
+## AppImage
+
+To build an AppImage file, follow these steps after building the file with the previous commands.
+
+Install appimagetool if not already installed:
+```
+wget https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-x86_64.AppImage
+
+chmod +x appimagetool-x86_64.AppImage
+sudo mv appimagetool-x86_64.AppImage /usr/local/bin/appimagetool
+```
+
 **IMPORTANT: Set AppRun inside InvoiceBuddy.AppDir as an executable file prior to building the AppImage**
 
 After building, copy InvoiceBuddy-Linux to packaging/InvoiceBuddy.AppDir/usr/bin
 
 Run this command from the root directory:
-
 ```
 appimagetool packaging/InvoiceBuddy.AppDir InvoiceBuddy-Linux.AppImage -v
 ```
+
+## DEBIAN
+
+For a Debian (.deb) file, follow these steps after building the file with the command listed earlier.
+
+Copy built file to deb directory:
+```
+mkdir -p packaging/deb/usr/bin
+cp dist/invoicebuddy.bin packaging/deb/usr/bin/invoice-buddy
+```
+
+Set permissions:
+```
+find packaging/deb -type d -exec chmod 755 {} +
+find packaging/deb/usr/bin -type f -exec chmod 755 {} +
+find packaging/deb/DEBIAN -type f -exec chmod 755 {} +
+find packaging/deb -type f ! -path "*/DEBIAN/*" -exec chmod 644 {} +
+chmod 755 packaging/deb/usr/bin/invoice-buddy
+find packaging/deb -type f ! -path "*/DEBIAN/*" -exec chmod 644 {} +
+```
+
+Build DEB:
+```
+fakeroot dpkg-deb --build packaging/deb "InvoiceBuddy-Linux-${VERSION}.deb"
+```
+
+Set permissions for .deb file:
+```
+chmod 644 "InvoiceBuddy-Linux-<version-number>.deb"
+```
+
+**Important: Make sure that you replace the version number properly to match the filename.**
 
 ## 🖥️ Windows
 

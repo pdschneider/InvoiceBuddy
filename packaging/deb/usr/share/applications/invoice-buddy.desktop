@@ -10,5 +10,5 @@ Terminal=false
 Categories=Office;Finance;Utility;
 Keywords=invoice;receipt;spreadsheet;finance;accounting;
 StartupNotify=true
-StartupWMClass=Invoice Buddy
+StartupWMClass=Tk
 MimeType=application/x-invoicebuddy;

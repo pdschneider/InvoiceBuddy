@@ -4,7 +4,7 @@
 
 #define MyAppName "Invoice Buddy"
 #define MyAppPublisher "Phillip Schneider"
-#define MyAppVersion "0.2.1"
+#define MyAppVersion "0.2.2"
 #define MyAppURL "https://github.com/pdschneider/InvoiceBuddy"
 #define MyAppExeName "InvoiceBuddy.exe"
 
@@ -14,6 +14,12 @@
 AppId={{5050A6F3-3B92-42C0-A27F-A9A7F8C63EC0}
 AppName={#MyAppName}
 AppVersion={#MyAppVersion}
+
+; Metadata for the Setup file
+VersionInfoCompany={#MyAppPublisher}
+VersionInfoCopyright=Copyright © 2026 {#MyAppPublisher}. Apache 2.0.
+VersionInfoProductName={#MyAppName}
+
 ;AppVerName={#MyAppName} {#MyAppVersion}
 AppPublisher={#MyAppPublisher}
 AppPublisherURL={#MyAppURL}

@@ -124,6 +124,39 @@ def create_general_settings_tab(globals, settings_tab):
     ctk.CTkLabel(version_frame,
                  text="*Requires restart",
                  font=fonts.body_font).pack(side="left", padx=6, pady=0)
+    
+    # Beta Version
+    beta_frame = ctk.CTkFrame(settings_tab,
+                              bg_color="transparent",
+                              fg_color="transparent")
+    beta_frame.pack(fill="x", pady=10, padx=10)
+
+    ctk.CTkLabel(beta_frame,
+                 text=None,
+                 image=None,
+                 width=40).pack(side="left", padx=6, pady=0)
+
+    beta_check_label = ctk.CTkLabel(beta_frame,
+                                    text="Include Beta Updates",
+                                    font=fonts.heading_font)
+    beta_check_label.pack(side="left", padx=(0, 12))
+    CTkToolTip(beta_check_label,
+               message="Inclides beta releases in version check",
+               delay=0.8,
+               follow=True,
+               padx=10,
+               pady=5)
+
+    ctk.CTkCheckBox(beta_frame,
+                    variable=globals.beta_var,
+                    onvalue=True,
+                    text=None,
+                    width=0,
+                    offvalue=False).pack(side="left")
+    
+    ctk.CTkLabel(beta_frame,
+                 text="*Requires restart",
+                 font=fonts.body_font).pack(side="left", padx=6, pady=0)
 
     # Save Button Frame
     save_button_frame = ctk.CTkFrame(settings_tab, fg_color="transparent")
@@ -140,14 +173,16 @@ def create_general_settings_tab(globals, settings_tab):
             prompt_restart = True
         elif globals.active_theme != globals.theme_var.get():
             prompt_restart = True
+        elif globals.beta != globals.beta_var.get():
+            prompt_restart = True
         save_all_settings(globals)
 
         if prompt_restart:
             if globals.qt_mode:
                 reply = QMessageBox.question(
                     None,
-                    "Restart Pearl?",
-                    f"Would you like to restart Pearl to apply all changes?",
+                    "Restart Invoice Buddy?",
+                    f"Would you like to restart Invoice Buddy to apply all changes?",
                     QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
                     QMessageBox.StandardButton.Yes)
                 if reply == QMessageBox.StandardButton.Yes:
@@ -156,8 +191,8 @@ def create_general_settings_tab(globals, settings_tab):
             else:
                     reply = messagebox.askyesno(
                         parent=globals.root,
-                        title="Restart Pearl",
-                        message="Would you like restart Pearl to apply all changes?")
+                        title="Restart Invoice Buddy",
+                        message="Would you like restart Invoice Buddy to apply all changes?")
                     if reply:
                         try:
                             subprocess.Popen(globals.app_path)

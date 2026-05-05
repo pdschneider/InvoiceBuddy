@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop">
+	<id>invoice-buddy.desktop</id>
+	<metadata_license>https://raw.githubusercontent.com/pdschneider/InvoiceBuddy/refs/heads/main/LICENSE.txt</metadata_license>
+	<project_license>https://raw.githubusercontent.com/pdschneider/InvoiceBuddy/refs/heads/main/LICENSE.txt</project_license>
+	<name>Invoice Buddy</name>
+	<url type="homepage">https://github.com/pdschneider/InvoiceBuddy</url>
+	<summary>Simplify Invoice Management</summary>
+	<description>
+		<p>Invoice Buddy simplifies invoice management by automating naming and spreadsheet entry.</p>
+	</description>
+	<screenshots>
+		<screenshot type="default">
+			<image>https://raw.githubusercontent.com/pdschneider/InvoiceBuddy/refs/heads/main/Screenshots/InvoiceBuddy-1.png</image>
+			<caption>Automate Invoice Entry</caption>
+		</screenshot>
+	</screenshots>
+</component>

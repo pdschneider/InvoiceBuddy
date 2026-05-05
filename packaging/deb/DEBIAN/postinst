@@ -1,5 +1,6 @@
 #!/bin/sh
-# postinst script for invoice-buddy
+# Runs after the files have been unpacked and the package is being configured
+# This is where most of the 'setup' happens
 
 set -e
 

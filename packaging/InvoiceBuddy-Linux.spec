@@ -31,7 +31,7 @@ exe = EXE(
     a.binaries,
     a.datas,
     [],
-    name='InvoiceBuddy',
+    name='invoice-buddy',
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,

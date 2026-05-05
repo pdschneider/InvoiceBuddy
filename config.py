@@ -123,6 +123,7 @@ class Globals:
         self.history_var = ""
         self.default_printer_var = ""
         self.github_check_var = None
+        self.beta_var = None
 
         # Inbox Temporary Vars
         self.inbox_dir_var = ""
@@ -184,6 +185,7 @@ class Globals:
         self.saved_y = settings.get("saved_y", -1)
         self.default_printer = settings.get("default_printer", "")
         self.github_check = settings.get("github_check", False)
+        self.beta = settings.get("beta", False)
 
         # Paths
         self.inbox = sources.get("inbox", "")
@@ -243,6 +245,11 @@ def get_executable_path():
     if 'APPIMAGE' in os.environ:
         print(f"Path to executable (AppImage): {os.environ['APPIMAGE']}")
         return os.environ['APPIMAGE']
+    
+    # Check if .deb
+    elif os.path.realpath(sys.executable).startswith("/usr/") and getattr(sys, 'frozen', False):
+        print(f"Path to executable (.deb/system): {os.path.realpath(sys.executable)}")
+        return os.path.realpath(sys.executable)
 
     # Check if running in frozen/compiled mode
     elif getattr(sys, 'frozen', False):

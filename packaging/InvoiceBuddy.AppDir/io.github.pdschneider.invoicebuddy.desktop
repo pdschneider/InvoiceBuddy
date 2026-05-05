@@ -1,7 +1,7 @@
 [Desktop Entry]
 Name=InvoiceBuddy
-Exec=invoicebuddy
+Exec=invoice-buddy
 Icon=icon
 Type=Application
 Categories=Utility;
-Name[en_US]=io.github.pdschneider.invoicebuddy.desktop
+Name[en_US]=io.github.pdschneider.invoice-buddy.desktop

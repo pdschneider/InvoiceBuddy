@@ -1,0 +1,3 @@
+#!/bin/sh
+# Runs before the package's files are unpacked
+# This script checks for enough disk space and stops Invoice Buddy if already running

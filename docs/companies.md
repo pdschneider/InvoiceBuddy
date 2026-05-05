@@ -73,6 +73,14 @@ This document lists every currently supported company with its **full official/l
 - Washington Department of Labor & Industries (L&I)
 - Washington State Department of Transportation (WSDOT)
 - Waste Management, Inc.
+- Washington Dept of Licensing
+- Snohomish County Treasurer
+
+## Gasoline & Fuel
+- 76 (Phillips 66)
+- Shell USA, Inc.
+- Tesoro Refining & Marketing Company LLC (ARCO)
+- Pioneer Gas (Sinclair)
 
 ## Retail, Consumer & Other Brands
 
@@ -92,7 +100,6 @@ This document lists every currently supported company with its **full official/l
 - Safeway
 - Walmart
 - Wayfair Inc.
-- 76 (Phillips 66)
 - AGCEducation (AGC Education Foundation)
 - Buenos Diaz Coffee Company
 - Seoul Bowl
@@ -101,8 +108,12 @@ This document lists every currently supported company with its **full official/l
 - Fred Meyer
 - Haggen
 - Kitanda
-- Shell USA, Inc.
 - SKECHERS USA, Inc.
+- Walgreen Co.
+- Popeyes Louisiana Kitchen, Inc.
+- Royal Star Buffet
+- Sunnyside Nursery
+- Ulta Beauty, Inc.
 
 ## Miscellaneous / Technology & Services
 
@@ -141,6 +152,12 @@ This document lists every currently supported company with its **full official/l
 - Logical Operations, Inc.
 - Independent Publishers Group
 - Ascend Education
+- Bigfoot Music
+- Butter Notes Cafe
+- Marshalls
+- Old Navy, LLC
+- Apple Inc.
+- Wet Rabbit
 
 ---
 

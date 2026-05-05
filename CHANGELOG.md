@@ -2,6 +2,23 @@
 
 All notable changes to **Invoice Buddy** will be located in this file.
 
+## [0.2.2] - 2026-05-06
+
+This version includes 15 new companies and is build as a .deb in addition to AppImage for Linux, granting Debian users full desktop integration. Invoice Buddy also has an optional beta channel for updates, making the main channel more stable.
+
+### Added
+- Invoice Buddy is now available as a .deb on Linux
+- Added beta channel to separate stable vs feature-rich branches
+- Added Companies: Walgreens, ARCO, Bigfoot Music, Butter Notes Cafe, Marshalls, Old Navy, Apple Inc., Pioneer Gas, Popeyes Louisiana Kitchen, Royal Star Buffet, Sunnyside Nursery, Washington Dept of Licensing, Snohomish County Treasurer, Ulta Beauty, Wet Rabbit
+
+### Changed
+- Tesseract version now logged for debugging
+- Updated dependencies
+
+### Fixed
+- Added missing metadata to Windows setup file
+- Various minor UI and bug fixes
+
 ## [0.2.1] - 2026-04-22
 
 This version adds an automatic update check on startup so you don't have to manually search for new updates to Invoice Buddy. It also supports 9 new companies and is the first version of Invoice Buddy for Windows to be correctly signed with an official certificate!
@@ -9,7 +26,7 @@ This version adds an automatic update check on startup so you don't have to manu
 ### Added
 - Added Tesseract check for Windows users to prompt for download if missing
 - Added optional update check on startup
-- New companies supported: &-Eleven, Everything John Deere Gator, Logical Operations, Independent Publishers Group, Fred Meyer, Haggen, Kitanda, Shell USA, Inc., SKECHERS USA, Inc.
+- New companies supported: 7-Eleven, Everything John Deere Gator, Logical Operations, Independent Publishers Group, Fred Meyer, Haggen, Kitanda, Shell USA, Inc., SKECHERS USA, Inc.
 
 ### Changed
 - Added restart prompt when saving settings which require app restart to apply
