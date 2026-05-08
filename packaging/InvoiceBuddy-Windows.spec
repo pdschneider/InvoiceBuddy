@@ -14,6 +14,8 @@ a = Analysis(
         ('../defaults', 'defaults'),
         ('../CHANGELOG.md', '.'),
         ('../README.md', '.'),
+        ('../bin/Poppler', 'bin/Poppler'),
+        ('../bin/Tesseract', 'bin/Tesseract'),
     ],
     hiddenimports=['PIL._tkinter_finder', 'openpyxl', 'watchdog', 'msoffcrypto', 'tkinter', '_tkinter', 'pytesseract', 'pdf2image', 'PIL', 'packaging', 'pkg_resources', 'pdfplumber', 'PySide6', 'shiboken6'],
     hookspath=[],

@@ -122,5 +122,10 @@ def load_icons(globals):
             dark_image=Image.open(load_data_path("config", "assets/notification-1.png")),
             size=(40, 40))
 
+        globals.windows_icon = CTkImage(
+            light_image=Image.open(load_data_path("config", "assets/window-size.png")),
+            dark_image=Image.open(load_data_path("config", "assets/window-size.png")),
+            size=(40, 40))
+
     except Exception as e:
         logging.error(f"Failed to load icons due to: {e}")

@@ -27,7 +27,8 @@ def create_about_tab(globals, about_tab):
         "2) Writes that data to a spreadsheet.\n"
         "3) Moves processed files to their proper folder for archival.\n\n"
         "Files are separated into three categories: Invoices, Credit Card Receipts, and Purchase Orders.\n\n"
-        "Always look over generated content to ensure its accuracy before continuing."
+        "Always look over generated content to ensure its accuracy before continuing.\n\n"
+        "On Windows, Invoice Buddy comes bundled with: Poppler (MIT), Tesseract (Apache 2.0)"
         ).pack(padx=5, pady=5)
 
     ctk.CTkLabel(about_tab,

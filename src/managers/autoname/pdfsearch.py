@@ -140,7 +140,7 @@ def apply_auto_naming(globals, directory, file_list=None):
                     if new_text != normalized_texts[filename]:
                         normalized_texts[filename] = new_text
                         logging.debug(f"  Scrubbed matched date: {matched}")
-                        logging.debug(f"  Length: {old_length} → {len(normalized_texts[filename])}")
+                        logging.debug(f"  Length: {old_length} becomes {len(normalized_texts[filename])}")
 
                 # 2. Exhaustively scrub ALL possible dates using all patterns
                 scrubbed_any = False
@@ -208,7 +208,7 @@ def apply_auto_naming(globals, directory, file_list=None):
             if field and field in available:
                 new_parts.append(available[field])
 
-        # If nothing new or same as original → skip rename/metadata
+        # If nothing new or same as original - skip rename/metadata
         if not new_parts or " ".join(new_parts) == " ".join(parts):
             logging.info(f"No changes needed for {filename}")
             continue
@@ -228,7 +228,7 @@ def apply_auto_naming(globals, directory, file_list=None):
         meta = {}
         for field in order:
             if field and field in available:
-                # Normalize key (e.g. "Invoice #" → "/InvoiceNumber")
+                # Normalize key (e.g. "Invoice #" becomes "/InvoiceNumber")
                 key = f"/{field.replace(' #', 'Number').replace(' ', '')}"
                 meta[key] = available[field]
 
@@ -248,7 +248,7 @@ def apply_auto_naming(globals, directory, file_list=None):
         # Finally rename
         try:
             os.rename(full_path, new_path)
-            logging.info(f"Auto-named: {filename} → {new_name}")
+            logging.info(f"Auto-named: {filename} becomes {new_name}")
             renamed += 1
         except Exception as e:
             logging.error(f"Rename failed for {filename}: {e}")

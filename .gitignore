@@ -28,6 +28,8 @@ FY26/
 .vscode/
 build.sh
 build.ps1
-build_deb.sh
+windows.sh
+deploy.sh
+linux.ps1
 .git/
 .Diricon

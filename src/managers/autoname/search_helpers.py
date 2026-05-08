@@ -2,6 +2,19 @@
 import logging
 import pdfplumber
 import os
+import platform
+
+os_name = platform.platform()
+
+# Silence window spam
+if os_name.startswith("Windows"):
+    import subprocess
+    _original_popen = subprocess.Popen
+    def _popen_nowindow(*args, **kwargs):
+        kwargs['creationflags'] = subprocess.CREATE_NO_WINDOW
+        return _original_popen(*args, **kwargs)
+    subprocess.Popen = _popen_nowindow
+
 try:
     from pdf2image import convert_from_path
     import pytesseract
@@ -46,7 +59,20 @@ def extract_text_with_ocr(full_path):
             f"OCR not available for {full_path}. Skipping fallback.")
         return ""
     try:
-        images = convert_from_path(full_path)  # Convert PDF to list of images
+        if os_name.startswith("Windows"):
+            import pdf2image.pdf2image
+            pdf2image.pdf2image.Popen = _popen_nowindow
+            # Point to bundled popplar files
+            kwargs = {}
+            base = os.path.dirname(os.path.abspath(__file__))
+            pytesseract.pytesseract.tesseract_cmd = os.path.join(base, '..', '..', '..', 'bin', 'Tesseract', 'tesseract.exe')
+            # Walk up to project root
+            project_root = os.path.normpath(os.path.join(base, '..', '..', '..'))
+            poppler_bin = os.path.join(project_root, 'bin', 'Poppler', 'Library', 'bin')
+            if os.path.isdir(poppler_bin):
+                kwargs['poppler_path'] = poppler_bin
+
+        images = convert_from_path(full_path, **kwargs)  # Convert PDF to list of images
         full_text = ""
         for image in images:
             text = pytesseract.image_to_string(image)

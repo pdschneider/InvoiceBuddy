@@ -94,6 +94,7 @@ class Globals:
         self.print_icon = None
         self.printer_icon = None
         self.notification_icon = None
+        self.windows_icon = None
 
         self.icons_list = ["assets/invoice-1.png",
                            "assets/invoice-2.png",
@@ -124,6 +125,7 @@ class Globals:
         self.default_printer_var = ""
         self.github_check_var = None
         self.beta_var = None
+        self.dynamic_window_size_var = None
 
         # Inbox Temporary Vars
         self.inbox_dir_var = ""
@@ -186,6 +188,7 @@ class Globals:
         self.default_printer = settings.get("default_printer", "")
         self.github_check = settings.get("github_check", False)
         self.beta = settings.get("beta", False)
+        self.dynamic_window_size = settings.get("dynamic_window_size", True)
 
         # Paths
         self.inbox = sources.get("inbox", "")

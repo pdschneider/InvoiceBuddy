@@ -80,7 +80,7 @@ def invoice_number_search(directory=None, file_list=None, normalized_texts=None)
                 if match:
                     candidate = match.group(1).strip().upper()
                     logging.info(
-                        f"Pattern matched: {pattern} → candidate: {candidate}")
+                        f"Pattern matched: {pattern} becomes candidate: {candidate}")
                     if re.match(r'^[A-Z0-9\-_]{2,20}$', candidate):
                         invoice = candidate
                         matched_inv = match.group(0)

@@ -5,8 +5,6 @@ import os
 import json
 import csv
 import hashlib
-import pytesseract
-import getpass
 from logging.handlers import TimedRotatingFileHandler
 from src.utils.load_settings import load_data_path, load_settings
 from src.utils.vars import create_vars
@@ -32,7 +30,6 @@ def setup(globals):
     folder_maps_check()
     create_vars(globals)
     load_icons(globals)
-    log_tesseract()
     get_exec_type()
 
 
@@ -217,6 +214,11 @@ def setup_settings():
             changed = True
             logging.info(
                 f"Added missing or nonconforming 'beta' key to settings.json")
+        if "dynamic_window_size" not in data or not isinstance(data["dynamic_window_size"], bool):
+            data["dynamic_window_size"] = True
+            changed = True
+            logging.info(
+                f"Added missing or nonconforming 'dynamic_window_size' key to settings.json")
 
         # Check to make sure paths are valid
         if not os.path.isfile(data["history_path"]) and data["history_path"]:
@@ -725,25 +727,6 @@ def make_legacy_compatible():
             f"JSON decode error in folder_maps.json or paths.json: {e}")
     except Exception as e:
         logging.error(f"Failed to set up archive path: {e}")
-
-
-def log_tesseract():
-    """Logs tesseract version for debugging."""
-    username = getpass.getuser()
-    download_url = "https://github.com/tesseract-ocr/tesseract/releases/download/5.5.0/tesseract-ocr-w64-setup-5.5.0.20241111.exe"
-
-    if os.path.isfile(r'C:\Program Files\Tesseract-OCR\tesseract.exe'):
-        pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
-    elif os.path.isfile(f'C:\\Users\\{username}\\AppData\\Local\\Programs\\Tesseract-OCR\\tesseract.exe'):
-        pytesseract.pytesseract.tesseract_cmd = f'C:\\Users\\{username}\\AppData\\Local\\Programs\\Tesseract-OCR\\tesseract.exe'
-
-    try:
-        logging.info(f"Pytesseract Version: {pytesseract.get_tesseract_version()}")
-        download_needed = False
-    except:
-        logging.warning(f"OCR not yet installed - prompting for download.")
-        logging.warning(f"Download Tesseract: {download_url}")
-        download_needed = True
 
 
 def get_exec_type():

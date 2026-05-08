@@ -72,6 +72,7 @@ def save_all_settings(globals, reject_toast=False, reject_metadata=False):
     logging_level = current_logging_level
     current_github_check = globals.github_check_var.get()
     current_beta = globals.beta_var.get()
+    current_dynamic_window_size = globals.dynamic_window_size_var.get()
 
     # Save Window Placement
     if globals.root.state() != "zoomed":  # don't save if maximized
@@ -97,7 +98,8 @@ def save_all_settings(globals, reject_toast=False, reject_metadata=False):
         saved_y=current_vertical_placement,
         default_printer=current_default_printer,
         github_check = current_github_check,
-        beta=current_beta)
+        beta=current_beta,
+        dynamic_window_size=current_dynamic_window_size)
 
     # Refresh globals
     globals.refresh_globals()

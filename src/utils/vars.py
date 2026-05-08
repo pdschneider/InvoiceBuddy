@@ -25,6 +25,7 @@ def create_vars(globals):
     globals.default_printer_var = ctk.StringVar(value=globals.default_printer)
     globals.github_check_var = ctk.BooleanVar(value=globals.github_check)
     globals.beta_var = ctk.BooleanVar(value=globals.beta)
+    globals.dynamic_window_size_var = ctk.BooleanVar(value=globals.dynamic_window_size)
 
     # Component Vars
     globals.invoice_com_a_var = ctk.StringVar(value=globals.invoice_component_a)

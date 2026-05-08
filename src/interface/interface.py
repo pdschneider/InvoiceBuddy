@@ -29,7 +29,7 @@ def create_interface(globals):
         y = (screen_height - 850) // 2
         globals.root.geometry(f"900x850+{x}+{y}")
 
-    if globals.saved_width and globals.saved_height and globals.saved_x and globals.saved_y:
+    if globals.saved_width and globals.saved_height and globals.saved_x and globals.saved_y and globals.dynamic_window_size:
         try:
             globals.root.geometry(
                 f"{globals.saved_width}x{globals.saved_height}+{globals.saved_x}+{globals.saved_y}")

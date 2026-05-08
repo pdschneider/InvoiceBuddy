@@ -8,5 +8,6 @@
     "saved_y": 0,
     "default_printer": "",
     "github_check": false,
-    "beta": false
+    "beta": false,
+    "dynamic_window_size": true
 }

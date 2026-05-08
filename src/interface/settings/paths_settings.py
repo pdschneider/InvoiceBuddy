@@ -222,6 +222,8 @@ def create_paths_settings_tab(globals, settings_tab):
             prompt_restart = True
         elif globals.beta != globals.beta_var.get():
             prompt_restart = True
+        if globals.os_name.startswith("Windows"):
+            prompt_restart = False
         save_all_settings(globals)
 
         if prompt_restart:

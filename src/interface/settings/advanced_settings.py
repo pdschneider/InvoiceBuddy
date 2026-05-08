@@ -160,6 +160,8 @@ def create_advanced_tab(globals, advanced_frame):
             prompt_restart = True
         elif globals.beta != globals.beta_var.get():
             prompt_restart = True
+        if globals.os_name.startswith("Windows"):
+            prompt_restart = False
         save_all_settings(globals)
 
         if prompt_restart:

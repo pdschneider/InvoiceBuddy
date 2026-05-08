@@ -494,6 +494,8 @@ def create_spreadsheet_settings_tab(globals, spreadsheet_tab):
             prompt_restart = True
         elif globals.beta != globals.beta_var.get():
             prompt_restart = True
+        if globals.os_name.startswith("Windows"):
+            prompt_restart = False
         save_all_settings(globals)
 
         if prompt_restart:

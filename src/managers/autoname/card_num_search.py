@@ -9,7 +9,7 @@ def card_number_search(directory=None, file_list=None, normalized_texts=None):
     """
     Returns dict: {original_filename: (card_num_str, matched_str) or None}
     Always searches regardless of current filename or identity.
-    Handles OCR errors like O→0, L→1 in the captured digits.
+    Handles OCR errors like O to 0, L to 1 in the captured digits.
     Does NOT rename.
     """
     if not file_list:
@@ -89,9 +89,9 @@ def card_number_search(directory=None, file_list=None, normalized_texts=None):
                     # Capture the "digits" group (last group in most patterns)
                     candidate = match.groups()[-1].strip().lower()
                     logging.info(
-                        f"Pattern matched: {pattern} → raw candidate: {candidate}")
+                        f"Pattern matched: {pattern} becomes raw candidate: {candidate}")
 
-                    # Fix OCR errors: O→0, L→1, I→1 (add more if needed)
+                    # Fix OCR errors: O to 0, L to 1, I to 1 (add more if needed)
                     candidate = candidate.replace(
                         'o', '0').replace(
                             'l', '1').replace(

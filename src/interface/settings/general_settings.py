@@ -158,6 +158,34 @@ def create_general_settings_tab(globals, settings_tab):
                  text="*Requires restart",
                  font=fonts.body_font).pack(side="left", padx=6, pady=0)
 
+    # Window Resize
+    window_frame = ctk.CTkFrame(settings_tab,
+                                 bg_color="transparent",
+                                 fg_color="transparent")
+    window_frame.pack(fill="x", pady=10, padx=10)
+
+    ctk.CTkLabel(window_frame,
+                 text=None,
+                 image=globals.windows_icon).pack(side="left", padx=6, pady=0)
+
+    window_size_label = ctk.CTkLabel(window_frame,
+                                    text="Save Window Placement",
+                                    font=fonts.heading_font)
+    window_size_label.pack(side="left", padx=(0, 12))
+    CTkToolTip(window_size_label,
+               message="Loads Invoice Buddy where\nit was last time",
+               delay=0.8,
+               follow=True,
+               padx=10,
+               pady=5)
+
+    ctk.CTkCheckBox(window_frame,
+                    variable=globals.dynamic_window_size_var,
+                    onvalue=True,
+                    text=None,
+                    width=0,
+                    offvalue=False).pack(side="left")
+
     # Save Button Frame
     save_button_frame = ctk.CTkFrame(settings_tab, fg_color="transparent")
     save_button_frame.pack(pady=10)
@@ -175,6 +203,8 @@ def create_general_settings_tab(globals, settings_tab):
             prompt_restart = True
         elif globals.beta != globals.beta_var.get():
             prompt_restart = True
+        if globals.os_name.startswith("Windows"):
+            prompt_restart = False
         save_all_settings(globals)
 
         if prompt_restart:

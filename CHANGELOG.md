@@ -2,6 +2,21 @@
 
 All notable changes to **Invoice Buddy** will be located in this file.
 
+## [0.2.3] - 2026-05-08
+
+This update bundles OCR-related files for Windows users, making OCR cross-platform. It also fixes several Windows-specific crashes and adds an option to not remember window placement, which helps users with multiple monitor setups from having a wonky sized window.
+
+### Added
+- Tesseract and Popplar now come bundled on Windows, allowing seamless OCR
+- Users can now select whether the window loads in the same spot it was left on the screen last time
+
+### Changed
+- Changed about page to include new bundled binaries
+
+### Fixed
+- Fixed crash on startup when Tesseract was not installed on Windows
+- Fixed error when restarting the app via settings by removing the prompt on Windows
+
 ## [0.2.2] - 2026-05-06
 
 This version includes 15 new companies and is build as a .deb in addition to AppImage for Linux, granting Debian users full desktop integration. Invoice Buddy also has an optional beta channel for updates, making the main channel more stable.
