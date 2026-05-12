@@ -507,8 +507,11 @@ def create_spreadsheet_settings_tab(globals, spreadsheet_tab):
                     QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
                     QMessageBox.StandardButton.Yes)
                 if reply == QMessageBox.StandardButton.Yes:
-                    subprocess.Popen(globals.app_path)
-                    sys.exit(0)
+                    try:
+                        subprocess.Popen(globals.app_path)
+                        sys.exit(0)
+                    except Exception as e:
+                        logging.error(f"Could not restart app due to: {e}")
             else:
                     reply = messagebox.askyesno(
                         parent=globals.root,

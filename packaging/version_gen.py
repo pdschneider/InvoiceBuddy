@@ -15,7 +15,8 @@ from version import __version__, __author__, __title__, __description__
 
 # Parse version string into tuple (major, minor, patch, build)
 try:
-    major, minor, patch = map(int, __version__.split('.'))
+    clean_version = __version__.replace('-beta', '').replace('-rc', '')
+    major, minor, patch = map(int, clean_version.split('.'))
     build = 0
 except Exception:
     major, minor, patch, build = 0, 1, 0, 0
@@ -100,9 +101,11 @@ if control_file_path.exists():
 
     # Replace the Version line specifically
     # This regex matches "Version: " followed by anything until the end of the line
+    deb_version = __version__.replace('-beta', '~beta').replace('-rc', '~rc')
+
     control_content = re.sub(
         r'^Version: .*$',
-        f'Version: {__version__}',
+        f'Version: {deb_version}',
         control_content,
         flags=re.MULTILINE)
 

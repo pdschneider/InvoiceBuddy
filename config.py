@@ -244,24 +244,25 @@ def apply_theme(name: str) -> None:
 def get_executable_path():
     """Get the correct path to the app file."""
     
+    script_path = os.path.abspath(sys.argv[0])
+
     # Check if AppImage
     if 'APPIMAGE' in os.environ:
         print(f"Path to executable (AppImage): {os.environ['APPIMAGE']}")
         return os.environ['APPIMAGE']
     
     # Check if .deb
-    elif os.path.realpath(sys.executable).startswith("/usr/") and getattr(sys, 'frozen', False):
-        print(f"Path to executable (.deb/system): {os.path.realpath(sys.executable)}")
-        return os.path.realpath(sys.executable)
+    elif script_path.startswith("/usr/bin/invoice-buddy") or script_path.startswith("/usr/local/bin/invoice-buddy"):
+        print(f"Path to executable (.deb/system): {os.path.realpath(sys.executable)} | Path to script: {script_path}")
+        return script_path
 
     # Check if running in frozen/compiled mode
     elif getattr(sys, 'frozen', False):
         print(f"Path to executable (frozen / Inno Setup): {sys.executable}")
         return sys.executable
     
-    # Development mode
+    # Fallback to Development Mode
     else:
-        script_path = os.path.abspath(sys.argv[0])
         print(f"Path to executable: {script_path}")
         return [sys.executable, script_path]
 

@@ -2,6 +2,23 @@
 
 All notable changes to **Invoice Buddy** will be located in this file.
 
+## [0.2.4] - 2026-05-00
+
+This update 
+
+### Added
+- 
+
+### Changed
+- Update dependencies
+
+### Fixed
+- Fixed issue where .deb users could not update from beta releases to the next stable release without uninstalling first
+- Fixed issue where app state was considered Development even for .deb builds, breaking app restart logic
+
+### Security
+- Patched 2 high severity vulnerabilities affecting availability and confedentiality of data in the urllib3 dependency by updating to version 2.7.0
+
 ## [0.2.3] - 2026-05-08
 
 This update bundles OCR-related files for Windows users, making OCR cross-platform. It also fixes several Windows-specific crashes and adds an option to not remember window placement, which helps users with multiple monitor setups from having a wonky sized window.

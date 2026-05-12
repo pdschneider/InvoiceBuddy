@@ -732,15 +732,22 @@ def make_legacy_compatible():
 def get_exec_type():
     """Get the correct executable type."""
     
+    # Script path (ex: /usr/bin/pearl)
+    script_path = os.path.abspath(sys.argv[0])
+
     # Check if AppImage
     if 'APPIMAGE' in os.environ:
+        logging.debug(f"Path to executable (AppImage): {os.environ['APPIMAGE']}")
         return "AppImage"
     # Check if .deb
-    elif os.path.realpath(sys.executable).startswith("/usr/") and getattr(sys, 'frozen', False):
+    elif script_path.startswith("/usr/bin/invoice-buddy") or script_path.startswith("/usr/local/bin/invoice-buddy"):
+        logging.debug(f"Path to executable (.deb/system): {os.path.realpath(sys.executable)} | Path to script: {script_path}")
         return "Deb"
     # Check if running in frozen/compiled mode
     elif getattr(sys, 'frozen', False):
+        logging.debug(f"Path to executable (frozen / Inno Setup): {sys.executable}")
         return "Exe"
     # Development mode
     else:
+        logging.debug(f"Path to executable: {sys.executable} | Path to script: {script_path}")
         return "Development"
