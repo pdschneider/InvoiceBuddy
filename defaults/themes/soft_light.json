@@ -93,7 +93,7 @@
         "scrollbar_button_hover_color": "#d0d0d0"
     },
     "CTkScrollbar": {
-        "bg_color": "transparent",
+        "bg_color": "#ffffff",
         "fg_color": "#e0e0e0",
         "button_color": "#d0d0d0",
         "button_hover_color": "#c0c0c0",

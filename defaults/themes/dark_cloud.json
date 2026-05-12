@@ -78,7 +78,7 @@
         "border_width": 2,
         "text_color": "#e8e8e8",
         "corner_radius": 8,
-        "button_color": "#2d2d2d",
+        "button_color": "#555555",
         "button_hover_color": "#383838",
         "text_color_disabled": "#777777"
     },

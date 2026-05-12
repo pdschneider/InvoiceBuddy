@@ -47,6 +47,7 @@ class Globals:
 
         # App Path
         self.app_path = get_executable_path()
+        self.app_type = None
 
         # Locks
         self.edit_lock = threading.Lock()
@@ -256,10 +257,10 @@ def get_executable_path():
         print(f"Path to executable (.deb/system): {os.path.realpath(sys.executable)} | Path to script: {script_path}")
         return script_path
 
-    # Check if running in frozen/compiled mode
-    elif getattr(sys, 'frozen', False):
-        print(f"Path to executable (frozen / Inno Setup): {sys.executable}")
-        return sys.executable
+    # Check if running as an .exe
+    elif platform.platform().startswith("Windows") and ('onefile' in sys.executable.lower() or '_MEIPASS' in sys.executable):
+        print(f"Path to executable (frozen / Inno Setup): {sys.executable} | Path to Script: {script_path}")
+        return script_path
     
     # Fallback to Development Mode
     else:

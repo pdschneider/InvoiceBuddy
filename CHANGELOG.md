@@ -2,14 +2,15 @@
 
 All notable changes to **Invoice Buddy** will be located in this file.
 
-## [0.2.4] - 2026-05-00
+## [0.2.4-beta] - 2026-05-12
 
-This update 
+Invoice Buddy is now pre-compiled to C on Windows! This improves speed and file size dramatically, taking Invoice Buddy from ~160GB to less than 90GB with all dependencies included!
 
 ### Added
-- 
+- Invoice Buddy is now pre-compiled to C, improving speed and reducing file size
 
 ### Changed
+- Minor UI improvements
 - Update dependencies
 
 ### Fixed

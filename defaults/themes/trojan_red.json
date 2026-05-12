@@ -88,13 +88,13 @@
         "border_color": "#ff6b6b",
         "corner_radius": 8,
         "border_width": 2,
-        "text_color": "#ffffff",
+        "text_color": "#d62828",
         "scrollbar_button_color": "#ff6b6b",
         "scrollbar_button_hover_color": "#ff453a"
     },
     "CTkScrollbar": {
         "bg_color": "#d62828",
-        "fg_color": "#ff6b6b",
+        "fg_color": "#c21807",
         "button_color": "#ff3b30",
         "button_hover_color": "#ff453a",
         "button_pressed_color": "#ff1744",

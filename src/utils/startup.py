@@ -30,7 +30,7 @@ def setup(globals):
     folder_maps_check()
     create_vars(globals)
     load_icons(globals)
-    get_exec_type()
+    globals.app_type = get_exec_type(globals)
 
 
 def setup_logging():
@@ -729,25 +729,25 @@ def make_legacy_compatible():
         logging.error(f"Failed to set up archive path: {e}")
 
 
-def get_exec_type():
+def get_exec_type(globals):
     """Get the correct executable type."""
     
-    # Script path (ex: /usr/bin/pearl)
+    # Script path (ex: /usr/bin/invoice-buddy)
     script_path = os.path.abspath(sys.argv[0])
 
     # Check if AppImage
     if 'APPIMAGE' in os.environ:
-        logging.debug(f"Path to executable (AppImage): {os.environ['APPIMAGE']}")
+        logging.debug(f"Path to executable (.AppImage): {os.environ['APPIMAGE']}")
         return "AppImage"
     # Check if .deb
     elif script_path.startswith("/usr/bin/invoice-buddy") or script_path.startswith("/usr/local/bin/invoice-buddy"):
-        logging.debug(f"Path to executable (.deb/system): {os.path.realpath(sys.executable)} | Path to script: {script_path}")
+        logging.debug(f"Path to executable (.deb): {os.path.realpath(sys.executable)} | Path to script: {script_path}")
         return "Deb"
-    # Check if running in frozen/compiled mode
-    elif getattr(sys, 'frozen', False):
-        logging.debug(f"Path to executable (frozen / Inno Setup): {sys.executable}")
-        return "Exe"
+    # Check if running as an .exe
+    elif globals.os_name.startswith("Windows") and ('onefile' in sys.executable.lower() or '_MEIPASS' in sys.executable):
+        print(f"Path to executable (frozen / Inno Setup): {sys.executable} | Path to Script: {script_path}")
+        return script_path
     # Development mode
     else:
-        logging.debug(f"Path to executable: {sys.executable} | Path to script: {script_path}")
+        logging.debug(f"Path to executable (Development): {sys.executable} | Path to script: {script_path}")
         return "Development"
