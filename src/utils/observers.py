@@ -8,6 +8,18 @@ from watchdog.observers import Observer
 from watchdog.observers.polling import PollingObserver
 from watchdog.events import FileSystemEventHandler
 
+try:
+    from PySide6.QtCore import QTimer, QObject, Signal
+    PYSIDE6_AVAILABLE = True
+except ImportError:
+    PYSIDE6_AVAILABLE = False
+
+
+if PYSIDE6_AVAILABLE:
+    class _WatchdogSignaler(QObject):
+        """Thread-safe bridge: emits signal from background thread, received in main thread."""
+        file_changed = Signal()
+
 
 class FolderEventHandler(FileSystemEventHandler):
     """Handles filesystem events for a single watched folder"""
@@ -17,6 +29,15 @@ class FolderEventHandler(FileSystemEventHandler):
         self.debounce_delay = debounce_delay
         self.last_event_time = 0
         self.scheduled_update = None
+
+        # Qt mode: Set up thread-safe signaling
+        if PYSIDE6_AVAILABLE and hasattr(globals, 'qt_mode') and globals.qt_mode:
+            self._signaler = _WatchdogSignaler()
+            self._signaler.file_changed.connect(self._on_file_changed_qt)
+            # Persistent timer that lives in the main thread
+            self._debounce_timer = QTimer()
+            self._debounce_timer.setSingleShot(True)
+            self._debounce_timer.timeout.connect(self._trigger_update)
 
     def on_any_event(self, event):
         """Ignores directories and irrelevant event types."""
@@ -38,17 +59,27 @@ class FolderEventHandler(FileSystemEventHandler):
 
         current_time = time.time()
 
-        # Cancel any pending updates
-        if self.scheduled_update:
-            self.globals.root.after_cancel(self.scheduled_update)
-            self.scheduled_update = None
+        if PYSIDE6_AVAILABLE and hasattr(self.globals, 'qt_mode') and self.globals.qt_mode:
+            # Qt Mode: Just emit the signal. That's it.
+            # The signal is thread-safe — it posts to the main thread automatically.
+            self._signaler.file_changed.emit()
+        else:
+            # Tkinter Mode: Cancel and reschedule
+            if self.scheduled_update:
+                self.globals.root.after_cancel(self.scheduled_update)
+                self.scheduled_update = None
 
-        # Schedule new update (UI refresh + metadata save)
-        self.scheduled_update = self.globals.root.after(
-            int(self.debounce_delay * 1000),
-            self._trigger_update)
+            delay_ms = int(self.debounce_delay * 1000)
+            self.scheduled_update = self.globals.root.after(
+                delay_ms, self._trigger_update)
 
         self.last_event_time = current_time
+
+    def _on_file_changed_qt(self):
+        """Runs in the MAIN thread when the signal is received. Handles debouncing."""
+        # Calling start() on a running single-shot timer restarts it automatically
+        delay_ms = int(self.debounce_delay * 1000)
+        self._debounce_timer.start(delay_ms)
 
     def _trigger_update(self):
         self.scheduled_update = None
@@ -72,7 +103,7 @@ def is_network_drive(globals, path):
     return False
 
 
-def setup_observer(globals, direct, key):
+def setup_observer(globals, direct, key, callback=None):
     """Sets up watchdog observers."""
     directory = direct
     if not directory or not os.path.isdir(directory):
@@ -82,7 +113,15 @@ def setup_observer(globals, direct, key):
     if key in globals.observers and globals.observers[key] and globals.observers[key].is_alive():
         globals.observers[key].stop()
         globals.observers[key].join()
-    handler = FolderEventHandler(globals, globals.update_file_counts)
+
+    if callback is None:
+        if hasattr(globals, 'update_file_counts'):
+            callback = globals.update_file_counts
+        else:
+            logging.warning("No callback provided and no globals.update_file_counts found.")
+            return None
+
+    handler = FolderEventHandler(globals, callback)
     if is_network_drive(globals, directory):
         observer = PollingObserver(timeout=1)
         logging.info(

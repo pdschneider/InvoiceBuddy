@@ -1,6 +1,6 @@
 # version.py
-__version__ = "0.2.4-beta"
+__version__ = "0.2.4"
 
 __author__ = "Phillip Schneider"
 __title__ = "Invoice Buddy"
-__description__ = "Simplified invoice and receipt management."
+__description__ = "Simplified invoice and receipt management"

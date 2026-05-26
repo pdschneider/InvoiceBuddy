@@ -49,7 +49,7 @@ VSVersionInfo(
           StringStruct('OriginalFilename', 'InvoiceBuddy.exe'),
           StringStruct('ProductName', '{__title__}'),
           StringStruct('ProductVersion', '{__version__}'),
-          StringStruct('Comments', 'Personal Everything Assistant Running Locally'),
+          StringStruct('Comments', '{__description__}'),
         ])
       ]),
     VarFileInfo([VarStruct('Translation', [0x409, 1200])])

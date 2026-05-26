@@ -2,6 +2,7 @@
 import requests
 import logging
 import webbrowser
+import time
 from PySide6.QtWidgets import QMessageBox
 from PySide6.QtGui import QIcon
 import sys
@@ -35,7 +36,10 @@ def version_check(globals):
             response = requests.get(url, headers=headers, params={"per_page": 10}, timeout=10)
         else:
             response = requests.get(url, headers=headers, timeout=10)
+    except Exception as e:
+        logging.error(f"An error occurred when connecting to github: {e}")
 
+    try:
         # Gracefully exit if status code is not 200
         if response.status_code != 200:
             logging.warning(
@@ -48,7 +52,10 @@ def version_check(globals):
         else:
             data = response.json()
         globals.latest_version = data["tag_name"].replace('v', '')
+    except Exception as e:
+        logging.error(f"An error occurred while parsing GitHub response: {e}")
 
+    try:
         # Determine if newest version is in beta
         beta = "-beta" in globals.latest_version
 
@@ -76,8 +83,6 @@ def version_check(globals):
         linux_download_url = None
 
         # print(f"{data}")  # <-- Prints entire output
-
-        globals.app_type = "Deb"
 
         # Locate the correct file
         for asset in assets:
@@ -146,6 +151,7 @@ def version_check(globals):
                 if globals.os_name.startswith("Linux"):
                     webbrowser.open(url=linux_download_url)
                 elif globals.os_name.startswith("Windows"):
+                    logging.debug(f"Attempting to open URL... {windows_download_url}")
                     webbrowser.open(url=windows_download_url)
                 else:
                     webbrowser.open(url=latest_version_url)

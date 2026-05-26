@@ -2,23 +2,28 @@
 
 All notable changes to **Invoice Buddy** will be located in this file.
 
-## [0.2.4-beta] - 2026-05-12
+## [0.2.4] - 2026-05-26
 
 Invoice Buddy is now pre-compiled to C on Windows! This improves speed and file size dramatically, taking Invoice Buddy from ~160GB to less than 90GB with all dependencies included!
 
 ### Added
 - Invoice Buddy is now pre-compiled to C, improving speed and reducing file size
+- New Companies: Chevron Corporation, Exxon Mobil Corporation, Precision Analytical Labortories, Thai Go, Wendy's Restaurant, Great Clips, Inc.
 
 ### Changed
+- Added debug line to troubleshoot windows silently not opening download in the browser
 - Minor UI improvements
 - Update dependencies
 
 ### Fixed
 - Fixed issue where .deb users could not update from beta releases to the next stable release without uninstalling first
 - Fixed issue where app state was considered Development even for .deb builds, breaking app restart logic
+- Added missing info for Carrier Corporation's auto-name
+- Fixed broken update check for Windows users
+- Fixed incorrect exe description
 
 ### Security
-- Patched 2 high severity vulnerabilities affecting availability and confedentiality of data in the urllib3 dependency by updating to version 2.7.0
+- Patched 2 high severity vulnerabilities affecting availability and confidentiality of data in the urllib3 dependency by updating to version 2.7.0
 
 ## [0.2.3] - 2026-05-08
 

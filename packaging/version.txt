@@ -19,14 +19,14 @@ VSVersionInfo(
         '040904B0',
         [
           StringStruct('CompanyName', 'Phillip Schneider'),
-          StringStruct('FileDescription', 'Simplified invoice and receipt management.'),
-          StringStruct('FileVersion', '0.2.4-beta'),
+          StringStruct('FileDescription', 'Simplified invoice and receipt management'),
+          StringStruct('FileVersion', '0.2.4'),
           StringStruct('InternalName', 'Invoice Buddy'),
           StringStruct('LegalCopyright', 'Copyright © 2026 Phillip Schneider. Apache 2.0.'),
           StringStruct('OriginalFilename', 'InvoiceBuddy.exe'),
           StringStruct('ProductName', 'Invoice Buddy'),
-          StringStruct('ProductVersion', '0.2.4-beta'),
-          StringStruct('Comments', 'Personal Everything Assistant Running Locally'),
+          StringStruct('ProductVersion', '0.2.4'),
+          StringStruct('Comments', 'Simplified invoice and receipt management'),
         ])
       ]),
     VarFileInfo([VarStruct('Translation', [0x409, 1200])])

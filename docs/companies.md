@@ -61,6 +61,7 @@ This document lists every currently supported company with its **full official/l
 - Westview Productions
 - Wolfe Fire Protection
 - Everything John Deere Gator
+- Precision Analytical Labortories
 
 ## Government, Utilities & Public Agencies
 
@@ -81,6 +82,8 @@ This document lists every currently supported company with its **full official/l
 - Shell USA, Inc.
 - Tesoro Refining & Marketing Company LLC (ARCO)
 - Pioneer Gas (Sinclair)
+- Chevron Corporation
+- Exxon Mobil Corporation
 
 ## Retail, Consumer & Other Brands
 
@@ -114,6 +117,8 @@ This document lists every currently supported company with its **full official/l
 - Royal Star Buffet
 - Sunnyside Nursery
 - Ulta Beauty, Inc.
+- Thai Go
+- Quality is our Recipe, LLC (Wendy's Restaurant)
 
 ## Miscellaneous / Technology & Services
 
@@ -158,6 +163,8 @@ This document lists every currently supported company with its **full official/l
 - Old Navy, LLC
 - Apple Inc.
 - Wet Rabbit
+- Name.com
+- Great Clips, Inc.
 
 ---
 

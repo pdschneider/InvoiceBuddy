@@ -17,7 +17,8 @@ def setup(globals):
     setup_logging()
     logging.info(f"Python Version: {sys.version}")
     logging.info(f"Invoice Buddy Version: {globals.current_version}")
-    version_check(globals)
+    if globals.github_check:
+        version_check(globals)
     setup_company_map()
     setup_folder_maps()
     setup_settings()

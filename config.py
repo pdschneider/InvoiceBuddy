@@ -44,6 +44,10 @@ class Globals:
         self.app = QApplication(sys.argv)
         self.window = QMainWindow()
         self.qt_mode = False
+        self.mailbox = None
+        self.splitter = None
+        self.preview_pane = None
+        self.pdf_viewer = None
 
         # App Path
         self.app_path = get_executable_path()
@@ -170,6 +174,7 @@ class Globals:
 
         # Counts for Watchdog
         self.inbox_count_var = None
+        self.update_file_counts = None
 
     def refresh_globals(self):
         """Refreshes settings from settings file"""

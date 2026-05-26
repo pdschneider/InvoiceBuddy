@@ -7,6 +7,7 @@ from tkinter import filedialog
 from src.managers.history_manager import load_history, add_update_history
 from src.utils.save_settings import save_metadata
 from src.utils.toast import show_toast
+from PySide6.QtWidgets import QFileDialog
 
 move_log = []
 
@@ -100,15 +101,29 @@ def add_files(globals):
                         ex: ['/home/phillip/ZZZ-Unnamed- Ice Melt V24533.pdf',
                         '/home/phillip/ZZZ-Unnamed- LED Lamp Refund.pdf']
     """
+
     # Uses path from var if saved path isn't valid
-    if not os.path.isdir(globals.inbox) and os.path.isdir(globals.inbox_dir_var.get().strip()):
-        globals.inbox = globals.inbox_dir_var.get().strip()
-        logging.debug(f"Inbox not a valid path. Using path from paths settings.")
+    if not globals.qt_mode:
+        if not os.path.isdir(globals.inbox) and os.path.isdir(globals.inbox_dir_var.get().strip()):
+            globals.inbox = globals.inbox_dir_var.get().strip()
+            logging.debug(f"Inbox not a valid path. Using path from paths settings.")
+    else:
+        if not os.path.isdir(globals.inbox):
+            logging.error(f"Unable to reach inbox folder.")
+            return
 
     if os.path.isdir(globals.inbox):
         # Open file selection box
-        files_tuple = filedialog.askopenfilenames(
-            title="Select Files", filetypes=[("PDF files", "*.pdf")], multiple=True)
+        if not globals.qt_mode:
+            files_tuple = filedialog.askopenfilenames(
+                title="Select Files", filetypes=[("PDF files", "*.pdf")], multiple=True)
+        else:
+            files_tuple, filter = QFileDialog.getOpenFileNames(
+                None,
+                "Add Files",
+                "",
+                "PDF Files (*.pdf)",
+                options=QFileDialog.Option.DontUseNativeDialog)
         try:
             if files_tuple:
                 files_list = []
