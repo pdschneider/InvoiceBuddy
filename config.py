@@ -43,11 +43,19 @@ class Globals:
         # PySide6 Widgets
         self.app = QApplication(sys.argv)
         self.window = QMainWindow()
-        self.qt_mode = False
         self.mailbox = None
         self.splitter = None
         self.preview_pane = None
         self.pdf_viewer = None
+        self.github_check_checkbox = None
+        self.beta_checkbox = None
+        self.window_checkbox = None
+        self.printer_combo = None  # The combobox that stores the printer value
+        self.legacy_checkbox = None
+
+        # PySide6 Inbox
+        self.files = []  # ALL filenames without extensions in inbox
+        self.checked_files = None  # ONLY the filenames of checked entries
 
         # App Path
         self.app_path = get_executable_path()
@@ -131,6 +139,7 @@ class Globals:
         self.github_check_var = None
         self.beta_var = None
         self.dynamic_window_size_var = None
+        self.legacy_mode_var = None
 
         # Inbox Temporary Vars
         self.inbox_dir_var = ""
@@ -195,6 +204,7 @@ class Globals:
         self.github_check = settings.get("github_check", False)
         self.beta = settings.get("beta", False)
         self.dynamic_window_size = settings.get("dynamic_window_size", True)
+        self.legacy_mode = settings.get("legacy_mode", True)
 
         # Paths
         self.inbox = sources.get("inbox", "")

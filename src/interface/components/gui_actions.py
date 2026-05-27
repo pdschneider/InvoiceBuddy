@@ -1,5 +1,6 @@
 # Interface/Components/gui_actions.py
-import os, subprocess, logging
+import os
+import logging
 from tkinter import messagebox
 from src.managers.autoname.pdfsearch import apply_auto_naming
 from src.managers.data_processing import parse_invoices, parse_credit_cards
@@ -7,22 +8,58 @@ from src.managers.file_management import archive_files
 from src.managers.import_export import export_history, import_history
 from src.utils.save_settings import save_metadata
 from src.utils.toast import show_toast
+from PySide6.QtWidgets import QMessageBox
 
 
 def pdf_button(globals, companies=None, directory=None, file_list=None):
     """One-click auto-naming — all logic in apply_auto_naming."""
     save_metadata(globals)
     if not file_list:
-        messagebox.showinfo("Nothing Selected", "Please select one or more files to auto-name.")
+        if not globals.legacy_mode:
+            QMessageBox.information(
+                None,
+                "Nothing Selected",
+                "Please select one or more files to auto-name.",
+                QMessageBox.StandardButton.Ok,
+                QMessageBox.StandardButton.Ok
+            )
+        else:
+            messagebox.showinfo("Nothing Selected", "Please select one or more files to auto-name.")
         return
+    
+    new_file_list = []
+    if not globals.legacy_mode:
+        for file in file_list:
+            new_file_list.append(os.path.normpath(os.path.join(globals.inbox, file)))
+    file_list = new_file_list
+
+    logging.debug(f"Attempting to auto-name files: {file_list}")
 
     search_dir = os.path.normpath(directory or globals.sources['inbox'])
     changes = apply_auto_naming(globals, search_dir, file_list)
 
     if changes == 0:
-        messagebox.showinfo("Nothing to Do", "Files already properly named or no matches found in file contents.")
+        if not globals.legacy_mode:
+            QMessageBox.information(
+                None,
+                "Nothing to Do",
+                "Files already properly named or no matches found in file contents.",
+                QMessageBox.StandardButton.Ok,
+                QMessageBox.StandardButton.Ok
+            )
+        else:
+            messagebox.showinfo("Nothing to Do", "Files already properly named or no matches found in file contents.")
     else:
-        messagebox.showinfo("Complete", f"Auto-Name Complete. Updated {changes} file(s).")
+        if not globals.legacy_mode:
+            QMessageBox.information(
+                None,
+                "Complete!",
+                f"Auto-Name Complete! Updated {changes} file(s).",
+                QMessageBox.StandardButton.Ok,
+                QMessageBox.StandardButton.Ok
+            )
+        else:
+            messagebox.showinfo("Complete", f"Auto-Name Complete. Updated {changes} file(s).")
 
     globals.root.after(100, globals.update_file_counts)
 

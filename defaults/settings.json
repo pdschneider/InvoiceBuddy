@@ -9,5 +9,6 @@
     "default_printer": "",
     "github_check": false,
     "beta": false,
-    "dynamic_window_size": true
+    "dynamic_window_size": true,
+    "legacy_mode": true
 }

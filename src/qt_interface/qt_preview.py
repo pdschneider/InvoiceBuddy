@@ -3,6 +3,9 @@ from PySide6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout,
                                QLabel, QPushButton, QFrame, QScrollArea)
 from PySide6.QtCore import Qt
 from src.qt_interface.qt_components.qt_viewer import NativePdfViewer
+from src.interface.components.gui_actions import smart_spreadsheet_button, pdf_button
+from src.managers.printers import print_selected_files
+from src.managers.file_management import archive_files, send_to_trash
 
 def create_preview_pane(globals):
     """Creates the right pane with PDF preview and action buttons."""
@@ -51,10 +54,15 @@ def create_preview_pane(globals):
 
     # Buttons
     btn_autoname = create_action_btn("Auto-Name", "🏷️")
+    btn_autoname.clicked.connect(lambda e: pdf_button(globals, directory=globals.inbox, file_list=globals.checked_files))
     btn_enter = create_action_btn("Enter", "➡️")
+    btn_enter.clicked.connect(lambda e: smart_spreadsheet_button(globals, file_list=globals.checked_files))
     btn_print = create_action_btn("Print", "🖨️")
+    btn_print.clicked.connect(lambda e: print_selected_files(globals, globals.checked_files))
     btn_archive = create_action_btn("Archive", "📦")
+    btn_archive.clicked.connect(lambda e: archive_files(globals, globals.checked_files))
     btn_delete = create_action_btn("Delete", "🗑️", "#8B0000")
+    btn_delete.clicked.connect(lambda e: send_to_trash(globals, globals.checked_files))
 
     actions_layout.addWidget(btn_autoname)
     actions_layout.addWidget(btn_enter)

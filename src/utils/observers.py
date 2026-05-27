@@ -31,7 +31,7 @@ class FolderEventHandler(FileSystemEventHandler):
         self.scheduled_update = None
 
         # Qt mode: Set up thread-safe signaling
-        if PYSIDE6_AVAILABLE and hasattr(globals, 'qt_mode') and globals.qt_mode:
+        if PYSIDE6_AVAILABLE and hasattr(globals, 'legacy_mode') and not globals.legacy_mode:
             self._signaler = _WatchdogSignaler()
             self._signaler.file_changed.connect(self._on_file_changed_qt)
             # Persistent timer that lives in the main thread
@@ -59,9 +59,7 @@ class FolderEventHandler(FileSystemEventHandler):
 
         current_time = time.time()
 
-        if PYSIDE6_AVAILABLE and hasattr(self.globals, 'qt_mode') and self.globals.qt_mode:
-            # Qt Mode: Just emit the signal. That's it.
-            # The signal is thread-safe — it posts to the main thread automatically.
+        if PYSIDE6_AVAILABLE and hasattr(self.globals, 'legacy_mode') and not self.globals.legacy_mode:
             self._signaler.file_changed.emit()
         else:
             # Tkinter Mode: Cancel and reschedule

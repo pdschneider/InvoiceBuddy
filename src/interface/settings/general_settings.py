@@ -186,6 +186,34 @@ def create_general_settings_tab(globals, settings_tab):
                     width=0,
                     offvalue=False).pack(side="left")
 
+    # Legacy Mode
+    legacy_frame = ctk.CTkFrame(settings_tab,
+                                 bg_color="transparent",
+                                 fg_color="transparent")
+    legacy_frame.pack(fill="x", pady=10, padx=10)
+
+    legacy_label = ctk.CTkLabel(legacy_frame,
+                                text="Legacy Mode",
+                                font=fonts.heading_font)
+    legacy_label.pack(side="left", padx=(0, 12))
+    CTkToolTip(legacy_label,
+               message="Use Legacy GUI",
+               delay=0.8,
+               follow=True,
+               padx=10,
+               pady=5)
+
+    ctk.CTkCheckBox(legacy_frame,
+                    variable=globals.legacy_mode_var,
+                    onvalue=True,
+                    text=None,
+                    width=0,
+                    offvalue=False).pack(side="left")
+    
+    ctk.CTkLabel(legacy_frame,
+                 text="*Requires restart",
+                 font=fonts.body_font).pack(side="left", padx=6, pady=0)
+
     # Save Button Frame
     save_button_frame = ctk.CTkFrame(settings_tab, fg_color="transparent")
     save_button_frame.pack(pady=10)
@@ -203,10 +231,12 @@ def create_general_settings_tab(globals, settings_tab):
             prompt_restart = True
         elif globals.beta != globals.beta_var.get():
             prompt_restart = True
+        elif globals.legacy_mode != globals.legacy_mode_var.get():
+            prompt_restart = True
         save_all_settings(globals)
 
         if prompt_restart:
-            if globals.qt_mode:
+            if not globals.legacy_mode:
                 reply = QMessageBox.question(
                     None,
                     "Restart Invoice Buddy?",

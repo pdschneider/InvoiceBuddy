@@ -14,7 +14,7 @@ from src.utils.observers import setup_observer
 import logging
 
 
-def create_interface(globals):
+def create_qt_interface(globals):
     """Creates the main interface in PySide."""
     
     # 1. SETUP WINDOW

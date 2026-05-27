@@ -20,7 +20,16 @@ def print_selected_files(globals, filenames=None):
     success = None
     if not filenames:
         return
-    
+
+    # Create list of full paths
+    new_file_list = []
+    if not globals.legacy_mode:
+        for file in filenames:
+            new_file_list.append(os.path.normpath(os.path.join(globals.inbox, file)))
+    filenames = new_file_list
+
+    logging.debug(f"Attempting to print files: {filenames}")
+
     try:
         if platform.platform().startswith("Linux"):
             reply = QMessageBox.question(

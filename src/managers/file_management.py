@@ -4,10 +4,12 @@ import os
 import shutil
 import subprocess
 from tkinter import filedialog
+from send2trash import send2trash
 from src.managers.history_manager import load_history, add_update_history
 from src.utils.save_settings import save_metadata
 from src.utils.toast import show_toast
 from PySide6.QtWidgets import QFileDialog
+from PySide6.QtWidgets import QMessageBox
 
 move_log = []
 
@@ -103,7 +105,7 @@ def add_files(globals):
     """
 
     # Uses path from var if saved path isn't valid
-    if not globals.qt_mode:
+    if globals.legacy_mode:
         if not os.path.isdir(globals.inbox) and os.path.isdir(globals.inbox_dir_var.get().strip()):
             globals.inbox = globals.inbox_dir_var.get().strip()
             logging.debug(f"Inbox not a valid path. Using path from paths settings.")
@@ -114,7 +116,7 @@ def add_files(globals):
 
     if os.path.isdir(globals.inbox):
         # Open file selection box
-        if not globals.qt_mode:
+        if globals.legacy_mode:
             files_tuple = filedialog.askopenfilenames(
                 title="Select Files", filetypes=[("PDF files", "*.pdf")], multiple=True)
         else:
@@ -227,6 +229,15 @@ def archive_files(globals, file_list=None):
         logging.warning(f"Nothing selected.")
         return
 
+    # Create list of full paths
+    new_file_list = []
+    if not globals.legacy_mode:
+        for file in file_list:
+            new_file_list.append(os.path.normpath(os.path.join(globals.inbox, file)))
+    file_list = new_file_list
+
+    logging.debug(f"Attempting to archive files: {file_list}")
+
     for src_file in file_list:
         # Find the first word of the filename for folder matching
         filename = os.path.basename(src_file)
@@ -278,9 +289,97 @@ def archive_files(globals, file_list=None):
 
     if errors:
         show_toast(globals, f"Error moving some files", _type="error")
-        logging.error("Move Errors", "\n".join(errors))
+        logging.error(f"Move Errors: \n{errors}")
     elif moved_files == 0:
         show_toast(globals, f"No files moved in {globals.inbox}.", _type="error")
-        logging.warning("No Files", f"No files moved in {globals.inbox}.")
+        logging.warning(f"No files moved in {globals.inbox}.")
     else:
         show_toast(globals, f"Archived {moved_files} files successfully!")
+
+
+def send_to_trash(globals, file_list=None):
+    """Safely move selected files to the system trash."""
+    save_metadata(globals)
+
+    # Show message if no files are selected
+    if not file_list:
+        show_toast(globals, "Please select one or more files to delete.")
+        return
+
+    # Create list of full paths
+    new_file_list = []
+    if not globals.legacy_mode:
+        for file in file_list:
+            new_file_list.append(os.path.normpath(os.path.join(globals.inbox, file)))
+    file_list = new_file_list
+
+    logging.debug(f"Attempting to print files: {file_list}")
+
+    # Important variables
+    count = len(file_list)
+    trashed_count = 0
+    errors = []
+
+    # If not on network drive, use safer deletion method
+    if not globals.network_drive:
+        reply = QMessageBox.question(
+            None,
+            "Confirm Delete",
+            f"Move {count} file{'s' if count != 1 else ''} to the Recycle Bin?",
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+            QMessageBox.StandardButton.No)
+
+        if reply == QMessageBox.StandardButton.No:
+            return
+
+        # Send files safely to trash
+        for file_path in file_list:
+            try:
+                send2trash(file_path)
+                trashed_count += 1
+                logging.info(f"Trashed: {os.path.basename(file_path)}")
+            except Exception as e:
+                errors.append(f"{os.path.basename(file_path)}: {str(e)}")
+                logging.error(f"Failed to trash {file_path}: {e}")
+
+    # If on network drive, fall back to permanent deletion method
+    else:
+        reply = QMessageBox.question(
+            None,
+            "Confirm Delete",
+            f"Permanently delete {count} file{'s' if count != 1 else ''}?",
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+            QMessageBox.StandardButton.No)
+
+        if reply == QMessageBox.StandardButton.No:
+            return
+
+        # Delete files permanently
+        for file_path in file_list:
+            try:
+                os.remove(file_path)
+                trashed_count += 1
+                logging.info(f"Deleted: {os.path.basename(file_path)}")
+            except Exception as e:
+                errors.append(f"{os.path.basename(file_path)}: {str(e)}")
+                logging.error(f"Failed to delete {file_path}: {e}")
+
+    # Refresh UI
+    if globals.legacy_mode:
+        globals.update_file_counts()
+
+    # Feedback
+    if trashed_count == len(file_list):
+        show_toast(globals,
+                    f"Moved {trashed_count} file{'s' if trashed_count != 1 else ''} to trash.")
+    elif trashed_count > 0:
+        logging.warning(f"Trashed {trashed_count} files.\n\nFailed: \n" + "\n".join(errors))
+        show_toast(globals,
+                    f"Trashed {trashed_count} files - Some Failed to Trash\n",
+                    _type="error")
+    else:
+        logging.error(
+            f"Could not move any files to trash.\n\n" + "\n".join(errors))
+        show_toast(globals,
+                    f"Could not move any files to trash.",
+                    _type="error")

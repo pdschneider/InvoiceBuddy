@@ -160,10 +160,12 @@ def create_advanced_tab(globals, advanced_frame):
             prompt_restart = True
         elif globals.beta != globals.beta_var.get():
             prompt_restart = True
+        elif globals.legacy_mode != globals.legacy_mode_var.get():
+            prompt_restart = True
         save_all_settings(globals)
 
         if prompt_restart:
-            if globals.qt_mode:
+            if not globals.legacy_mode:
                 reply = QMessageBox.question(
                     None,
                     "Restart Pearl?",

@@ -2,13 +2,32 @@
 
 All notable changes to **Invoice Buddy** will be located in this file.
 
+## [0.2.5-beta] - 2026-05-27
+
+This version of Invoice Buddy marks an important transition over to the new GUI framework.
+
+### Added
+- Added togglable legacy mode
+- Added enter to spreadsheet functionality to new GUI
+- Added auto-name functionality to new GUI
+- Added print button functionality to new GUI
+- Added archive functionality to new GUI
+- Added more settings to new GUI
+
+### Changed
+- Further separated QT widgets from the legacy app
+
+### Fixed
+- Fixed logging error in archive files function
+
 ## [0.2.4] - 2026-05-26
 
 Invoice Buddy is now pre-compiled to C on Windows! This improves speed and file size dramatically, taking Invoice Buddy from ~160GB to less than 90GB with all dependencies included!
 
 ### Added
 - Invoice Buddy is now pre-compiled to C, improving speed and reducing file size
-- New Companies: Chevron Corporation, Exxon Mobil Corporation, Precision Analytical Labortories, Thai Go, Wendy's Restaurant, Great Clips, Inc.
+- New Companies: Chevron Corporation, Exxon Mobil Corporation, Precision Analytical Laboratories, Thai Go, Wendy's Restaurant, Great Clips, Inc.
+- Greatly improved functionality of future GUI
 
 ### Changed
 - Added debug line to troubleshoot windows silently not opening download in the browser

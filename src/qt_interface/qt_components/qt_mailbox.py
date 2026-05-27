@@ -12,9 +12,9 @@ class MailboxWidget(QWidget):
     def __init__(self, globals_obj, parent=None):
         super().__init__(parent)
         self.globals = globals_obj
-        self.files = []  # Store filenames
+        self.globals.files = []  # Store ALL filenames
         self.selected_files = set()
-        self.checked_files = set()
+        self.globals.checked_files = set()
 
         # Layout
         layout = QVBoxLayout(self)
@@ -27,7 +27,7 @@ class MailboxWidget(QWidget):
         self.master_checkbox = QCheckBox()
         self.master_checkbox.setStyleSheet("QCheckBox { spacing: 0; border: 2px solid #555}")
         self.master_checkbox.toggled.connect(self._toggle_all)
-        
+
         header_layout.addWidget(self.master_checkbox)
 
         # Header Label
@@ -81,9 +81,9 @@ class MailboxWidget(QWidget):
     def refresh_files(self, folder_path):
         """Clears the list and repopulates with PDFs from folder."""
         self.list_widget.clear()
-        self.files = []
+        self.globals.files = []
         self.selected_files.clear()
-        self.checked_files.clear()
+        self.globals.checked_files.clear()
 
         # Reset Master Checkbox
         self.master_checkbox.setChecked(False)
@@ -96,7 +96,7 @@ class MailboxWidget(QWidget):
                             if f.lower().endswith(".pdf")])
 
         for filename in pdf_files:
-            self.files.append(filename)
+            self.globals.files.append(filename)
 
             item = QListWidgetItem()
             item.setSizeHint(QSize(0, 50))
@@ -112,14 +112,14 @@ class MailboxWidget(QWidget):
         row_layout = QHBoxLayout(row)
         row_layout.setContentsMargins(10, 5, 10, 5)
         row_layout.setSpacing(10)
-        
+
         # CHECKBOX
         checkbox = QCheckBox()
         checkbox.setStyleSheet("QCheckBox { spacing: 0; border: 2px solid #555}")
         checkbox.setCursor(Qt.PointingHandCursor)
         checkbox.toggled.connect(lambda checked, f=filename: self._on_checkbox_toggled(f, checked))
         row_layout.addWidget(checkbox)
-        
+
         # Label
         base_name = os.path.splitext(filename)[0] 
         label = QLabel(base_name)
@@ -127,13 +127,13 @@ class MailboxWidget(QWidget):
         label.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
         label.setWordWrap(False)
         label.setCursor(Qt.PointingHandCursor)
-        label.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)  # <-- ADD THIS
-        
+        label.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
+
         # Double click starts editing
         label.mouseDoubleClickEvent = lambda event: self._start_editing(filename, folder_path, label, row, row_layout)
-        
+
         row_layout.addWidget(label)
-        
+
         row.file_data = {
             'filename': filename,
             'folder_path': folder_path,
@@ -141,22 +141,22 @@ class MailboxWidget(QWidget):
             'row': row,
             'row_layout': row_layout
         }
-        
+
         return row
 
     def _on_item_click(self, item):
         """Handle single click."""
         # Get the filename from our internal list
-        filename = self.files[self.list_widget.row(item)]
+        filename = self.globals.files[self.list_widget.row(item)]
         self.globals.selected_file = filename
-        
+
         # Construct the full path
         # IMPORTANT: Ensure globals.inbox is the correct absolute path
         if hasattr(self.globals, 'inbox') and self.globals.inbox:
             full_path = os.path.join(self.globals.inbox, filename)
-            
+
             logging.debug(f"Attempting to load: {full_path}")
-            
+
             # Check if the viewer exists and load the file
             if hasattr(self.globals, 'pdf_viewer') and self.globals.pdf_viewer:
                 self.globals.pdf_viewer.load_pdf(full_path)
@@ -167,9 +167,9 @@ class MailboxWidget(QWidget):
 
     def _on_double_click(self, item):
         """Handle double click (start editing)."""
-        filename = self.files[self.list_widget.row(item)]
+        filename = self.globals.files[self.list_widget.row(item)]
         row_widget = self.list_widget.itemWidget(item)
-        
+
         if row_widget and hasattr(row_widget, 'file_data'):
             file_data = row_widget.file_data
             self._start_editing(
@@ -183,40 +183,39 @@ class MailboxWidget(QWidget):
     def _on_checkbox_toggled(self, filename, checked):
         """Tracks which files have their checkboxes checked and updates master."""
         if checked:
-            self.checked_files.add(filename)
+            self.globals.checked_files.add(filename)
         else:
-            self.checked_files.discard(filename)
-        
+            self.globals.checked_files.discard(filename)
+
         # Update Master Checkbox State
         # BLOCK SIGNALS so this doesn't trigger _toggle_all recursively
         self.master_checkbox.blockSignals(True)
-        
-        if len(self.checked_files) == len(self.files) and len(self.files) > 0:
+
+        if len(self.globals.checked_files) == len(self.globals.files) and len(self.globals.files) > 0:
             self.master_checkbox.setChecked(True)
         else:
             self.master_checkbox.setChecked(False)
-            
-        self.master_checkbox.blockSignals(False)
-        
-        logging.debug(f"Checked: {filename}")
 
+        self.master_checkbox.blockSignals(False)
+
+        logging.debug(f"Checked: {filename}")
 
     def get_checked_files(self):
         """Returns a list of filenames whose checkboxes are checked."""
-        return list(self.checked_files)
+        return list(self.globals.checked_files)
 
     def _toggle_all(self, checked):
         """Checks or unchecks all files based on the master checkbox."""
         # Update internal state
         if checked:
-            self.checked_files = set(self.files)
+            self.globals.checked_files = set(self.globals.files)
         else:
-            self.checked_files.clear()
-        
+            self.globals.checked_files.clear()
+
         # Update the UI of all rows
         # BLOCK SIGNALS on the list items so we don't trigger _on_checkbox_toggled recursively
         self.list_widget.blockSignals(True)
-        
+
         for i in range(self.list_widget.count()):
             item = self.list_widget.item(i)
             row_widget = self.list_widget.itemWidget(item)
@@ -224,21 +223,21 @@ class MailboxWidget(QWidget):
                 checkbox = row_widget.findChild(QCheckBox)
                 if checkbox:
                     checkbox.setChecked(checked)
-        
+
         self.list_widget.blockSignals(False)
-        
+
         logging.debug(f"Master toggle: {'All Checked' if checked else 'All Unchecked'}")
 
     def _start_editing(self, filename, folder_path, label, row, row_layout):
         """Creates a Line Edit on the fly."""
-        
+
         # Close any existing editor first (One at a time)
         if hasattr(self, 'active_editor') and self.active_editor:
             self.active_editor.deleteLater()
             self.active_editor = None
 
         label.hide()
-        
+
         line_edit = QLineEdit(os.path.splitext(filename)[0])
 
         # Explicitly set line edit height
@@ -257,11 +256,11 @@ class MailboxWidget(QWidget):
             }
             QLineEdit:focus { border: 1px solid #2ecc71; }
         """)
-        
+
         row_layout.insertWidget(1, line_edit)
         line_edit.selectAll()
         line_edit.setFocus()
-        
+
         self.active_editor = line_edit
         self.active_label = label
         self.active_filename = filename
@@ -287,7 +286,7 @@ class MailboxWidget(QWidget):
             new_filename = new_base + ".pdf"
             old_path = os.path.join(folder_path, filename)
             new_path = os.path.join(folder_path, new_filename)
-            
+
             if os.path.exists(new_path) and new_path != old_path:
                 logging.error(f"File exists: {new_filename}")
                 line_edit.deleteLater()
@@ -297,13 +296,13 @@ class MailboxWidget(QWidget):
 
             try:
                 os.rename(old_path, new_path)
-                if filename in self.files:
-                    self.files[self.files.index(filename)] = new_filename
+                if filename in self.globals.files:
+                    self.globals.files[self.globals.files.index(filename)] = new_filename
                 label.setText(new_base)
                 line_edit.deleteLater()
                 label.show()
                 self.active_editor = None
-                
+
                 if hasattr(self.globals, 'selected_file') and self.globals.selected_file == filename:
                     self.globals.selected_file = new_filename
                     if hasattr(self.globals, 'pdf_viewer'):
@@ -321,7 +320,7 @@ class MailboxWidget(QWidget):
             finish(save=False)  # Click away = cancel
             original_focus_out(event)
         line_edit.focusOutEvent = custom_focus_out
-        
+
         # Handle Escape
         original_key = line_edit.keyPressEvent
         def custom_key(event):
@@ -335,20 +334,9 @@ class MailboxWidget(QWidget):
         """Global event filter to catch Escape key for the active editor."""
         if event.type() == QEvent.KeyPress and event.key() == Qt.Key_Escape:
             if obj == self.active_editor:
-                # Call the finish logic with save=False
-                # We need to reconstruct the logic or call a helper
-                # Let's just do the cancel logic directly here
                 obj.deleteLater()
-                # Find the label to show it
-                # The label is the sibling in the layout
                 row_layout = obj.parent().layout()
-                # The label is at index 1 (since we inserted line_edit at 1, label was there)
-                # Actually, we hid the label, so it's still in the layout at index 1?
-                # No, we hid it. It's still there.
-                label = row_layout.itemAt(1).widget() # This might be the line_edit if we aren't careful
-                # Let's just use the stored filename to find the row?
-                # Easier: The label is the widget we hid.
-                # Let's just iterate the layout to find the QLabel
+                label = row_layout.itemAt(1).widget()
                 for i in range(row_layout.count()):
                     w = row_layout.itemAt(i).widget()
                     if isinstance(w, QLabel):
@@ -361,51 +349,51 @@ class MailboxWidget(QWidget):
     def _save_edit(self, old_filename, folder_path, label, line_edit):
         """Saves the edited filename and renames the file on disk."""
         new_base = line_edit.text().strip()
-        
+
         if not new_base:
             # Empty name, cancel edit
             line_edit.hide()
             label.show()
             return
-        
+
         # Preserve the .pdf extension
         new_filename = new_base + ".pdf"
-        
+
         # Build full paths
         old_path = os.path.join(folder_path, old_filename)
         new_path = os.path.join(folder_path, new_filename)
-        
+
         # Check if new name already exists
         if os.path.exists(new_path) and new_path != old_path:
             logging.error(f"File already exists: {new_filename}")
             line_edit.hide()
             label.show()
             return
-        
+
         try:
             # Rename the file on disk
             os.rename(old_path, new_path)
-            
+
             # Update internal file list
-            if old_filename in self.files:
-                idx = self.files.index(old_filename)
-                self.files[idx] = new_filename
-            
+            if old_filename in self.globals.files:
+                idx = self.globals.files.index(old_filename)
+                self.globals.files[idx] = new_filename
+
             # Update the label text
             label.setText(new_base)
-            
+
             # Switch back to label view
             line_edit.hide()
             label.show()
-            
+
             logging.debug(f"Renamed: {old_filename} -> {new_filename}")
-            
+
             # Refresh the PDF viewer if this file is currently selected
             if hasattr(self.globals, 'selected_file') and self.globals.selected_file == old_filename:
                 self.globals.selected_file = new_filename
                 if hasattr(self.globals, 'pdf_viewer') and self.globals.pdf_viewer:
                     self.globals.pdf_viewer.load_pdf(new_path)
-            
+
         except Exception as e:
             logging.error(f"Failed to rename file: {e}")
             line_edit.hide()
