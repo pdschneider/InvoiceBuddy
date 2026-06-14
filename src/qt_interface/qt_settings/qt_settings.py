@@ -2,6 +2,9 @@
 from PySide6.QtWidgets import QWidget, QVBoxLayout, QLabel, QPushButton, QTabWidget
 from PySide6.QtCore import Qt
 from src.qt_interface.qt_settings.general_qt import create_general_settings_tab
+from src.qt_interface.qt_settings.qt_advanced import create_advanced_settings_tab
+from src.qt_interface.qt_settings.qt_paths import create_paths_settings_tab
+from src.qt_interface.qt_settings.qt_spreadsheet import create_spreadsheet_settings_tab
 from src.utils.save_qt import save_qt_settings
 
 def create_settings_panel(globals):
@@ -50,17 +53,20 @@ def create_settings_panel(globals):
         }
     """)
 
-    # Create General tab
+    # General tab
     general_tab = create_general_settings_tab(globals)
     tabs.addTab(general_tab, "General")
 
-    # Empty tabs for now
-    connections_tab = QWidget()
-    connections_tab.setStyleSheet("background-color: transparent;")
-    tabs.addTab(connections_tab, "Connections")
+    # Paths tab
+    paths_tab = create_paths_settings_tab(globals)
+    tabs.addTab(paths_tab, "Paths")
 
-    advanced_tab = QWidget()
-    advanced_tab.setStyleSheet("background-color: transparent;")
+    # Spreadsheet tab
+    spreadsheet_tab = create_spreadsheet_settings_tab(globals)
+    tabs.addTab(spreadsheet_tab, "Spreadsheet")
+
+    # Advanced tab
+    advanced_tab = create_advanced_settings_tab(globals)
     tabs.addTab(advanced_tab, "Advanced")
 
     layout.addWidget(tabs)

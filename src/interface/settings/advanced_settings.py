@@ -3,6 +3,7 @@ import customtkinter as ctk
 from src.utils.save_settings import save_all_settings
 from src.utils.load_settings import load_data_path
 from src.utils.factory_reset import total_factory_reset
+from src.managers.file_management import open_logs, open_config
 import src.utils.fonts as fonts
 from CTkToolTip import CTkToolTip
 from PySide6.QtWidgets import QMessageBox
@@ -62,26 +63,6 @@ def create_advanced_tab(globals, advanced_frame):
             ).grid(row=0, column=col, padx=5, sticky="w")
         col += 1
 
-    def open_logs():
-        """Opens the logs folder."""
-        if globals.os_name.startswith("Windows"):
-            logging.debug(f"Opening logs folder on Windows...")
-            os.startfile(load_data_path("cache", "logs"))
-        else:
-            logging.debug(f"Opening logs folder on Linux...")
-            subprocess.run(
-                ['xdg-open', load_data_path("cache", "logs")], check=True)
-
-    def open_config():
-        """Opens the settings folder."""
-        if globals.os_name.startswith("Windows"):
-            logging.debug(f"Opening settings folder on Windows...")
-            os.startfile(load_data_path("config"))
-        else:
-            logging.debug(f"Opening settings folder on Linux...")
-            subprocess.run(
-                ['xdg-open', load_data_path("config")], check=True)
-
     # Folders Frame
     folders_frame = ctk.CTkFrame(advanced_frame,
                               bg_color="transparent",
@@ -99,7 +80,7 @@ def create_advanced_tab(globals, advanced_frame):
     logs_button = ctk.CTkButton(folders_frame,
                                 text="Logs",
                                 width=20,
-                                command=lambda: open_logs())
+                                command=lambda: open_logs(globals))
     logs_button.pack(side="left", padx=(0, 12))
 
     ctk.CTkLabel(folders_frame,
@@ -113,7 +94,7 @@ def create_advanced_tab(globals, advanced_frame):
     open_config_button = ctk.CTkButton(folders_frame,
                                 text="Config",
                                 width=20,
-                                command=lambda: open_config())
+                                command=lambda: open_config(globals))
     open_config_button.pack(side="left", padx=(0, 12))
 
     # Deletion

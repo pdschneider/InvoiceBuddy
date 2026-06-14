@@ -119,6 +119,7 @@ This document lists every currently supported company with its **full official/l
 - Ulta Beauty, Inc.
 - Thai Go
 - Quality is our Recipe, LLC (Wendy's Restaurant)
+- Chick N Fries
 
 ## Miscellaneous / Technology & Services
 

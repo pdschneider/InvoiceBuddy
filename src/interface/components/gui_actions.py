@@ -31,7 +31,7 @@ def pdf_button(globals, companies=None, directory=None, file_list=None):
     if not globals.legacy_mode:
         for file in file_list:
             new_file_list.append(os.path.normpath(os.path.join(globals.inbox, file)))
-    file_list = new_file_list
+        file_list = new_file_list
 
     logging.debug(f"Attempting to auto-name files: {file_list}")
 
@@ -61,7 +61,8 @@ def pdf_button(globals, companies=None, directory=None, file_list=None):
         else:
             messagebox.showinfo("Complete", f"Auto-Name Complete. Updated {changes} file(s).")
 
-    globals.root.after(100, globals.update_file_counts)
+    if globals.legacy_mode:
+        globals.root.after(100, globals.update_file_counts)
 
 def parse_to_spreadsheet(globals, file_type, file_list=None):
     """

@@ -52,6 +52,10 @@ class Globals:
         self.window_checkbox = None
         self.printer_combo = None  # The combobox that stores the printer value
         self.legacy_checkbox = None
+        self.logging_level_box = None
+        self.inbox_entry_box = None
+        self.archive_entry_box = None
+        self.spreadsheet_toggle = None
 
         # PySide6 Inbox
         self.files = []  # ALL filenames without extensions in inbox
@@ -205,6 +209,7 @@ class Globals:
         self.beta = settings.get("beta", False)
         self.dynamic_window_size = settings.get("dynamic_window_size", True)
         self.legacy_mode = settings.get("legacy_mode", True)
+        self.use_google = settings.get("use_google", False)
 
         # Paths
         self.inbox = sources.get("inbox", "")

@@ -1,5 +1,5 @@
 Package: invoice-buddy
-Version: 0.2.5~beta
+Version: 0.2.5
 Architecture: amd64
 Depends: libxcb-cursor0
 Maintainer: Phillip Schneider <bugs@phillipplays.com>

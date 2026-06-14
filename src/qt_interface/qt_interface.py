@@ -10,8 +10,11 @@ from src.qt_interface.qt_preview import create_preview_pane
 from src.qt_interface.qt_components.qt_sidebar import create_sidebar, toggle_sidebar
 from src.qt_interface.qt_settings.qt_settings import create_settings_panel, toggle_settings_panel
 from src.qt_interface.qt_components.qt_mailbox import MailboxWidget
+from src.managers.file_management import open_workbook, open_directory, open_logs, open_config
 from src.utils.observers import setup_observer
+from src.interface.setup.setup_wizard import create_wizard
 import logging
+import webbrowser
 
 
 def create_qt_interface(globals):
@@ -39,19 +42,35 @@ def create_qt_interface(globals):
     main_layout.addWidget(title_bar)
     globals.title_bar = title_bar
 
-    # 5. POPULATE MENUS IN TITLE BAR
+    # Populate File Title Menu
     file_menu = title_bar.menu_bar.addMenu("File")
-    file_menu.addAction("Open Logs")
-    file_menu.addAction("Open Config")
+    open_inbox_Q = file_menu.addAction("Open Inbox...")
+    open_workbook_Q = file_menu.addAction("Open Workbook...")
+    open_logs_Q = file_menu.addAction("Open Logs...")
+    open_config_Q = file_menu.addAction("Open Config...")
+
+    # Attach Actions to File Buttons
+    open_inbox_Q.triggered.connect(lambda: open_directory(globals.inbox))
+    open_workbook_Q.triggered.connect(lambda: open_workbook(globals))
+    open_logs_Q.triggered.connect(lambda: open_logs(globals))
+    open_config_Q.triggered.connect(lambda: open_config(globals))
     
+    # Populate Data Title Menu
     data_menu = title_bar.menu_bar.addMenu("Data")
-    data_menu.addAction("Export / Import History")
-    data_menu.addAction("Export / Import Settings")
+    data_menu.addAction("Export / Import History (Coming Soon...)")
+    data_menu.addAction("Export / Import Settings (Coming Soon...)")
     
+    # Populate Help Title Menu
     help_menu = title_bar.menu_bar.addMenu("Help")
     help_menu.addAction("View Changelog")
-    help_menu.addAction("Open Wizard")
-    help_menu.addAction("View Github")
+    open_wizard_Q = help_menu.addAction("Open Wizard...")
+    view_github_Q = help_menu.addAction("Open Github...")
+    view_about_Q = help_menu.addAction("About")
+
+    # Attach Functions to Help Buttons
+    open_wizard_Q.triggered.connect(lambda: create_wizard(globals))
+    view_github_Q.triggered.connect(lambda: webbrowser.open(
+        url="https://github.com/pdschneider/InvoiceBuddy"))
 
     # 6. ADD YOUR EXISTING TOP BAR (Unchanged)
     top_bar = create_top_bar(globals)

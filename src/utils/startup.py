@@ -221,10 +221,15 @@ def setup_settings():
             logging.info(
                 f"Added missing or nonconforming 'dynamic_window_size' key to settings.json")
         if "legacy_mode" not in data or not isinstance(data["legacy_mode"], bool):
-            data["dynamic_window_size"] = True
+            data["legacy_mode"] = True
             changed = True
             logging.info(
                 f"Added missing or nonconforming 'legacy_mode' key to settings.json")
+        if "use_google" not in data or not isinstance(data["use_google"], bool):
+            data["use_google"] = False
+            changed = True
+            logging.info(
+                f"Added missing or nonconforming 'use_google' key to settings.json")
 
         # Check to make sure paths are valid
         if not os.path.isfile(data["history_path"]) and data["history_path"]:

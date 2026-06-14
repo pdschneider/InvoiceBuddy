@@ -7,6 +7,7 @@ from tkinter import filedialog
 from send2trash import send2trash
 from src.managers.history_manager import load_history, add_update_history
 from src.utils.save_settings import save_metadata
+from src.utils.load_settings import load_data_path
 from src.utils.toast import show_toast
 from PySide6.QtWidgets import QFileDialog
 from PySide6.QtWidgets import QMessageBox
@@ -383,3 +384,25 @@ def send_to_trash(globals, file_list=None):
         show_toast(globals,
                     f"Could not move any files to trash.",
                     _type="error")
+
+
+def open_logs(globals):
+    """Opens the logs folder."""
+    if globals.os_name.startswith("Windows"):
+        logging.debug(f"Opening logs folder on Windows...")
+        os.startfile(load_data_path("cache", "logs"))
+    else:
+        logging.debug(f"Opening logs folder on Linux...")
+        subprocess.run(
+            ['xdg-open', load_data_path("cache", "logs")], check=True)
+
+
+def open_config(globals):
+    """Opens the settings folder."""
+    if globals.os_name.startswith("Windows"):
+        logging.debug(f"Opening settings folder on Windows...")
+        os.startfile(load_data_path("config"))
+    else:
+        logging.debug(f"Opening settings folder on Linux...")
+        subprocess.run(
+            ['xdg-open', load_data_path("config")], check=True)

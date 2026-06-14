@@ -2,23 +2,29 @@
 
 All notable changes to **Invoice Buddy** will be located in this file.
 
-## [0.2.5-beta] - 2026-05-27
+## [0.2.5] - 2026-06-14
 
-This version of Invoice Buddy marks an important transition over to the new GUI framework.
+This version of Invoice Buddy marks an important transition over to the new GUI framework. Users can now switch between legacy mode and Qt mode to test the new app.
 
 ### Added
+- New companies added to database: Chick N Fries
 - Added togglable legacy mode
 - Added enter to spreadsheet functionality to new GUI
 - Added auto-name functionality to new GUI
 - Added print button functionality to new GUI
 - Added archive functionality to new GUI
 - Added more settings to new GUI
+- Added functional title bar buttons to new GUI
+- Added new setting for later Google Sheets implementation
 
 ### Changed
-- Further separated QT widgets from the legacy app
+- Further separated QT-compatible code from the legacy app
+- Updated dependencies
 
 ### Fixed
 - Fixed logging error in archive files function
+- Corrected broken auto-name feature in legacy mode
+- Got rid of leading comma causing many companies to be titled "Name"
 
 ## [0.2.4] - 2026-05-26
 
