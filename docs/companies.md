@@ -166,6 +166,7 @@ This document lists every currently supported company with its **full official/l
 - Wet Rabbit
 - Name.com
 - Great Clips, Inc.
+- Rocket Mortgage, LLC
 
 ---
 

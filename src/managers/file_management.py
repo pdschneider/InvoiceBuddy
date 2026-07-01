@@ -231,11 +231,12 @@ def archive_files(globals, file_list=None):
         return
 
     # Create list of full paths
-    new_file_list = []
     if not globals.legacy_mode:
-        for file in file_list:
-            new_file_list.append(os.path.normpath(os.path.join(globals.inbox, file)))
-    file_list = new_file_list
+        new_file_list = []
+        if not globals.legacy_mode:
+            for file in file_list:
+                new_file_list.append(os.path.normpath(os.path.join(globals.inbox, file)))
+        file_list = new_file_list
 
     logging.debug(f"Attempting to archive files: {file_list}")
 

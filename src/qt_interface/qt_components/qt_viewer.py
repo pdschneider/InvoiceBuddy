@@ -2,7 +2,7 @@
 from PySide6.QtWidgets import QWidget, QVBoxLayout
 from PySide6.QtPdf import QPdfDocument
 from PySide6.QtPdfWidgets import QPdfView
-from PySide6.QtCore import Qt
+from PySide6.QtCore import Qt, QBuffer, QByteArray
 import logging
 
 class NativePdfViewer(QWidget):
@@ -11,6 +11,10 @@ class NativePdfViewer(QWidget):
 
         self.doc = QPdfDocument(self)
         self.view = QPdfView(self)
+
+        # Removes the scroll bar to prevent crashing
+        self.view.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.view.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
 
         self.view.setDocument(self.doc)
         self.view.setMinimumSize(200, 200)
@@ -27,8 +31,14 @@ class NativePdfViewer(QWidget):
 
         logging.debug(f"Loading PDF: {file_path}")
 
-        # Start loading. DO NOT check status here. It is async.
-        self.doc.load(file_path)
+        # Load the file as a buffer
+        with open(file_path, 'rb') as f:
+            data = f.read()
+
+        self.buffer = QBuffer()
+        self.buffer.setData(QByteArray(data))
+        self.buffer.open(QBuffer.ReadOnly)
+        self.doc.load(self.buffer)
 
         # Set the mode immediately. Qt will apply it when the doc is ready.
         # Use MultiPage for scrolling through all pages.

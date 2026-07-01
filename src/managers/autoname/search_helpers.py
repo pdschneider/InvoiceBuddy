@@ -58,12 +58,13 @@ def extract_text_with_ocr(full_path):
         logging.warning(
             f"OCR not available for {full_path}. Skipping fallback.")
         return ""
+    kwargs = {}
+
     try:
         if os_name.startswith("Windows"):
             import pdf2image.pdf2image
             pdf2image.pdf2image.Popen = _popen_nowindow
             # Point to bundled popplar files
-            kwargs = {}
             base = os.path.dirname(os.path.abspath(__file__))
             pytesseract.pytesseract.tesseract_cmd = os.path.join(base, '..', '..', '..', 'bin', 'Tesseract', 'tesseract.exe')
             # Walk up to project root

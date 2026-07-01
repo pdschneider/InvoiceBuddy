@@ -2,6 +2,22 @@
 
 All notable changes to **Invoice Buddy** will be located in this file.
 
+## [0.2.6] - 2026-07-01
+
+This version of Invoice Buddy adds more features to the new GUI.
+
+### Added
+- Added companies: Rocket Mortgage, LLC
+
+### Changed
+- Updated dependencies
+
+### Fixed
+- Fixed issue where renaming files in the new GUI would fail while pdf is up in the preview pane
+- Fixed crash when preview pane is the exact size to fit the image
+- Fixed broken archive function
+- Fixed broken OCR on Linux
+
 ## [0.2.5] - 2026-06-14
 
 This version of Invoice Buddy marks an important transition over to the new GUI framework. Users can now switch between legacy mode and Qt mode to test the new app.
