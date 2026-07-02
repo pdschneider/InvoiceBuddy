@@ -4,7 +4,7 @@ All notable changes to **Invoice Buddy** will be located in this file.
 
 ## [0.2.6] - 2026-07-01
 
-This version of Invoice Buddy adds more features to the new GUI.
+This version of Invoice Buddy fixes various bugs introduced by the new GUI and adds one new company to the database.
 
 ### Added
 - Added companies: Rocket Mortgage, LLC
