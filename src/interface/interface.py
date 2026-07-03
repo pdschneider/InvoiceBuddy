@@ -1,4 +1,4 @@
-# Interface/interface.py
+# src/interface/interface.py
 import tkinter as tk
 import customtkinter as ctk
 from config import apply_theme

@@ -1,4 +1,4 @@
-# Managers/file_management.py
+# src/managers/file_management.py
 import logging
 import os
 import shutil
@@ -32,7 +32,7 @@ def count_files(directory, extension=None):
         return 0
 
 
-def browse_file(var, _type=None):
+def browse_file(globals, var, _type=None):
     """
     Open a file dialog to select a single file and set the variable.
 
@@ -45,11 +45,17 @@ def browse_file(var, _type=None):
         file_types = [("All files", "*.*"), ("CSV files", "*.csv")]
     else:
         file_types = [("All files", "*.*"), ("CSV files", "*.csv"), ("Excel files", "*.xlsx")]
-    file_path = filedialog.askopenfilename(
-        filetypes=file_types)
-    if file_path:
-        var.set(file_path)
-        logging.info(f"Selected file: {file_path}")
+    if globals.legacy_mode:
+        file_path = filedialog.askopenfilename(
+            filetypes=file_types)
+        if file_path:
+            var.set(file_path)
+            logging.info(f"Selected file: {file_path}")
+    else:
+        file_path, _ = QFileDialog.getOpenFileName(None, "Select File", "", "Excel Files (*.xlsx *.xlsm *.xlst *.xltm)")
+        if file_path:
+            var.setText(file_path)
+            logging.info(f"Selected file: {file_path}")
 
 
 def browse_directory(var):
@@ -65,21 +71,26 @@ def browse_directory(var):
         logging.info(f"Selected directory: {dir_path}")
 
 
-def open_workbook(globals):
+def open_workbook(globals, workbook_path=None):
     """
-    Opens the Excel workbook at the initiated file path.
-    
-        globals:        Global variables
+    Opens an Excel workbook at the specified file path.
+    Falls back to globals.workbook if no path is provided.
+
+        globals:            Global variables
+        workbook_path:      Path to the workbook file (optional)
     """
-    if os.path.isfile(globals.workbook):
+    if not workbook_path:
+        workbook_path = globals.workbook
+
+    if os.path.isfile(workbook_path):
         try:
             if globals.os_name.startswith("Windows"):
-                os.startfile(globals.workbook)
+                os.startfile(workbook_path)
             else:
-                subprocess.run(['xdg-open', globals.workbook], check=True)
+                subprocess.run(['xdg-open', workbook_path], check=True)
         except PermissionError as e:
             show_toast(globals, f"Permission Error. Is the workbook already open?", _type="error")
-            logging.error(f"Permission Error accessing {globals.workbook}: {e}")
+            logging.error(f"Permission Error accessing {workbook_path}: {e}")
             return
         except Exception as e:
             show_toast(globals, "Failed to open workbook", _type="error")
@@ -87,7 +98,7 @@ def open_workbook(globals):
             return
     else:
         show_toast(globals, f"Invalid workbook path", _type="error")
-        logging.error(f"Cannot open workbook. Invalid file path {globals.workbook}")
+        logging.error(f"Cannot open workbook. Invalid file path {workbook_path}")
         return
 
 
@@ -301,7 +312,6 @@ def archive_files(globals, file_list=None):
 
 def send_to_trash(globals, file_list=None):
     """Safely move selected files to the system trash."""
-    save_metadata(globals)
 
     # Show message if no files are selected
     if not file_list:
@@ -332,7 +342,7 @@ def send_to_trash(globals, file_list=None):
             QMessageBox.StandardButton.No)
 
         if reply == QMessageBox.StandardButton.No:
-            return
+            return False
 
         # Send files safely to trash
         for file_path in file_list:
@@ -354,7 +364,7 @@ def send_to_trash(globals, file_list=None):
             QMessageBox.StandardButton.No)
 
         if reply == QMessageBox.StandardButton.No:
-            return
+            return False
 
         # Delete files permanently
         for file_path in file_list:
@@ -385,6 +395,8 @@ def send_to_trash(globals, file_list=None):
         show_toast(globals,
                     f"Could not move any files to trash.",
                     _type="error")
+    
+    return True
 
 
 def open_logs(globals):

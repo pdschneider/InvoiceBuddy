@@ -1,4 +1,4 @@
-# Managers/data_processing.py
+# src/managers/data_processing.py
 import os
 import logging
 import msoffcrypto
@@ -7,6 +7,73 @@ from tkinter import simpledialog
 from openpyxl import load_workbook
 from src.managers.history_manager import load_history, add_update_history
 from src.utils.toast import show_toast
+
+
+def parse_sheet_qt(globals, sheet_name, file_list=None):
+    """
+    Qt-mode parser: writes filename data to a user-defined sheet.
+    Reads sheet config (workbook, starting row/col, column order) from sheet_data.
+    """
+    if not file_list:
+        show_toast(globals, "Please select one or more files to enter.")
+        return
+
+    sheet_config = None
+    for sheet in globals.sheet_data.get("sheets", []):
+        if sheet.get("name") == sheet_name:
+            sheet_config = sheet
+            break
+
+    if not sheet_config:
+        logging.error(f"Sheet '{sheet_name}' not found in sheet definitions.")
+        return
+
+    workbook_path = sheet_config.get("workbook", "")
+    if not os.path.isfile(workbook_path):
+        show_toast(globals, f"No valid workbook for sheet '{sheet_name}'.", _type="error")
+        return
+
+    wb = encryption_handler(globals)
+    if not wb:
+        return
+
+    try:
+        base_names = [os.path.basename(f) for f in file_list]
+        sheet = wb[sheet_config.get("sheet_name", sheet_name)]
+
+        starting_row = sheet_config.get("first_row", 3)
+        starting_column = sheet_config.get("first_column", 1)
+        column_order = sheet_config.get("column_order", ["Company", "Date", "Invoice #", ""])
+
+        columns_to_check = 5
+
+        while not all(
+            sheet.cell(row=starting_row, column=col).value is None
+            for col in range(starting_column, starting_column + columns_to_check)):
+            starting_row += 1
+
+        for full_file_name in base_names:
+            while not all(
+                sheet.cell(row=starting_row, column=col).value is None
+                for col in range(starting_column, starting_column + columns_to_check)):
+                starting_row += 1
+
+            base_name = os.path.splitext(full_file_name)[0]
+            portions = base_name.split()
+
+            for j, portion in enumerate(portions, start=starting_column):
+                sheet.cell(row=starting_row, column=j, value=portion.strip())
+
+            starting_row += 1
+
+        if os.access(workbook_path, os.W_OK):
+            wb.save(workbook_path)
+            logging.info(f"Saved {len(base_names)} entries to '{sheet_name}' in {workbook_path}")
+        else:
+            logging.warning(f"Permission denied to write to {workbook_path}")
+
+    except Exception as e:
+        logging.error(f"Qt sheet parsing error for '{sheet_name}': {e}")
 
 
 def paths_check(globals):

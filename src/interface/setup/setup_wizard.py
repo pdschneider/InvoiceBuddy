@@ -109,7 +109,7 @@ def create_wizard(globals):
 
     workbook_browse = QPushButton()
     workbook_browse.setText("Browse")
-    workbook_browse.clicked.connect(lambda: browse_file(workbook_entry, _type="workbook"))
+    workbook_browse.clicked.connect(lambda: browse_file(globals, workbook_entry, _type="workbook"))
     workbook_entry_layout.addWidget(workbook_browse)
     workbook_browse.setFixedWidth(150)
 

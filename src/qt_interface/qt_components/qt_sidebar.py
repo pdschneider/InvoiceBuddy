@@ -67,6 +67,8 @@ def create_sidebar(globals):
         item.setData(Qt.UserRole, folder.lower()) # Store key
         nav_list.addItem(item)
 
+    nav_list.itemClicked.connect(lambda item: on_folder_click(item, globals))
+
     layout.addWidget(nav_list, stretch=1)
 
     # Store references
@@ -76,12 +78,39 @@ def create_sidebar(globals):
 
     return sidebar
 
+
 def toggle_sidebar(globals, sidebar):
     """Toggles sidebar visibility (optional for this layout, but good to have)."""
-    # Implementation similar to your Pearl code, but maybe just hide/show
     if globals.sidebar_is_open:
         sidebar.hide()
         globals.sidebar_is_open = False
     else:
         sidebar.show()
         globals.sidebar_is_open = True
+
+
+def on_folder_click(item, globals):
+    """Handles clicking a folder in the sidebar navigation."""
+    folder_key = item.data(Qt.UserRole)
+
+    if folder_key == 'inbox':
+        globals.current_folder = globals.inbox
+    elif folder_key == 'archive':
+        globals.current_folder = globals.archive
+    elif folder_key == 'budget':
+        return  # Not implemented yet
+    elif folder_key == 'trash':
+        return  # Not implemented yet
+    else:
+        return
+
+    # Clear the preview pane
+    if hasattr(globals, 'preview_meta') and globals.preview_meta:
+        globals.preview_meta.setText("Select a file to view details")
+    if hasattr(globals, 'pdf_viewer') and globals.pdf_viewer:
+        globals.pdf_viewer.doc.close()
+        globals.pdf_viewer.view.setDocument(globals.pdf_viewer.doc)
+
+    # Refresh the mailbox
+    if hasattr(globals, 'mailbox') and globals.mailbox:
+        globals.mailbox.refresh_files(globals.current_folder)

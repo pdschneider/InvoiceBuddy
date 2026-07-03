@@ -28,7 +28,7 @@ def load_data_path(direct=None, filename=None, default=False):
         "assets/settings-2.png", "assets/printer-1.png", "assets/printer-2.png", "assets/window-size.png",
         "assets/notification-1.png", "assets/notification-2.png", "assets/notification-3.png",
         "themes/cosmic_sky.json", "themes/pastel_green.json", "themes/trojan_red.json",
-        "themes/dark_cloud.json", "themes/soft_light.json"
+        "themes/dark_cloud.json", "themes/soft_light.json", "sheets.json"
     ]
 
     # ==================== DETECT RUN MODE ====================
@@ -254,3 +254,17 @@ def load_settings():
     except json.JSONDecodeError as e:
         logging.error(f"Error decoding settings.json: {e}")
         return {}
+
+
+def load_sheets():
+    """Load sheet definitions from sheets.json."""
+    try:
+        file_path = os.path.normpath(load_data_path("config", "sheets.json"))
+        with open(file_path, 'r') as f:
+            return json.load(f)
+    except FileNotFoundError:
+        logging.error("Error: sheets.json not found in data folder")
+        return []
+    except json.JSONDecodeError as e:
+        logging.error(f"Error decoding sheets.json: {e}")
+        return []

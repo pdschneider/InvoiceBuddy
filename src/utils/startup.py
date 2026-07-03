@@ -225,11 +225,6 @@ def setup_settings():
             changed = True
             logging.info(
                 f"Added missing or nonconforming 'legacy_mode' key to settings.json")
-        if "use_google" not in data or not isinstance(data["use_google"], bool):
-            data["use_google"] = False
-            changed = True
-            logging.info(
-                f"Added missing or nonconforming 'use_google' key to settings.json")
 
         # Check to make sure paths are valid
         if not os.path.isfile(data["history_path"]) and data["history_path"]:

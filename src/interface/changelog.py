@@ -1,4 +1,4 @@
-# Interface/Windows/changelog.py
+# src/interface/changelog.py
 import logging
 import customtkinter as ctk
 import src.utils.fonts as fonts

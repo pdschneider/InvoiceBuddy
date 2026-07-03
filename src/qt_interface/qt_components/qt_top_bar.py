@@ -9,6 +9,7 @@ def create_top_bar(globals):
     """Creates the top navigation bar for Invoice Buddy."""
     top_bar_widget = QWidget()
     top_bar_widget.setFixedHeight(50)
+    top_bar_widget.setStyleSheet("background-color: #333339;")
 
     top_bar_layout = QHBoxLayout(top_bar_widget)
     top_bar_layout.setContentsMargins(10, 5, 10, 5)

@@ -3,17 +3,24 @@ import os
 import logging
 from tkinter import messagebox
 from src.managers.autoname.pdfsearch import apply_auto_naming
-from src.managers.data_processing import parse_invoices, parse_credit_cards
+from src.managers.data_processing import (parse_invoices, parse_credit_cards,
+                                          parse_sheet_qt)
 from src.managers.file_management import archive_files
 from src.managers.import_export import export_history, import_history
 from src.utils.save_settings import save_metadata
+from src.utils.save_qt import save_metadata as save_qt_metadata
 from src.utils.toast import show_toast
 from PySide6.QtWidgets import QMessageBox
 
 
 def pdf_button(globals, companies=None, directory=None, file_list=None):
     """One-click auto-naming — all logic in apply_auto_naming."""
-    save_metadata(globals)
+    # Save metadata first
+    if globals.legacy_mode:
+        save_metadata(globals)
+    else:
+        save_qt_metadata(globals)
+
     if not file_list:
         if not globals.legacy_mode:
             QMessageBox.information(
@@ -72,7 +79,12 @@ def parse_to_spreadsheet(globals, file_type, file_list=None):
         • globals.history_tree (for UI refresh)
         • optional file_list
     """
-    save_metadata(globals)
+    # Save metadata first
+    if globals.legacy_mode:
+        save_metadata(globals)
+    else:
+        save_qt_metadata(globals)
+
     parsers = {
         "Invoices":     parse_invoices,
         "Credit Cards": parse_credit_cards,}
@@ -93,51 +105,75 @@ def smart_spreadsheet_button(globals, file_list=None):
       - "Card"     → parse_credit_cards
       - "Purchase" → skipped (or warn)
     """
-    save_metadata(globals)
+    # Save metadata first
+    if globals.legacy_mode:
+        save_metadata(globals)
+    else:
+        save_qt_metadata(globals)
 
     if not file_list:
         show_toast(globals, "Please select one or more files to enter.")
         return
 
-    # Split files by type
-    invoices = []
-    cards = []
-    purchases = []
-    unknown = []
+    if globals.legacy_mode:
+        # Split files by type
+        invoices = []
+        cards = []
+        purchases = []
+        unknown = []
 
-    for full_path in file_list:
-        filename = os.path.basename(full_path)
-        file_type = globals.file_identity.get(filename, "Invoice")  # default to Invoice if untagged
+        for full_path in file_list:
+            filename = os.path.basename(full_path)
+            file_type = globals.file_identity.get(filename, "Invoice")  # default to Invoice if untagged
 
-        if file_type == "Invoice":
-            invoices.append(full_path)
-        elif file_type == "Card":
-            cards.append(full_path)
-        elif file_type == "Purchase":
-            purchases.append(full_path)
+            if file_type == "Invoice":
+                invoices.append(full_path)
+            elif file_type == "Card":
+                cards.append(full_path)
+            elif file_type == "Purchase":
+                purchases.append(full_path)
+            else:
+                unknown.append(full_path)
+
+        # Run the appropriate parsers
+        if invoices:
+            parse_invoices(globals, globals.history_tree, invoices)
+        if cards:
+            parse_credit_cards(globals, globals.history_tree, cards)
+
+        # Feedback
+        total = len(file_list)
+        processed = len(invoices) + len(cards)
+        skipped = len(purchases) + len(unknown)
+
+        if skipped == 0 and (os.path.isfile(globals.workbook) or os.path.isfile(globals.workbook_var.get().strip())):
+            show_toast(globals, f"Entered {processed} files into the spreadsheet.")
+        elif skipped != 0 and (os.path.isfile(globals.workbook) or os.path.isfile(globals.workbook_var.get().strip())):
+            show_toast(globals,
+                f"Entered {processed} files.\n"
+                f"Skipped {skipped} files (tagged as Purchase or unknown).")
         else:
-            unknown.append(full_path)
-
-    # Run the appropriate parsers
-    if invoices:
-        parse_invoices(globals, globals.history_tree, invoices)
-    if cards:
-        parse_credit_cards(globals, globals.history_tree, cards)
-
-    # Feedback
-    total = len(file_list)
-    processed = len(invoices) + len(cards)
-    skipped = len(purchases) + len(unknown)
-
-    if skipped == 0 and (os.path.isfile(globals.workbook) or os.path.isfile(globals.workbook_var.get().strip())):
-        show_toast(globals, f"Entered {processed} files into the spreadsheet.")
-    elif skipped != 0 and (os.path.isfile(globals.workbook) or os.path.isfile(globals.workbook_var.get().strip())):
-        show_toast(globals,
-            f"Entered {processed} files.\n"
-            f"Skipped {skipped} files (tagged as Purchase or unknown).")
+            show_toast(globals, f"No valid workbook path. Skipping entering data.", _type="error")
+            logging.warning(f"No valid workbook path. Skipping entering data.")
     else:
-        show_toast(globals, f"No valid workbook path. Skipping entering data.", _type="error")
-        logging.warning(f"No valid workbook path. Skipping entering data.")
+        # Qt: group files by sheet name
+        sheet_groups = {}
+
+        for full_path in file_list:
+            filename = os.path.basename(full_path)
+            sheet_name = globals.file_identity.get(filename, "")
+            if not sheet_name:
+                sheets = globals.sheet_data.get("sheets", [])
+                sheet_name = sheets[0].get("name", "Sheet") if sheets else "Sheet"
+            if sheet_name not in sheet_groups:
+                sheet_groups[sheet_name] = []
+            sheet_groups[sheet_name].append(full_path)
+
+        logging.info(f"Qt dispatch groups: {sheet_groups}")
+
+        # Dispatch to parse_sheet_qt for each sheet
+        for sheet_name, files in sheet_groups.items():
+            parse_sheet_qt(globals, sheet_name, files)
 
 def invoice_button(globals, file_list=None):
     """Initiates the parse_invoices function to enter invoice data to the spreadsheet."""
@@ -149,7 +185,11 @@ def credit_button(globals, file_list=None):
 
 def move_button(globals):
     """Initiates archive_files and moves the files associated with selected treeview rows to their destination folders."""
-    save_metadata(globals)
+    # Save metadata first
+    if globals.legacy_mode:
+        save_metadata(globals)
+    else:
+        save_qt_metadata(globals)
     selected_items = globals.history_tree.selection()
     if not selected_items:
         show_toast(globals, "No files selected to move.")
@@ -175,10 +215,18 @@ def move_button(globals):
 
 def export_button(globals):
     """Initiates export_history to export the current history log to a chosen location."""
-    save_metadata(globals)
+    # Save metadata first
+    if globals.legacy_mode:
+        save_metadata(globals)
+    else:
+        save_qt_metadata(globals)
     export_history(globals.history_tree)
 
 def import_button(globals):
     """Initiates import_history and imports a previously exported log into the History tab's treeview."""
-    save_metadata(globals)
+    # Save metadata first
+    if globals.legacy_mode:
+        save_metadata(globals)
+    else:
+        save_qt_metadata(globals)
     import_history(globals.history_tree)

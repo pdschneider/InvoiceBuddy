@@ -69,16 +69,20 @@ def apply_auto_naming(globals, directory, file_list=None):
 
         try:
             reader = PdfReader(full_path)
-            if reader.metadata and "/Identity" in reader.metadata:
-                identity = reader.metadata["/Identity"]
-                logging.info(
-                    f"Identity read from metadata for {filename}: {identity}")
-            else:
-                logging.debug(
-                    f"No /Identity metadata found for {filename}, using default 'Invoice'")
+            if reader.metadata:
+                if globals.legacy_mode:
+                    if "/Identity" in reader.metadata:
+                        identity = reader.metadata["/Identity"]
+                        logging.info(
+                            f"Identity read from metadata for {filename}: {identity}")
+                else:
+                    if "/Sheet" in reader.metadata:
+                        identity = reader.metadata["/Sheet"]
+                        logging.info(
+                            f"Sheet read from metadata for {filename}: {identity}")
         except Exception as e:
             logging.warning(
-                f"Could not read /Identity from {filename}: {e}, using default 'Invoice'")
+                f"Could not read metadata from {filename}: {e}, using default")
 
         # Pick apart base name from filename
         base_name = os.path.splitext(filename)[0]
@@ -188,7 +192,15 @@ def apply_auto_naming(globals, directory, file_list=None):
             normalized_texts=normalized_texts)
 
         # Get user-defined field order based on the file's Identity
-        order = get_field_order(globals, identity, filename)
+        if globals.legacy_mode:
+            order = get_field_order(globals, identity, filename)
+        else:
+            order = ["", "", "", ""]
+            sheets = globals.sheet_data.get("sheets", [])
+            for s in sheets:
+                if s.get("name") == identity:
+                    order = s.get("column_order", ["Company", "Date", "Invoice #", ""])
+                    break
 
         # Map field names to their extracted values (only if found)
         available = {}

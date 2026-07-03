@@ -25,7 +25,7 @@ def print_selected_files(globals, filenames=None):
     new_file_list = []
     if not globals.legacy_mode:
         for file in filenames:
-            new_file_list.append(os.path.normpath(os.path.join(globals.inbox, file)))
+            new_file_list.append(os.path.normpath(os.path.join(globals.current_folder, file)))
     filenames = new_file_list
 
     logging.debug(f"Attempting to print files: {filenames}")

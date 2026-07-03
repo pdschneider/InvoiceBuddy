@@ -1,4 +1,4 @@
-# Utils/save_settings.py
+# src/utils/save_settings.py
 import logging
 import json
 import os
@@ -151,7 +151,8 @@ def save_all_settings(globals, reject_toast=False, reject_metadata=False):
     logging.root.setLevel(getattr(logging, settings["logging_level"]))
 
     # Apply new theme
-    apply_theme(current_active_theme)
+    if globals.legacy_mode:
+        apply_theme(current_active_theme)
 
     load_history(globals.history_tree)
 

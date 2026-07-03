@@ -44,7 +44,7 @@ def create_onboarding_page(globals, onboarding_page):
 
     # Helper Functions
     def on_browse_workbook():
-        browse_file(globals.workbook_var, _type="workbook")
+        browse_file(globals, globals.workbook_var, _type="workbook")
 
     def on_browse_inbox():
         browse_directory(globals.inbox_dir_var)

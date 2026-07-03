@@ -14,7 +14,8 @@ from src.utils.load_settings import (load_settings,
                                  load_data_path,
                                  load_folder_map,
                                  load_paths,
-                                 load_spreadsheet_specs)
+                                 load_spreadsheet_specs,
+                                 load_sheets)
 
 
 # Globals Class
@@ -56,6 +57,7 @@ class Globals:
         self.inbox_entry_box = None
         self.archive_entry_box = None
         self.spreadsheet_toggle = None
+        self.dim_overlay = None
 
         # PySide6 Inbox
         self.files = []  # ALL filenames without extensions in inbox
@@ -195,6 +197,7 @@ class Globals:
         sources, buddies = load_paths()
         spreadsheet_specs = load_spreadsheet_specs()
         self.folder_map, self.oneoffs_folder = load_folder_map()
+        self.sheet_data = load_sheets()
 
         # Settings
         self.logging_level = settings.get("logging_level", "INFO")
@@ -209,7 +212,6 @@ class Globals:
         self.beta = settings.get("beta", False)
         self.dynamic_window_size = settings.get("dynamic_window_size", True)
         self.legacy_mode = settings.get("legacy_mode", True)
-        self.use_google = settings.get("use_google", False)
 
         # Paths
         self.inbox = sources.get("inbox", "")
@@ -244,6 +246,9 @@ class Globals:
         self.po_component_b = spreadsheet_specs.get("po_component_b", "Date")
         self.po_component_c = spreadsheet_specs.get("po_component_c", "Invoice #")
         self.po_component_d = spreadsheet_specs.get("po_component_d", "")
+
+        # Variables not stored directly in a file
+        self.current_folder = self.inbox
 
 
 def apply_theme(name: str) -> None:

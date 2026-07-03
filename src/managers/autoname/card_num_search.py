@@ -106,7 +106,7 @@ def card_number_search(directory=None, file_list=None, normalized_texts=None):
 
             if card_num:
                 logging.info(
-                    f"Final card number for {filename}: {card_num} from pattern: {matched_pattern}")
+                    f"Final card number for {filename} matched from pattern: {matched_pattern}")
             else:
                 logging.info(
                     f"No valid card number found for {filename} - checked all patterns")

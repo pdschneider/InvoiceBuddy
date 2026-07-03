@@ -167,11 +167,12 @@ This document lists every currently supported company with its **full official/l
 - Name.com
 - Great Clips, Inc.
 - Rocket Mortgage, LLC
+- QFC (Quality Food Centers)
 
 ---
 
-**Last updated**: April 2026  
+**Last updated**: July 2026  
 **Maintained by**: Phillip Schneider
 
 **Missing a company?**  
-Open a [GitHub](https://github.com/pdschneider/InvoiceBuddy) issue and attach a sample invoice (with any personal or financial information redacted).
+Open a [GitHub](https://github.com/pdschneider/InvoiceBuddy) issue and attach a sample invoice (with any personal information redacted).

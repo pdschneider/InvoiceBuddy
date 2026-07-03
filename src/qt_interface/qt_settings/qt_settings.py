@@ -12,7 +12,7 @@ def create_settings_panel(globals):
 
     # Main container
     settings_panel = QWidget(globals.window)
-    settings_panel.setFixedSize(650, 550)
+    settings_panel.setMinimumSize(650, 550)
     settings_panel.setStyleSheet("""
         background-color: rgb(43, 43, 43);
         border-radius: 10px;
@@ -104,14 +104,27 @@ def toggle_settings_panel(globals):
     """Shows or hides the settings panel."""
     if globals.settings_panel.isVisible():
         globals.settings_panel.hide()
+        globals.dim_overlay.hide()
     else:
+        # Hide any changelog panels currently open
+        if hasattr(globals, 'changelog_panel') and globals.changelog_panel.isVisible():
+            globals.changelog_panel.hide()
+
+        globals.dim_overlay.resize(globals.window.width(), globals.window.height() - 35)
+        globals.dim_overlay.move(0, 35)
+        globals.dim_overlay.show()
+        globals.dim_overlay.raise_()
+
+        # Dynamic size: 85% of window, but never below minimum (650x550)
         parent_w = globals.window.width()
         parent_h = globals.window.height()
-        panel_w = globals.settings_panel.width()
-        panel_h = globals.settings_panel.height()
+        panel_w = max(650, int(parent_w * 0.85))
+        panel_h = max(550, int(parent_h * 0.85))
+        globals.settings_panel.resize(panel_w, panel_h)
 
         x = (parent_w - panel_w) // 2
         y = (parent_h - panel_h) // 2
 
         globals.settings_panel.move(x, y)
         globals.settings_panel.show()
+        globals.settings_panel.raise_()

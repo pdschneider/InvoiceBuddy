@@ -2,6 +2,29 @@
 
 All notable changes to **Invoice Buddy** will be located in this file.
 
+## [0.2.7-beta] - 2026-07-07
+
+This version of Invoice Buddy 
+
+### Added
+- Added new companies: QFC
+- Added 'Changelog' panel accessible from the title bar under 'Help' in the new GUI
+- Added 'About' panel accessible from the title bar under 'Help' in the new GUI
+- Added spreadsheet data to Qt GUI settings (for later implementation)
+- Added pills to the Qt GUI to indicate & cycle through sheets for each invoice (in later implementation)
+- Delete button moved in new GUI to above the mailbox pane only when something is selected
+- Print button moved to new contextual above mailbox pane
+- New button added above mailbox pane for bulk sheet naming
+- Entering data to spreadsheet now works with new Qt GUI data formats when in new GUI mode
+- Auto-naming now uses Gt-GUI specific sheet names
+
+### Changed
+- Various UI improvements
+
+### Fixed
+- Stopped app from trying to apply CTK theme after switching to the Qt GUI
+- Fixed glitchy toast from opening second window in Qt GUI
+
 ## [0.2.6] - 2026-07-01
 
 This version of Invoice Buddy fixes various bugs introduced by the new GUI and adds one new company to the database.
@@ -15,8 +38,11 @@ This version of Invoice Buddy fixes various bugs introduced by the new GUI and a
 ### Fixed
 - Fixed issue where renaming files in the new GUI would fail while pdf is up in the preview pane
 - Fixed crash when preview pane is the exact size to fit the image
-- Fixed broken archive function
+- Fixed broken legacy archive function
 - Fixed broken OCR on Linux
+
+### Security
+- Fixed pypdf-related security vulnerability by updating to the most recent version
 
 ## [0.2.5] - 2026-06-14
 

@@ -10,6 +10,5 @@
     "github_check": false,
     "beta": false,
     "dynamic_window_size": true,
-    "legacy_mode": true,
-    "use_google": false
+    "legacy_mode": true
 }

@@ -1,4 +1,4 @@
-# src/qt_interface/qt_settings/qt_advanced.py
+# src/qt_interface/qt_settings/qt_paths.py
 from PySide6.QtWidgets import (QWidget, QVBoxLayout, QLabel,
                                QCheckBox, QComboBox, QHBoxLayout,
                                QPushButton, QLineEdit)

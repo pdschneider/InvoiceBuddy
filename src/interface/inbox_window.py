@@ -1,4 +1,4 @@
-# Interface/Windows/inbox_window.py
+# src/interface/inbox_window.py
 import customtkinter as ctk
 from PySide6.QtWidgets import QMessageBox
 from src.interface.components.gui_actions import (pdf_button)
