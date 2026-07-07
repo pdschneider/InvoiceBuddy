@@ -168,6 +168,7 @@ This document lists every currently supported company with its **full official/l
 - Great Clips, Inc.
 - Rocket Mortgage, LLC
 - QFC (Quality Food Centers)
+- IdentoGo by IDEMIA
 
 ---
 

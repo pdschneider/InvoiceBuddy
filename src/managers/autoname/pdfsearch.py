@@ -71,18 +71,36 @@ def apply_auto_naming(globals, directory, file_list=None):
             reader = PdfReader(full_path)
             if reader.metadata:
                 if globals.legacy_mode:
+                    # Legacy: check /Identity first
                     if "/Identity" in reader.metadata:
-                        identity = reader.metadata["/Identity"]
-                        logging.info(
-                            f"Identity read from metadata for {filename}: {identity}")
+                        val = str(reader.metadata["/Identity"])
+                        if val in ["Invoice", "Card", "Purchase"]:
+                            identity = val
+                        logging.info(f"Identity read from metadata for {filename}: {identity}")
+                    else:
+                        # Fallback to /Sheet, try to map it
+                        if "/Sheet" in reader.metadata:
+                            sheet_val = str(reader.metadata["/Sheet"])
+                            # Map known sheet names to identity types
+                            mapping = {
+                                "Invoices": "Invoice",
+                                "Credit Cards": "Card",
+                                "Income": "Invoice",
+                                "Expenses": "Card"
+                            }
+                            if sheet_val in mapping:
+                                identity = mapping[sheet_val]
+                            else:
+                                identity = "Invoice"  # Unknown sheet, default to Invoice
+                            logging.info(f"Sheet fallback for {filename}: {sheet_val} → {identity}")
+                        else:
+                            logging.debug(f"No metadata found for {filename}, using default 'Invoice'")
                 else:
                     if "/Sheet" in reader.metadata:
                         identity = reader.metadata["/Sheet"]
-                        logging.info(
-                            f"Sheet read from metadata for {filename}: {identity}")
+                        logging.info(f"Sheet read from metadata for {filename}: {identity}")
         except Exception as e:
-            logging.warning(
-                f"Could not read metadata from {filename}: {e}, using default")
+            logging.warning(f"Could not read metadata from {filename}: {e}, using default")
 
         # Pick apart base name from filename
         base_name = os.path.splitext(filename)[0]

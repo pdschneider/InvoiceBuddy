@@ -282,7 +282,7 @@ def save_folder_map(globals):
 
 
 def save_metadata(globals):
-    # Save file identities to PDF metadata
+    """Save file identities to PDF metadata."""
     if hasattr(globals, "file_identity") and globals.file_identity:
         inbox_dir = globals.sources.get("inbox", "")
         if os.path.isdir(inbox_dir):

@@ -1,4 +1,4 @@
-# Interface/Components/treeview.py
+# src/interface/components/treeview.py
 import os
 import logging
 from pypdf import PdfReader
@@ -131,18 +131,14 @@ class Treeview:
 
     def _load_identity(self, filepath):
         """Read the Identity metadata from a PDF using pypdf.
-        Returns 'Invoice' if missing."""
+        Returns 'Invoice' if missing or invalid."""
+        valid_types = ["Invoice", "Card", "Purchase"]
         try:
             reader = PdfReader(filepath)
             if reader.metadata:
-                # Try our custom field first
                 identity = reader.metadata.get("/Identity")
-                if identity:
+                if identity and str(identity) in valid_types:
                     return str(identity)
-                # Fallback to Subject if we used that
-                subject = reader.metadata.get("/Subject")
-                if subject:
-                    return str(subject)
             return "Invoice"  # Default
         except Exception as e:
             logging.debug(

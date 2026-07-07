@@ -2,12 +2,12 @@
 
 All notable changes to **Invoice Buddy** will be located in this file.
 
-## [0.2.7-beta] - 2026-07-07
+## [0.2.7] - 2026-07-07
 
-This version of Invoice Buddy 
+This version of Invoice Buddy adds new functionality to the new GUI - modular sheet names, contextual buttons, bulk labeling, and more!
 
 ### Added
-- Added new companies: QFC
+- Added new companies: QFC, IdentoGo by IDEMIA
 - Added 'Changelog' panel accessible from the title bar under 'Help' in the new GUI
 - Added 'About' panel accessible from the title bar under 'Help' in the new GUI
 - Added spreadsheet data to Qt GUI settings (for later implementation)
@@ -24,6 +24,7 @@ This version of Invoice Buddy
 ### Fixed
 - Stopped app from trying to apply CTK theme after switching to the Qt GUI
 - Fixed glitchy toast from opening second window in Qt GUI
+- Fixed legacy mode bug where sheets with non-conforming identities were not entered to spreadsheet
 
 ## [0.2.6] - 2026-07-01
 
