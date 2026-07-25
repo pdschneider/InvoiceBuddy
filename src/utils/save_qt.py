@@ -80,6 +80,13 @@ def save_qt_settings(globals):
     except Exception as e:
         logging.error(f"Failed to save settings: {e}")
 
+    # Clear text boxes and update placeholders to show saved values
+    globals.inbox_entry_box.clear()
+    globals.inbox_entry_box.setPlaceholderText(globals.inbox)
+
+    globals.archive_entry_box.clear()
+    globals.archive_entry_box.setPlaceholderText(globals.archive)
+
     # Save sheet definitions
     save_sheets(globals)
 

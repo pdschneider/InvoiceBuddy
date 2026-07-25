@@ -73,6 +73,7 @@ This document lists every currently supported company with its **full official/l
 - SnoPUD (Snohomish County Public Utility District)
 - Washington Department of Labor & Industries (L&I)
 - Washington State Department of Transportation (WSDOT)
+- Washington State Department of Ecology (WADOE)
 - Waste Management, Inc.
 - Washington Dept of Licensing
 - Snohomish County Treasurer
@@ -84,6 +85,7 @@ This document lists every currently supported company with its **full official/l
 - Pioneer Gas (Sinclair)
 - Chevron Corporation
 - Exxon Mobil Corporation
+- Pilot Travel Centers LLC
 
 ## Retail, Consumer & Other Brands
 
@@ -120,6 +122,10 @@ This document lists every currently supported company with its **full official/l
 - Thai Go
 - Quality is our Recipe, LLC (Wendy's Restaurant)
 - Chick N Fries
+- Whidbey Coffee
+- CFA Properties, Inc. (Chick-fil-A)
+- Under Armour, Inc.
+- TJ Maxx
 
 ## Miscellaneous / Technology & Services
 
@@ -169,6 +175,8 @@ This document lists every currently supported company with its **full official/l
 - Rocket Mortgage, LLC
 - QFC (Quality Food Centers)
 - IdentoGo by IDEMIA
+- Desktronic Trading US, Inc
+- Jiffy Lube International, Inc.
 
 ---
 

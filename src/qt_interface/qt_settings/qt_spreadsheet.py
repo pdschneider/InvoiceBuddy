@@ -3,7 +3,8 @@ from src.managers.file_management import browse_file
 from PySide6.QtWidgets import (QWidget, QVBoxLayout, QLabel, QSlider,
                                QHBoxLayout, QPushButton, QLineEdit,
                                QColorDialog, QMessageBox, QScrollArea,
-                               QSpinBox, QComboBox, QFileDialog)
+                               QSpinBox, QComboBox, QFileDialog,
+                               QFrame)
 from PySide6.QtCore import Qt, QSize
 from PySide6.QtGui import QColor
 import logging
@@ -104,6 +105,193 @@ def populate_sheets_list(globals):
         sheet.setdefault("workbook", "")
         row = create_sheet_row(globals, idx, sheet)
         layout.addWidget(row)
+
+
+class WorkbookSourceDialog(QWidget):
+    """Dialog to choose between Local Spreadsheet or Google Sheets."""
+
+    def __init__(self, sheet_index, on_local_click, on_google_click, parent=None):
+        super().__init__(parent)
+        self.sheet_index = sheet_index
+        self.on_local_click = on_local_click
+        self.on_google_click = on_google_click
+
+        # Window setup (popup style like AssignSheetDialog)
+        self.setWindowFlags(Qt.Popup | Qt.FramelessWindowHint)
+        self.setAttribute(Qt.WA_TranslucentBackground)
+        self.setFixedWidth(200)
+        main_layout = QVBoxLayout(self)
+        main_layout.setContentsMargins(0, 0, 0, 0)
+
+        # Container with background
+        container = QFrame()
+        container.setStyleSheet("""
+            QFrame {
+                background-color: #2d2d30;
+                border: 1px solid #444;
+                border-radius: 8px;
+            }
+        """)
+
+        layout = QVBoxLayout(container)
+        layout.setContentsMargins(12, 12, 12, 12)
+        layout.setSpacing(8)
+
+        # Title
+        title = QLabel("Select Source")
+        title.setStyleSheet("color: white; font-size: 13px; font-weight: bold; margin-bottom: 4px;")
+        layout.addWidget(title)
+
+        # Local Spreadsheet button
+        local_btn = QPushButton("Local Spreadsheet")
+        local_btn.setFixedHeight(36)
+        local_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #3498db; color: white; border: none;
+                border-radius: 4px; font-size: 13px;
+            }
+            QPushButton:hover { background-color: #2980b9; }
+        """)
+        local_btn.clicked.connect(lambda: self._handle_local())
+        layout.addWidget(local_btn)
+
+        # Google Sheets button
+        google_btn = QPushButton("Google Sheets")
+        google_btn.setFixedHeight(36)
+        google_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #2ecc71; color: white; border: none;
+                border-radius: 4px; font-size: 13px;
+            }
+            QPushButton:hover { background-color: #27ae60; }
+        """)
+        google_btn.clicked.connect(lambda: self._handle_google())
+        layout.addWidget(google_btn)
+
+        layout.addStretch()
+        main_layout.addWidget(container)
+
+        self.main_container = container
+
+    def _handle_local(self):
+        """Call the local spreadsheet handler."""
+        if self.on_local_click:
+            self.on_local_click(self.sheet_index)
+        self.close()
+
+    def _handle_google(self):
+        """Call the google sheets handler."""
+        if self.on_google_click:
+            self.on_google_click(self.sheet_index)
+        self.close()
+
+    def mousePressEvent(self, event):
+        """Close dialog if clicked outside the container."""
+        pos = event.pos()
+        if not self.main_container.geometry().contains(pos):
+            self.close()
+
+
+class GoogleSheetsUrlDialog(QWidget):
+    """Dialog for entering Google Sheets URL."""
+
+    def __init__(self, sheet_index, on_save_callback, parent=None):
+        super().__init__(parent)
+        self.sheet_index = sheet_index
+        self.on_save_callback = on_save_callback
+
+        # Window setup (popup style)
+        self.setWindowFlags(Qt.Popup | Qt.FramelessWindowHint)
+        self.setAttribute(Qt.WA_TranslucentBackground)
+        self.setFixedSize(300, 180)
+
+        # Container with background
+        container = QFrame()
+        container.setStyleSheet("""
+            QFrame {
+                background-color: #2d2d30;
+                border: 1px solid #444;
+                border-radius: 8px;
+            }
+        """)
+
+        layout = QVBoxLayout(container)
+        layout.setContentsMargins(16, 16, 16, 16)
+        layout.setSpacing(12)
+
+        # Title
+        title = QLabel("Paste Google Sheets URL")
+        title.setStyleSheet("color: white; font-size: 13px; font-weight: bold; margin-bottom: 4px;")
+        layout.addWidget(title)
+
+        # URL Input
+        self.url_input = QLineEdit()
+        self.url_input.setPlaceholderText("https://docs.google.com/spreadsheets/...")
+        self.url_input.setMinimumHeight(36)
+        self.url_input.setStyleSheet("""
+            QLineEdit {
+                background-color: #3a3a40; border: 1px solid #555;
+                border-radius: 4px; padding: 5px 8px; color: white; font-size: 13px;
+            }
+            QLineEdit:focus { border: 1px solid #2ecc71; }
+        """)
+        layout.addWidget(self.url_input)
+
+        # Buttons row
+        buttons_widget = QWidget()
+        buttons_layout = QHBoxLayout(buttons_widget)
+        buttons_layout.setContentsMargins(0, 0, 0, 0)
+        buttons_layout.setSpacing(8)
+        buttons_layout.addStretch()
+
+        # Cancel button
+        cancel_btn = QPushButton("Cancel")
+        cancel_btn.setFixedHeight(32)
+        cancel_btn.setFixedWidth(70)
+        cancel_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #444; color: white; border: none;
+                border-radius: 4px; font-size: 12px;
+            }
+            QPushButton:hover { background-color: #555; }
+        """)
+        cancel_btn.clicked.connect(lambda: self.close())
+        buttons_layout.addWidget(cancel_btn)
+
+        # Save button
+        save_btn = QPushButton("Save")
+        save_btn.setFixedHeight(32)
+        save_btn.setFixedWidth(70)
+        save_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #2ecc71; color: white; border: none;
+                border-radius: 4px; font-size: 12px;
+            }
+            QPushButton:hover { background-color: #27ae60; }
+        """)
+        save_btn.clicked.connect(lambda: self._save_url())
+        buttons_layout.addWidget(save_btn)
+
+        layout.addWidget(buttons_widget)
+        layout.addStretch()
+
+        main_layout = QVBoxLayout(self)
+        main_layout.setContentsMargins(0, 0, 0, 0)
+        main_layout.addWidget(container)
+
+    def _save_url(self):
+        """Save the URL and call the callback."""
+        url = self.url_input.text().strip()
+        if url:
+            if self.on_save_callback:
+                self.on_save_callback(self.sheet_index, url)
+        self.close()
+
+    def mousePressEvent(self, event):
+        """Close dialog if clicked outside the container."""
+        pos = event.pos()
+        if not self.geometry().contains(pos):
+            self.close()
 
 
 def _input_style():
@@ -253,8 +441,9 @@ def create_sheet_row(globals, idx, sheet):
     line1.addWidget(wb_label, stretch=1)
 
     # Browse button
-    browse_btn = QPushButton("Browse")
-    browse_btn.setFixedWidth(70)
+    browse_btn = QPushButton("Workbook  ▼")
+    browse_btn.setFixedWidth(90)
+    browse_btn.setFixedHeight(32)
     browse_btn.setStyleSheet("""
         QPushButton {
             background-color: #444; color: white; border: 1px solid #555;
@@ -262,7 +451,7 @@ def create_sheet_row(globals, idx, sheet):
         }
         QPushButton:hover { background-color: #555; }
     """)
-    browse_btn.clicked.connect(lambda checked, i=idx, lbl=wb_label: browse_file_wrapper(globals, i, lbl))
+    browse_btn.clicked.connect(lambda checked, i=idx, btn=browse_btn, lbl=wb_label: show_source_dialog(globals, i, btn, lbl))
     line1.addWidget(browse_btn)
 
     # Delete button
@@ -390,6 +579,43 @@ def browse_file_wrapper(globals, index, label_widget):
         label_widget.setText(os.path.basename(file_path))
         label_widget.setToolTip(file_path)
         label_widget.setStyleSheet("color: #2ecc71; font-size: 12px;")
+
+
+def show_source_dialog(globals, sheet_index, button_widget, label_widget):
+    """Show the source selection dialog positioned near the button."""
+    
+    def on_local_chosen(index):
+        """User chose Local Spreadsheet - open file browser."""
+        browse_file_wrapper(globals, index, label_widget)
+    
+    def on_google_chosen(index):
+        """User chose Google Sheets - open URL input dialog."""
+        def save_url_callback(idx, url):
+            """Called when user saves URL from GoogleSheetsUrlDialog."""
+            logging.info(f"Saving Google URL for sheet {idx}: {url}")
+            globals.sheet_data["sheets"][idx]["workbook"] = url
+            label_widget.setText("Google Sheet")
+            label_widget.setToolTip(url)
+            label_widget.setStyleSheet("color: #3498db; font-size: 12px;")
+        
+        dialog = GoogleSheetsUrlDialog(index, save_url_callback, parent=globals.window)
+        global_pos = button_widget.mapToGlobal(button_widget.rect().bottomLeft())
+        dialog.move(global_pos.x(), global_pos.y() + 32)  # Offset slightly below source dialog
+        
+        globals.active_google_dialog = dialog  # Keep reference alive
+        dialog.show()
+        dialog.raise_()
+        dialog.activateWindow()
+    
+    dialog = WorkbookSourceDialog(sheet_index, on_local_chosen, on_google_chosen)
+    
+    global_pos = button_widget.mapToGlobal(button_widget.rect().bottomLeft())
+    dialog.move(global_pos.x(), global_pos.y())
+    
+    globals.active_source_dialog = dialog
+    dialog.show()
+    dialog.raise_()
+    dialog.activateWindow()
 
 
 def on_add_sheet(globals):

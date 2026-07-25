@@ -84,7 +84,7 @@ def create_wizard(globals):
 
     inbox_browse = QPushButton()
     inbox_browse.setText("Browse")
-    inbox_browse.clicked.connect(lambda: browse_directory(inbox_entry))
+    inbox_browse.clicked.connect(lambda: browse_directory(globals, inbox_entry))
     inbox_entry_layout.addWidget(inbox_browse)
     inbox_browse.setFixedWidth(150)
 
@@ -134,7 +134,7 @@ def create_wizard(globals):
 
     archive_browse = QPushButton()
     archive_browse.setText("Browse")
-    archive_browse.clicked.connect(lambda: browse_directory(archive_entry))
+    archive_browse.clicked.connect(lambda: browse_directory(globals, archive_entry))
     archive_entry_layout.addWidget(archive_browse)
     archive_browse.setFixedWidth(150)
 

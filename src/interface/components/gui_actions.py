@@ -1,4 +1,4 @@
-# Interface/Components/gui_actions.py
+# src/interface/components/gui_actions.py
 import os
 import logging
 from tkinter import messagebox
@@ -71,6 +71,7 @@ def pdf_button(globals, companies=None, directory=None, file_list=None):
     if globals.legacy_mode:
         globals.root.after(100, globals.update_file_counts)
 
+
 def parse_to_spreadsheet(globals, file_type, file_list=None):
     """
     Dispatch to the correct parser (Invoices or Credit Cards).
@@ -96,6 +97,7 @@ def parse_to_spreadsheet(globals, file_type, file_list=None):
 
     # Call the selected parser with the exact signature it expects
     parsers[file_type](globals, globals.history_tree, file_list)
+
 
 def smart_spreadsheet_button(globals, file_list=None):
     """
@@ -175,13 +177,19 @@ def smart_spreadsheet_button(globals, file_list=None):
         for sheet_name, files in sheet_groups.items():
             parse_sheet_qt(globals, sheet_name, files)
 
+        # Show completion toast
+        show_toast(globals, f"Entered {len(file_list)} files to {len(sheet_groups)} sheets!")
+
+
 def invoice_button(globals, file_list=None):
     """Initiates the parse_invoices function to enter invoice data to the spreadsheet."""
     parse_to_spreadsheet(globals, "Invoices", file_list)
-    
+
+
 def credit_button(globals, file_list=None):
     """Initiates the parse_credit_cards function to enter credit card data to the spreadsheet."""
     parse_to_spreadsheet(globals, "Credit Cards", file_list)
+
 
 def move_button(globals):
     """Initiates archive_files and moves the files associated with selected treeview rows to their destination folders."""
@@ -213,6 +221,7 @@ def move_button(globals):
     for (directory, file_type), file_list in groups.items():
         archive_files(globals, globals.history_tree, directory, file_type, globals.folder_map, globals.oneoffs_folder, file_list)
 
+
 def export_button(globals):
     """Initiates export_history to export the current history log to a chosen location."""
     # Save metadata first
@@ -221,6 +230,7 @@ def export_button(globals):
     else:
         save_qt_metadata(globals)
     export_history(globals.history_tree)
+
 
 def import_button(globals):
     """Initiates import_history and imports a previously exported log into the History tab's treeview."""

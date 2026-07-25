@@ -47,7 +47,7 @@ def create_paths_settings_tab(globals):
 
     inbox_browse = QPushButton()
     inbox_browse.setText("Browse")
-    inbox_browse.clicked.connect(lambda: browse_directory(globals.inbox_entry_box))
+    inbox_browse.clicked.connect(lambda: browse_directory(globals, globals.inbox_entry_box))
     inbox_entry_layout.addWidget(inbox_browse)
     inbox_browse.setFixedWidth(150)
 
@@ -69,7 +69,7 @@ def create_paths_settings_tab(globals):
 
     archive_browse = QPushButton()
     archive_browse.setText("Browse")
-    archive_browse.clicked.connect(lambda: browse_directory(globals.archive_entry_box))
+    archive_browse.clicked.connect(lambda: browse_directory(globals, globals.archive_entry_box))
     archive_entry_layout.addWidget(archive_browse)
     archive_browse.setFixedWidth(150)
 

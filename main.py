@@ -1,4 +1,4 @@
-# invoicebuddy.py
+# main.py
 import sys
 import logging
 from src.utils.dependencies import check_dependencies

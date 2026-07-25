@@ -10,7 +10,8 @@ from src.qt_interface.qt_preview import create_preview_pane
 from src.qt_interface.qt_components.qt_sidebar import create_sidebar, toggle_sidebar
 from src.qt_interface.qt_settings.qt_settings import create_settings_panel, toggle_settings_panel
 from src.qt_interface.qt_components.qt_mailbox import MailboxWidget
-from src.managers.file_management import open_workbook, open_directory, open_logs, open_config
+from src.managers.file_management import (open_workbook, open_directory,
+                                          open_logs, open_config)
 from src.utils.observers import setup_observer
 from src.interface.setup.setup_wizard import create_wizard
 from src.qt_interface.qt_components.qt_changelog import create_changelog_panel, toggle_changelog_panel
@@ -23,17 +24,17 @@ import os
 def create_qt_interface(globals):
     """Creates the main interface in PySide."""
     
-    # 1. SETUP WINDOW
+    # Set Up Window
     globals.window.setWindowTitle("Invoice Buddy")
     if globals.saved_width and globals.saved_height and globals.saved_x and globals.saved_y:
         globals.window.setGeometry(globals.saved_x, globals.saved_y, globals.saved_width, globals.saved_height)
     else:
         globals.window.resize(900, 850)
 
-    # 2. MAKE IT BORDERLESS
+    # Make Window Borderless
     globals.window.setWindowFlags(Qt.FramelessWindowHint)
 
-    # 3. CENTRAL WIDGET
+    # Create Central Widget
     central_widget = QWidget()
     globals.window.setCentralWidget(central_widget)
     main_layout = QVBoxLayout(central_widget)
@@ -41,7 +42,7 @@ def create_qt_interface(globals):
     main_layout.setSpacing(0)
     central_widget.setStyleSheet("background-color: #333339;")
 
-    # 4. ADD NEW TITLE BAR (Draggable + Menus + Buttons)
+    # ADD NEW TITLE BAR (Draggable + Menus + Buttons)
     title_bar = TitleBar(globals.window)
     main_layout.addWidget(title_bar)
     globals.title_bar = title_bar
@@ -70,11 +71,13 @@ def create_qt_interface(globals):
             action = workbook_menu.addAction(wb_name)
             action.triggered.connect(lambda checked, p=wb_path: open_workbook(globals, p))
 
+    open_archive_Q = file_menu.addAction("Open Archive")
     open_logs_Q = file_menu.addAction("Open Logs")
     open_config_Q = file_menu.addAction("Open Config")
 
     # Attach Actions to File Buttons
     open_inbox_Q.triggered.connect(lambda: open_directory(globals.inbox))
+    open_archive_Q.triggered.connect(lambda: open_directory(globals.archive))
     open_logs_Q.triggered.connect(lambda: open_logs(globals))
     open_config_Q.triggered.connect(lambda: open_config(globals))
     
@@ -96,6 +99,15 @@ def create_qt_interface(globals):
     open_wizard_Q.triggered.connect(lambda: create_wizard(globals))
     view_github_Q.triggered.connect(lambda: webbrowser.open(
         url="https://github.com/pdschneider/InvoiceBuddy"))
+
+    # Style Menus with Distinct Hover States
+    menu_stylesheet = """
+        QMenuBar::item { color: #aaaaaa; }
+        QMenuBar::item:selected { color: #ffffff; }
+        QMenu::item { color: #aaaaaa; }
+        QMenu::item:selected { color: #ffffff; }
+    """
+    globals.window.setStyleSheet(menu_stylesheet)
 
     # Add the Top Bar
     top_bar = create_top_bar(globals)

@@ -47,14 +47,14 @@ def create_onboarding_page(globals, onboarding_page):
         browse_file(globals, globals.workbook_var, _type="workbook")
 
     def on_browse_inbox():
-        browse_directory(globals.inbox_dir_var)
+        browse_directory(globals, globals.inbox_dir_var)
         try:
             globals.update_file_counts()
         except Exception as e:
             logging.error(f"Error updating file counts after browse: {e}")
 
     def on_browse_archive():
-        browse_directory(globals.archive_path_var)
+        browse_directory(globals, globals.archive_path_var)
 
     # Workbook
     ctk.CTkLabel(paths_frame,

@@ -7,7 +7,7 @@ ret_pyside = collect_all('PySide6')
 ret_shiboken = collect_all('shiboken6')
 
 a = Analysis(
-    ['../invoicebuddy.py'],
+    ['../main.py'],
     pathex=[],
     binaries=[],
     datas=[

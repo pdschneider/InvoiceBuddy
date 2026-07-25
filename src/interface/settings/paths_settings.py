@@ -62,7 +62,7 @@ def create_paths_settings_tab(globals, settings_tab):
     ctk.CTkButton(paths_section,
                   text="Browse",
                   width=140,
-                  command=lambda: [browse_directory(globals.inbox_dir_var), globals.update_file_counts()]
+                  command=lambda: [browse_directory(globals, globals.inbox_dir_var), globals.update_file_counts()]
                   ).grid(row=1, column=2, pady=5)
 
     # Archive
@@ -78,7 +78,7 @@ def create_paths_settings_tab(globals, settings_tab):
     ctk.CTkButton(paths_section,
                   text="Browse",
                   width=140,
-                  command=lambda: [browse_directory(globals.archive_path_var)]
+                  command=lambda: [browse_directory(globals, globals.archive_path_var)]
                   ).grid(row=2, column=2, pady=5)
 
     def add_buddy():
@@ -101,7 +101,7 @@ def create_paths_settings_tab(globals, settings_tab):
         ctk.CTkButton(buddy_subframe,
                       width=105,
                       text="Browse",
-                      command=lambda: browse_directory(path_var)
+                      command=lambda: browse_directory(globals, path_var)
                       ).grid(row=0, column=2, pady=0, padx=5)
         ctk.CTkButton(buddy_subframe,
                       text="-",

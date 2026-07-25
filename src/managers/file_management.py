@@ -58,17 +58,32 @@ def browse_file(globals, var, _type=None):
             logging.info(f"Selected file: {file_path}")
 
 
-def browse_directory(var):
+def browse_directory(globals, var):
     """
     Open a directory dialog to select a directory and set the variable.
 
         var:        Variable to change
                     ex: globals.inbox_dir_var
     """
-    dir_path = filedialog.askdirectory()
+    if globals.legacy_mode:
+        dir_path = filedialog.askdirectory()
+    else:
+        dir_path = QFileDialog.getExistingDirectory(None, "Select Folder", "")
+
     if dir_path:
-        var.set(dir_path)
+
+        # Handle Tkinter variable (legacy mode)
+        if hasattr(var, 'set'):
+            var.set(dir_path)
+        # Handle QLineEdit widget (Qt mode)
+        elif hasattr(var, 'setText'):
+            var.setText(dir_path)
+
         logging.info(f"Selected directory: {dir_path}")
+        return dir_path
+    else:
+        logging.warning(f"No path found - returning empty string.")
+        return ""
 
 
 def open_workbook(globals, workbook_path=None):

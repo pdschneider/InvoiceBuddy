@@ -2,6 +2,28 @@
 
 All notable changes to **Invoice Buddy** will be located in this file.
 
+## [0.2.8-beta] - 2026-08-05
+
+This version of Invoice Buddy adds another step of Google Sheets integration and features various UI and bug fixes, as well as several new companies added!
+
+### Added
+- Users can now choose a URL to add for later Google Sheets integration
+- New companies: Whidbey Coffee, Desktronic Trading US, Pilot Travel Centers LLC, Subway, Jiffy Lube International, Washington State Department of Ecology, Under Armour, TJ Maxx
+- Sha256 Checksums are now added to release notes
+- Archive path is now viewable via the title bar's File Menu
+
+### Changed
+- Upgraded from Python 3.12.3 to Python 3.13.14 on Linux
+- Updated dependencies
+- Lowered log count to 30
+- Built with cached temp files for faster re-launch
+- Users upgrading from previous versions no longer have to go through as many pages of the installation wizard each upgrade
+
+### Fixed
+- During Windows installs, application now closes whether or not it responds to graceful shutdown commands - correcting a rare error during the installation process
+- Browse buttons in Qt-GUI paths settings now correctly fill text boxes and save
+- Toasts now correcly show up for successful spreadsheet entries
+
 ## [0.2.7] - 2026-07-07
 
 This version of Invoice Buddy adds new functionality to the new GUI - modular sheet names, contextual buttons, bulk labeling, and more!
