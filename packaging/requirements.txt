@@ -7,8 +7,8 @@ CTkToolTip==0.9
 customtkinter==6.0.0
 darkdetect==0.8.0
 et_xmlfile==2.0.0
-google-auth==2.56.2
-google-auth-httplib2==0.4.0
+google-auth==2.56.3
+google-auth-httplib2==0.4.1
 google-auth-oauthlib==1.4.0
 gspread==6.2.1
 httplib2==0.32.0
@@ -35,7 +35,7 @@ Pygments==2.20.0
 pyinstaller==6.16.0
 pyinstaller-hooks-contrib==2026.6
 pyparsing==3.3.2
-pypdf==6.14.2
+pypdf==6.15.0
 pypdfium2==5.12.1
 PySide6==6.11.1
 PySide6_Addons==6.11.1

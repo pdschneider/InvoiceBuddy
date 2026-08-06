@@ -12,6 +12,7 @@ def create_advanced_settings_tab(globals):
 
     # Create the main widget that will BE the tab
     tab_widget = QWidget()
+    tab_widget.setStyleSheet("color: #d0d0d0;")
     layout = QVBoxLayout(tab_widget)
     layout.setContentsMargins(20, 20, 20, 20)  # More padding
     layout.setSpacing(20)  # More space between elements

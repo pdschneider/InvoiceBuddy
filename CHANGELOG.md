@@ -2,7 +2,7 @@
 
 All notable changes to **Invoice Buddy** will be located in this file.
 
-## [0.2.8-beta] - 2026-08-05
+## [0.2.8] - 2026-08-06
 
 This version of Invoice Buddy adds another step of Google Sheets integration and features various UI and bug fixes, as well as several new companies added!
 
@@ -18,11 +18,12 @@ This version of Invoice Buddy adds another step of Google Sheets integration and
 - Lowered log count to 30
 - Built with cached temp files for faster re-launch
 - Users upgrading from previous versions no longer have to go through as many pages of the installation wizard each upgrade
+- Minor UI improvements and bug fixes
 
 ### Fixed
 - During Windows installs, application now closes whether or not it responds to graceful shutdown commands - correcting a rare error during the installation process
 - Browse buttons in Qt-GUI paths settings now correctly fill text boxes and save
-- Toasts now correcly show up for successful spreadsheet entries
+- Toasts now correctly show up for successful spreadsheet entries
 
 ## [0.2.7] - 2026-07-07
 

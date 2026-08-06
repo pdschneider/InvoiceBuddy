@@ -75,19 +75,6 @@ After completing authentication, your token is saved automatically at:
 
 This token is refreshed automatically and does not require re-authentication.
 
-**To verify your connection works, run:**
-
-bash python src/connections/alphabet.py
-
-
-You should see your Google Sheets listed:
-
-✅ Connected! Found 3 spreadsheet(s):
-
-Helf's Top Albums
-Paper Mario: Dark Star Items
-DGI Dividend Reinvestment Calculator
-
 ---
 
 ## Troubleshooting
@@ -143,22 +130,16 @@ If you need to reset your Google authentication (switching accounts, revoking ac
    ```bash
    rm ~/.config/invoicebuddy/google_token.json
 (Optional) Revoke access from your Google account:
-Go to Google Account Permissions
-Find InvoiceBuddy → Click Remove Access
-Re-run the authentication flow
-Data & Privacy
+2. Go to Google Account Permissions
+3. Find InvoiceBuddy → Click Remove Access
+4. Re-run the authentication flow
+
+### Data & Privacy
 Invoice Buddy stores your OAuth token locally at ~/.config/invoicebuddy/google_token.json
 Your client_secrets.json file is only needed during initial setup
 Invoice Buddy never sees or stores your Google password
 Authentication is handled entirely through Google's OAuth 2.0 protocol
 You can revoke access at any time from your Google Account
-Need Help?
-If you encounter issues not covered in this troubleshooting guide, please file an issue on GitHub or consult the Google OAuth 2.0 documentation.
 
-Google Cloud APIs Quick Links
-API	Direct Link
-Google Sheets API	Enable
-Google Drive API	Enable
-OAuth Consent Screen	Configure
-Credentials	Create
-Account Permissions	Manage
+### Need Help?
+If you encounter issues not covered in this troubleshooting guide, please file an issue on GitHub or consult the Google OAuth 2.0 documentation.

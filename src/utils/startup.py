@@ -10,7 +10,7 @@ from logging.handlers import TimedRotatingFileHandler
 from src.utils.load_settings import load_data_path, load_settings
 from src.utils.vars import create_vars
 from src.utils.icons import load_icons
-from src.connections.github import version_check
+from src.connections.updater import version_check
 
 
 def setup(globals):

@@ -68,10 +68,11 @@ def version_check(globals):
         if not changelog:
             changelog = "Changelog not available."
 
-        # Remove markdown elements from changelog
+        # Remove markdown elements and checksums from changelog
+        changelog = changelog.split("---")[0].rstrip()
         changelog = changelog.replace("###", "").replace("##", "")
 
-        # print(f"\n\nChangelog: {changelog}\n\n")  # <-- Prints Changelog
+        print(f"\n\nChangelog: {changelog}\n\n")  # <-- Prints Changelog
 
         # Exit if assets is not available
         if not assets:

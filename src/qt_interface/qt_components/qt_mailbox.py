@@ -70,6 +70,7 @@ class AssignSheetDialog(QWidget):
         scroll.setMaximumHeight(250)
 
         list_widget = QWidget()
+        list_widget.setStyleSheet("background-color: #2d2d30;")
         list_layout = QVBoxLayout(list_widget)
         list_layout.setContentsMargins(0, 0, 0, 0)
         list_layout.setSpacing(2)
