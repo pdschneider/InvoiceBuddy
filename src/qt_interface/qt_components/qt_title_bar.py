@@ -1,7 +1,10 @@
-from PySide6.QtWidgets import QWidget, QHBoxLayout, QMenuBar, QToolButton
+# src/qt_interface/qt_components/qt_title_bar.py
+from PySide6.QtWidgets import (QWidget, QHBoxLayout,
+                               QMenuBar, QToolButton,
+                               QMenu, QStyle)
 from PySide6.QtCore import Qt, QPoint
-from PySide6.QtGui import QCursor
-from PySide6.QtGui import QColor
+from PySide6.QtGui import QColor, QAction
+
 
 class TitleBar(QWidget):
     def __init__(self, parent=None):
@@ -69,6 +72,51 @@ class TitleBar(QWidget):
         self.dragging = False
         self.drag_position = QPoint()
 
+    def contextMenuEvent(self, event):
+        """Show context menu on right-click."""
+        menu = QMenu(self)
+        menu.setStyleSheet("""
+            QMenu {
+                background-color: #2d2d2d;
+                color: white;
+                border: 1px solid #444;
+                padding: 4px;
+            }
+            QMenu::item {
+                padding: 6px 30px 6px 8px;
+                min-width: 120px;
+                margin-left: 4px;
+            }
+            QMenu::item:selected {
+                background-color: #444;
+            }
+        """)
+        
+        style = self.style()
+        
+        minimize_action = QAction("Minimize", menu)
+        minimize_action.setIcon(style.standardIcon(QStyle.SP_TitleBarMinButton))
+        minimize_action.triggered.connect(self.parent_window.showMinimized)
+        menu.addAction(minimize_action)
+        
+        if self.parent_window.isMaximized():
+            restore_action = QAction("Restore", menu)
+            restore_action.setIcon(style.standardIcon(QStyle.SP_TitleBarNormalButton))
+        else:
+            restore_action = QAction("Maximize", menu)
+            restore_action.setIcon(style.standardIcon(QStyle.SP_TitleBarMaxButton))
+        restore_action.triggered.connect(self.toggle_maximize)
+        menu.addAction(restore_action)
+        
+        menu.addSeparator()
+        
+        close_action = QAction("Close", menu)
+        close_action.setIcon(style.standardIcon(QStyle.SP_TitleBarCloseButton))
+        close_action.triggered.connect(self.parent_window.close)
+        menu.addAction(close_action)
+        
+        menu.exec_(event.globalPos())
+
     def toggle_maximize(self):
         if self.parent_window.isMaximized():
             self.parent_window.showNormal()
@@ -78,7 +126,8 @@ class TitleBar(QWidget):
             self.max_btn.setText("❐")
 
     def mousePressEvent(self, event):
-        if self.childAt(event.pos()):
+        child = self.childAt(event.pos())
+        if isinstance(child, QToolButton):
             return
         if event.button() == Qt.LeftButton:
             self.dragging = True

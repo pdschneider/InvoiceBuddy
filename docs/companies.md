@@ -35,10 +35,12 @@ This document lists every currently supported company with its **full official/l
 - McMaster-Carr Supply Company
 - Platt Electric Supply
 - United Rentals, Inc.
+- City and Sign Electrical Services, LLC
+- Cuz Concrete Products, Inc.
 
 ## Facility Maintenance & Services
 
-- Barclay Dean Architectural Products LLC
+- Barclay Dean Architectural Products, LLC
 - Bill's Blueprint, Inc.
 - Britten Inc.
 - Cintas Corporation
@@ -62,6 +64,7 @@ This document lists every currently supported company with its **full official/l
 - Wolfe Fire Protection
 - Everything John Deere Gator
 - Precision Analytical Labortories
+- Parts Town
 
 ## Government, Utilities & Public Agencies
 
@@ -126,6 +129,7 @@ This document lists every currently supported company with its **full official/l
 - CFA Properties, Inc. (Chick-fil-A)
 - Under Armour, Inc.
 - TJ Maxx
+- Michaels Stores
 
 ## Miscellaneous / Technology & Services
 

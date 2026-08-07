@@ -2,6 +2,23 @@
 
 All notable changes to **Invoice Buddy** will be located in this file.
 
+## [0.2.9-beta] - 2026-08-07
+
+This update shifts from the old onefile mode to the much more robust standalone mode (bundled as a folder under the hood with all dll files signed). This should silence any remaining Windows Defender false positives.
+
+### Added
+- New vendors: City and Sign Electrical Services, Parts Town, Michaels Stores, Cuz Concrete Products Inc.
+- View Codeberg button added to help menu
+- Added actions when right-clicking the title bar
+
+### Changed
+- Built as a standalone folder on Windows rather than one single binary to avoid false positive Windows Defender errors
+- Updated Tesseract to v5.5.3
+- Improved window resizing logic and cursor detection
+
+### Fixed
+- Strengthened app type detection logic, resolving restart and update errors
+
 ## [0.2.8] - 2026-08-06
 
 This version of Invoice Buddy adds another step of Google Sheets integration and features various UI and bug fixes, as well as several new companies added!

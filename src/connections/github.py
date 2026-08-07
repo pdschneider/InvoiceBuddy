@@ -68,8 +68,7 @@ def version_check(globals):
         if not changelog:
             changelog = "Changelog not available."
 
-        # Remove markdown elements and checksums from changelog
-        changelog = changelog.split("---")[0].rstrip()
+        # Remove markdown elements from changelog
         changelog = changelog.replace("###", "").replace("##", "")
 
         # print(f"\n\nChangelog: {changelog}\n\n")  # <-- Prints Changelog

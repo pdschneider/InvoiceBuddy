@@ -1,14 +1,13 @@
 from PySide6.QtWidgets import (
-    QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, 
+    QApplication, QWidget, QVBoxLayout, QHBoxLayout, 
     QSplitter, QFrame, QLabel, QPushButton, QSizeGrip)
-from PySide6.QtCore import Qt, QEvent, QTimer
+from PySide6.QtCore import Qt, QEvent, QTimer, QObject
 from PySide6.QtGui import QCursor
 from src.qt_interface.qt_components.qt_title_bar import TitleBar
 from src.qt_interface.qt_components.qt_top_bar import create_top_bar
-from src.qt_interface.qt_inbox import create_inbox_list
 from src.qt_interface.qt_preview import create_preview_pane
-from src.qt_interface.qt_components.qt_sidebar import create_sidebar, toggle_sidebar
-from src.qt_interface.qt_settings.qt_settings import create_settings_panel, toggle_settings_panel
+from src.qt_interface.qt_components.qt_sidebar import create_sidebar
+from src.qt_interface.qt_settings.qt_settings import create_settings_panel
 from src.qt_interface.qt_components.qt_mailbox import MailboxWidget
 from src.managers.file_management import (open_workbook, open_directory,
                                           open_logs, open_config)
@@ -19,6 +18,133 @@ from src.qt_interface.qt_components.qt_about import create_about_panel, toggle_a
 import logging
 import webbrowser
 import os
+
+
+class WindowResizeEventFilter(QObject):
+    """
+    Global event filter to handle cursor shape changes for frameless window resizing.
+    This ensures mouse moves over child widgets also trigger edge detection.
+    """
+    
+    def __init__(self, window, resize_margin=10):
+        super().__init__()
+        self.window = window
+        self.resize_margin = resize_margin
+        self.last_cursor_shape = Qt.ArrowCursor
+        self.resize_state = {
+            "active": False,
+            "edge": None,
+            "last_pos": None,
+            "start_geom": None
+        }
+        
+    def get_resize_edge_from_global(self, global_pos):
+        geom = self.window.frameGeometry()
+        x, y = global_pos.x(), global_pos.y()
+        
+        left = x <= geom.left() + self.resize_margin
+        right = x >= geom.right() - self.resize_margin
+        top = y <= geom.top() + self.resize_margin
+        bottom = y >= geom.bottom() - self.resize_margin
+        
+        if top and left: return "TL"
+        if top and right: return "TR"
+        if bottom and left: return "BL"
+        if bottom and right: return "BR"
+        if left: return "L"
+        if right: return "R"
+        if top: return "T"
+        if bottom: return "B"
+        return None
+    
+    def get_cursor_shape(self, edge):
+        shapes = {
+            "L": Qt.SizeHorCursor, "R": Qt.SizeHorCursor,
+            "T": Qt.SizeVerCursor, "B": Qt.SizeVerCursor,
+            "TL": Qt.SizeFDiagCursor, "BR": Qt.SizeFDiagCursor,
+            "TR": Qt.SizeBDiagCursor, "BL": Qt.SizeBDiagCursor,
+            None: Qt.ArrowCursor
+        }
+        return shapes.get(edge, Qt.ArrowCursor)
+    
+    def eventFilter(self, obj, event):
+        # Skip resize logic if a popup/menu is open
+        if QApplication.activePopupWidget():
+            return False
+        if event.type() == QEvent.MouseMove:
+            global_pos = event.globalPosition().toPoint()
+            
+            # --- Active resize drag ---
+            if self.resize_state["active"]:
+                start_geom = self.resize_state["start_geom"]
+                start_pos = self.resize_state["last_pos"]
+                
+                total_delta = global_pos - start_pos
+                edge = self.resize_state["edge"]
+                
+                min_w = self.window.minimumWidth()
+                min_h = self.window.minimumHeight()
+                
+                # Start from original geometry each frame
+                new_left = start_geom.left()
+                new_right = start_geom.right()
+                new_top = start_geom.top()
+                new_bottom = start_geom.bottom()
+                
+                if edge in ["L", "TL", "BL"]:
+                    new_left = start_geom.left() + total_delta.x()
+                    if new_left > start_geom.right() - min_w:
+                        new_left = start_geom.right() - min_w
+                if edge in ["R", "TR", "BR"]:
+                    new_right = start_geom.right() + total_delta.x()
+                    if new_right < start_geom.left() + min_w:
+                        new_right = start_geom.left() + min_w
+                if edge in ["T", "TL", "TR"]:
+                    new_top = start_geom.top() + total_delta.y()
+                    if new_top > start_geom.bottom() - min_h:
+                        new_top = start_geom.bottom() - min_h
+                if edge in ["B", "BL", "BR"]:
+                    new_bottom = start_geom.bottom() + total_delta.y()
+                    if new_bottom < start_geom.top() + min_h:
+                        new_bottom = start_geom.top() + min_h
+                
+                self.window.setGeometry(new_left, new_top, new_right - new_left, new_bottom - new_top)
+                
+                return True
+            
+            # --- Cursor shape only ---
+            edge = self.get_resize_edge_from_global(global_pos)
+            target_shape = self.get_cursor_shape(edge)
+            
+            if self.last_cursor_shape != target_shape:
+                self.window.setCursor(target_shape)
+                self.last_cursor_shape = target_shape
+                
+        elif event.type() == QEvent.MouseButtonPress:
+            if event.button() == Qt.LeftButton:
+                global_pos = event.globalPosition().toPoint()
+                edge = self.get_resize_edge_from_global(global_pos)
+                
+                if edge:
+                    self.resize_state["active"] = True
+                    self.resize_state["edge"] = edge
+                    self.resize_state["last_pos"] = global_pos
+                    self.resize_state["start_geom"] = self.window.frameGeometry()
+                    return True
+        
+        elif event.type() == QEvent.MouseButtonRelease:
+            if event.button() == Qt.LeftButton:
+                if self.resize_state["active"]:
+                    self.resize_state["active"] = False
+                    self.resize_state["edge"] = None
+                    self.resize_state["last_pos"] = None
+                    self.resize_state["start_geom"] = None
+                    self.window.setCursor(Qt.ArrowCursor)
+                    return True
+        
+        return False
+                
+        return False
 
 
 def create_qt_interface(globals):
@@ -91,6 +217,7 @@ def create_qt_interface(globals):
     view_changelog_Q = help_menu.addAction("View Changelog")
     open_wizard_Q = help_menu.addAction("Open Wizard")
     view_github_Q = help_menu.addAction("Open Github")
+    view_codeberg_Q = help_menu.addAction("Open Codeberg")
     view_about_Q = help_menu.addAction("About")
 
     # Attach Functions to Help Buttons
@@ -99,6 +226,8 @@ def create_qt_interface(globals):
     open_wizard_Q.triggered.connect(lambda: create_wizard(globals))
     view_github_Q.triggered.connect(lambda: webbrowser.open(
         url="https://github.com/pdschneider/InvoiceBuddy"))
+    view_codeberg_Q.triggered.connect(lambda: webbrowser.open(
+            url="https://codeberg.org/pdschneider/InvoiceBuddy"))
 
     # Style Menus with Distinct Hover States
     menu_stylesheet = """
@@ -299,15 +428,14 @@ def create_qt_interface(globals):
 
     # Enable mouse tracking so we get MouseMove even without pressing
     globals.window.setMouseTracking(True)
+    for child in globals.window.findChildren(QWidget):
+        child.setMouseTracking(True)
 
-    # Install Event Filter
-    original_event = globals.window.event
-    def custom_event(event):
-        if handle_window_mouse_event(globals.window, event):
-            return True
-        return original_event(event)
-
-    globals.window.event = custom_event
+    # Install Global Event Filter for Cursor Changes
+    resize_filter = WindowResizeEventFilter(globals.window)
+    globals.app.installEventFilter(resize_filter)
+    globals.resize_filter = resize_filter  # Keep it alive!
+    print(f"Event filter installed: {globals.resize_filter is not None}")
 
     # Show the Window
     globals.window.setMinimumSize(800, 750)

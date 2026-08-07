@@ -753,7 +753,9 @@ def get_executable_path(globals):
     
     # Check if .deb
     elif (script_path_2.startswith("/usr/bin/invoice-buddy") or
-          script_path_2.startswith("/usr/local/bin/invoice-buddy")):
+          script_path_2.startswith("/usr/local/bin/invoice-buddy")
+          ) or (script_path.startswith("/usr/bin/invoice-buddy") or
+                script_path.startswith("/usr/local/bin/invoice-buddy")):
         globals.app_type = "Deb"
         globals.app_path = script_path
         logging.debug(f"Path to executable (.deb/system): {os.path.realpath(sys.executable)} | Path to script: {script_path_2}")
@@ -761,7 +763,7 @@ def get_executable_path(globals):
         return script_path_2
 
     # Check if running as an .exe
-    elif platform.platform().startswith("Windows") and ('onefile' in sys.executable.lower() or '_MEIPASS' in sys.executable):
+    elif platform.platform().startswith("Windows") and (getattr(sys, 'frozen', False) or '__compiled__' in dir(sys.modules.get('__main__', {})) or 'onefile' in sys.executable.lower() or '_MEIPASS' in sys.executable):
         globals.app_type = "Exe"
         globals.app_path = script_path
         logging.debug(f"Path to executable (frozen / Inno Setup): {sys.executable} | Path to Script: {script_path}")
