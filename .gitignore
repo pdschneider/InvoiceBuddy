@@ -7,6 +7,8 @@ build/
 *.AppImage
 *.deb
 *.bin
+*.exe
+*.dll
 InvoiceBuddy-Linux
 invoicebuddy.bin
 

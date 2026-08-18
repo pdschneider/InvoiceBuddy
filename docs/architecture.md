@@ -42,22 +42,44 @@ The application is designed to be:
 
 ```Bash
 InvoiceBuddy/
-├── InvoiceBuddy.py           # Main entry point - launches the GUI
-├── config.py                 # Configuration and settings handling
-├── version.py                # Version information
+├── main.py                   # Main entry point — launches the GUI
+├── config.py                 # Global variables, configuration, and theme handling
+├── version.py                # Version, author, and title metadata
 ├── defaults/                 # Default themes, assets, icons, and configuration files
-├── src/                      # Primary source code
-│   ├── interface/            # All GUI-related code
-│   │   ├── components/       # Reusable  UI components
-│   │   ├── settings/         # Settings pages
-│   │   └── setup/            # Initial setup wizard and onboarding screen
-│   ├── connections/          # Connections to external API's or domains (ex: GitHub)
-│   ├── managers/             # Core business logic managers
-│   │   └── autoname/         # Logic for auto-generating filenames
-│   └── utils/                # Utility functions, helpers, and shared tools
-├── data/                     # Development mode data storage
-├── packaging/                # Build configurations, spec files, AppImage resources, Inno Setup scripts
-├── docs/                     # Documentation files (ARCHITECTURE.md, USAGE.md, etc.)
+│   ├── assets/               # App icons and UI images
+│   ├── themes/               # JSON theme files
+│   ├── company_map.json      # Company name mappings for auto-naming
+│   ├── folder_maps.json      # Archive folder structure mappings
+│   ├── paths.json            # Default file paths JSON structure
+│   ├── settings.json         # Default app settings
+│   ├── sheets.json           # Spreadsheet JSON structure
+│   └── spreadsheet.json      # Legacy Spreadsheet JSON structure
+├── src/
+│   ├── interface/            # Legacy Tkinter GUI (used when "Legacy Mode" is enabled)
+│   │   ├── components/       # Reusable Tkinter UI components
+│   │   ├── settings/         # Tkinter settings pages
+│   │   └── setup/            # Tkinter onboarding wizard
+│   ├── qt_interface/         # Modern PySide6 GUI
+│   │   ├── qt_components/    # Reusable PySide6 UI components
+│   │   └── qt_settings/      # PySide6 settings pages
+│   ├── connections/          # External API connections (GitHub, Google)
+│   ├── managers/             # Core business logic
+│   │   ├── autoname/         # Auto-naming search engine (company, date, invoice #, etc.)
+│   │   ├── data_processing.py
+│   │   ├── file_management.py
+│   │   ├── history_manager.py
+│   │   ├── import_export.py
+│   │   └── printers.py
+│   └── utils/                # Utility functions and helpers
+├── tests/                    # Test scripts
+├── packaging/                # Build configs, spec files, AppImage, DEB, and Inno Setup
+│   ├── deb/                  # Debian package structure
+│   ├── InvoiceBuddy.AppDir/  # AppImage directory structure
+│   ├── InnoSetup.iss         # Windows installer script
+│   ├── requirements.txt      # Python dependencies
+│   ├── prebuild.py           # Pre-build version bumping script
+│   └── *.spec                # PyInstaller spec files
+├── docs/                     # Documentation
 ├── CHANGELOG.md
 ├── LICENSE.txt
 └── README.md
@@ -67,9 +89,9 @@ InvoiceBuddy/
 
 - **Separation of Concerns**: GUI code is kept separate from core logic where possible.
 - **Privacy First**: All processing happens locally. No telemetry or cloud services are used by default.
-- **Modularity**: Multiple filetypes are supported for spreadsheets and cloud integration is planned.
-- **Why PySide6**: Chosen for better styling, performance, and modern Qt features compared to the current Tkinter implementation.
-- **Build Strategy**: One-file executables for easy distribution while maintaining reasonable binary size.
+- **Modularity**: Multiple filetypes are supported for spreadsheets and local server integration is planned.
+- **Why PySide6**: Chosen for better styling, performance, and modern Qt features compared to the legacy Tkinter implementation.
+- **Build Strategy**: Simple executables for easy distribution while maintaining reasonable binary size.
 
 ## Data Flow (Simplified)
 
@@ -78,55 +100,22 @@ InvoiceBuddy/
 3. Extraction engine pulls key data
 4. Auto-naming feature generates a new filename based on file contents in a user-selected order
 5. Data is entered to a spreadsheet via the filenames via the spreadsheet entry button
-6. Files are moved to appropriate auto-generated folders when user clicks archive button
-7. All actions are logged to history for auditing
+6. PDFs are optionally shared with colleagues via the buddies feature
+7. Files are moved to appropriate auto-generated folders when user clicks archive button
 
 ## Extensibility Points
 
-- Adding support for more filetypes for both spreadsheets and invoices
+- Adding support for more filetypes for local spreadsheets
 - Extending auto-naming to meet more criteria
-- Adding spreadsheet generation logic
-- Incorporating printer support for making physical copies of invoices/receipts
+- Adding spreadsheet generation logic for faster onboarding
 - Supporting cloud-based spreadsheets like Google Sheets
+- Adding a local server option for broader device support
 
 ## Future Considerations
 
 - Full migration to PySide6 for a more modern and versatile GUI
 - Enhanced data validation and error handling
 - Expanded company list
-- Performance optimizations for large context windows
-
----
-
-## Folder Structure (deb - inside packaging/)
-
-``` bash
-deb/
-├── DEBIAN
-├── etc
-│   └── invoice-buddy
-└── usr
-    ├── bin
-    ├── lib
-    │   └── invoice-buddy
-    └── share
-        ├── applications
-        ├── doc
-        │   └── invoice-buddy
-        ├── icons
-        │   └── hicolor
-        │       ├── 128x128
-        │       │   └── apps
-        │       ├── 256x256
-        │       │   └── apps
-        │       └── scalable
-        ├── invoice-buddy
-        ├── man
-        │   └── man1
-        ├── metainfo
-        └── pixmaps
-
-```
 
 ---
 
@@ -148,3 +137,4 @@ deb/
 ---
 
 **Maintained by**: Phillip Schneider
+*Up to date as of v0.2.9*

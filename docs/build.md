@@ -62,7 +62,7 @@ Make sure to update the product version and file version with the correct versio
 
 To build an AppImage file, follow these steps after building the file with the previous commands.
 
-**IMPORTANT: Must have patchelf installed: `sudo apt patchelf`**
+**IMPORTANT: Must have patchelf installed: `sudo apt install patchelf`**
 
 Install appimagetool if not already installed:
 ```
@@ -180,5 +180,63 @@ Make sure to update the product version and file version with the correct versio
 *Note: Nuitka builds can take significantly longer than Pyinstaller. Assume 5-10 minutes to complete.*
 
 That's it! If you have any questions or run into any errors, you can report them via GitHub issues
+
+---
+
+## Folder Structure (deb)
+
+``` bash
+InvoiceBuddy/packaging/deb/
+├── DEBIAN/
+│   ├── control              # Package metadata (name, version, dependencies)
+│   ├── postinst             # Post-installation script
+│   ├── postrm               # Post-removal script
+│   ├── preinst              # Pre-installation script
+│   └── prerm                # Pre-removal script
+├── etc/
+│   └── invoice-buddy/       # System-level configuration directory
+└── usr/
+    ├── bin/                 # Compiled binary goes here during packaging
+    ├── lib/
+    │   └── invoice-buddy/   # Library files
+    └── share/
+        ├── applications/
+        │   └── invoice-buddy.desktop
+        ├── doc/
+        │   └── invoice-buddy/
+        │       └── changelog
+        ├── icons/
+        │   └── hicolor/
+        │       ├── 128x128/apps/
+        │       ├── 256x256/apps/
+        │       └── scalable/apps/
+        ├── invoice-buddy/   # App data files
+        ├── man/
+        │   └── man1/         # Man page
+        ├── metainfo/
+        │   └── invoice-buddy.metainfo.xml
+        └── pixmaps/
+            └── invoice-buddy.png
+
+```
+
+## Folder Structure (appimage)
+
+``` bash
+InvoiceBuddy/packaging/InvoiceBuddy.AppDir/
+├── AppRun                                    # AppImage entry point (must be executable)
+├── icon.png                                  # App icon
+├── io.github.pdschneider.invoicebuddy.desktop  # Desktop integration file
+└── usr/
+    ├── bin/                                  # Compiled binary goes here during packaging
+    └── share/
+        ├── applications/
+        │   └── io.github.pdschneider.invoice-buddy.desktop
+        └── metainfo/
+            └── io.github.pdschneider.invoicebuddy.appdata.xml
+
+```
+
+---
 
 *Up to date as of v0.2.9*
