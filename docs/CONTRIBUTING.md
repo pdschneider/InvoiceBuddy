@@ -30,7 +30,7 @@ Examples:
 
 ## Development Environment Setup
 
-See [build.md](docs/build.md) for detailed setup instructions including Python version, virtual environment creation, and system dependencies.
+See [build.md](build.md) for detailed setup instructions including Python version, virtual environment creation, and system dependencies.
 
 ## Release Process
 
@@ -47,7 +47,7 @@ Versions labeled -alpha are skipped entirely. Beta versions are marked as pre-re
 
 ## Project Structure
 
-See [architecture.md](docs/architecture.md) for a detailed breakdown of the codebase, folder structure, and key design decisions.
+See [architecture.md](architecture.md) for a detailed breakdown of the codebase, folder structure, and key design decisions.
 
 ## AI Usage Policy
 
