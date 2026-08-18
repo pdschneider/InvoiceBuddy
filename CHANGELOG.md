@@ -21,6 +21,9 @@ This update shifts from the old onefile mode to the much more robust standalone 
 - Strengthened app type detection logic, resolving restart and update errors
 - Icon properly displays on Windows
 
+### Documentation
+- Added CONTRIBUTING.md
+
 ## [0.2.8] - 2026-08-06
 
 This version of Invoice Buddy adds another step of Google Sheets integration and features various UI and bug fixes, as well as several new companies added!
