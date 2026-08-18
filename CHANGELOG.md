@@ -2,7 +2,7 @@
 
 All notable changes to **Invoice Buddy** will be located in this file.
 
-## [0.2.9-beta] - 2026-08-07
+## [0.2.9] - 2026-08-07
 
 This update shifts from the old onefile mode to the much more robust standalone mode (bundled as a folder under the hood with all dll files signed). This should silence any remaining Windows Defender false positives.
 
@@ -15,9 +15,11 @@ This update shifts from the old onefile mode to the much more robust standalone 
 - Built as a standalone folder on Windows rather than one single binary to avoid false positive Windows Defender errors
 - Updated Tesseract to v5.5.3
 - Improved window resizing logic and cursor detection
+- Updated dependencies
 
 ### Fixed
 - Strengthened app type detection logic, resolving restart and update errors
+- Icon properly displays on Windows
 
 ## [0.2.8] - 2026-08-06
 
