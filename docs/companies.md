@@ -65,6 +65,7 @@ This document lists every currently supported company with its **full official/l
 - Everything John Deere Gator
 - Precision Analytical Labortories
 - Parts Town
+- Global Equipment Company Inc. (Global Industrial)
 
 ## Government, Utilities & Public Agencies
 
@@ -130,6 +131,13 @@ This document lists every currently supported company with its **full official/l
 - Under Armour, Inc.
 - TJ Maxx
 - Michaels Stores
+- AEO Management Co. (Aerie)
+- IHOP Restaurants LLC
+- Campus Gyros
+- Burger King Corporation
+- Sport Clips, Inc.
+- Petco Animal Supplies, Inc.
+- Chops Lynnwood
 
 ## Miscellaneous / Technology & Services
 
@@ -181,10 +189,12 @@ This document lists every currently supported company with its **full official/l
 - IdentoGo by IDEMIA
 - Desktronic Trading US, Inc
 - Jiffy Lube International, Inc.
+- Code Blue Corporation
+- Les Schwab Tire Center
 
 ---
 
-**Last updated**: July 2026  
+**Last updated**: August 2026
 **Maintained by**: Phillip Schneider
 
 **Missing a company?**  

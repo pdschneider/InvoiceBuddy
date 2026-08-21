@@ -2,12 +2,12 @@
 
 All notable changes to **Invoice Buddy** will be located in this file.
 
-## [0.2.9] - 2026-08-07
+## [0.2.9] - 2026-08-20
 
-This update shifts from the old onefile mode to the much more robust standalone mode (bundled as a folder under the hood with all dll files signed). This should silence any remaining Windows Defender false positives.
+This update shifts from the old onefile mode to the much more robust standalone mode (bundled as a folder under the hood with all dll files signed) as well as improves on documentation and adds 15 new companies!
 
 ### Added
-- New vendors: City and Sign Electrical Services, Parts Town, Michaels Stores, Cuz Concrete Products Inc.
+- 15 New Companies: City and Sign Electrical Services, Parts Town, Michaels Stores, Cuz Concrete Products Inc., Aerie, IHOP Restaurants LLC, Campus Gyros, Code Blue Corporation, Burger King Corporation, Global Industrial, Sport Clips, Petco Animal Supplies, Chops Lynnwood, Les Schwab Tire Center
 - View Codeberg button added to help menu
 - Added actions when right-clicking the title bar
 
@@ -20,9 +20,14 @@ This update shifts from the old onefile mode to the much more robust standalone 
 ### Fixed
 - Strengthened app type detection logic, resolving restart and update errors
 - Icon properly displays on Windows
+- Fixed critical bug preventing spreadsheet data entry in the new GUI
 
 ### Documentation
 - Added CONTRIBUTING.md
+- Added SECURITY.md
+- Updated architecture doc
+- Updated build doc
+- Updated roadmap
 
 ## [0.2.8] - 2026-08-06
 

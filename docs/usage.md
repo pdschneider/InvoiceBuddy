@@ -1,13 +1,13 @@
 # 📖 How to Use Invoice Buddy
 
-Invoice Buddy makes repetitive invoice processing much faster by automatically scanning files, suggesting smart filenames, helping you enter data into a spreadsheet, and archiving everything with one click.
+Invoice Buddy makes repetitive invoice processing much faster by automatically scanning files, suggesting smart filenames, helping you enter data into a spreadsheet, and archiving everything with just a few clicks.
 
 This guide walks you through the main workflow and features.
 
 ## Getting Started
 
 1. **Launch Invoice Buddy**  
-   Run the built executable (`InvoiceBuddy.exe` on Windows or `InvoiceBuddy.AppImage` on Linux).
+   Run the built executable (`InvoiceBuddy.exe` on Windows or `InvoiceBuddy.AppImage` or `InvoiceBuddy.deb` on Linux).
 
 2. **Complete the Onboarding (first time only)**  
    The setup wizard will guide you through:
@@ -34,7 +34,7 @@ After clicking the auto-name button, Invoice Buddy will scan each file and:
 
 ### 3. Enter Data into Spreadsheet
 - Select one or multiple files
-- Click **Enter to Spreadsheet** button (pen icon)
+- Click **Enter to Spreadsheet** button
 - Invoice Buddy will append the extracted data to your configured spreadsheet
 
 ### 4. Archive Files

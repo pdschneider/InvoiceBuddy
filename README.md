@@ -12,7 +12,7 @@ care of it for you.
 
 ### ✨ Features
 
-- Automatic filename generation based on file contents
+- Automatic filename generation supporting 160+ companies, municipalities, and government departments
 - One-click spreadsheet entry
 - Simple archiving
 - Local-only processing (nothing sent online)

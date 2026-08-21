@@ -14,16 +14,21 @@ def parse_sheet_qt(globals, sheet_name, file_list=None):
     Qt-mode parser: writes filename data to a user-defined sheet.
     Reads sheet config (workbook, starting row/col, column order) from sheet_data.
     """
+
+    # Exit early if no files are selected
     if not file_list:
         show_toast(globals, "Please select one or more files to enter.")
         return
 
+    # Get sheet config (name, color, workbook path, first row/column, column order)
     sheet_config = None
     for sheet in globals.sheet_data.get("sheets", []):
         if sheet.get("name") == sheet_name:
             sheet_config = sheet
+            logging.debug(f"Sheet Config: {sheet_config}")
             break
 
+    # Exit if sheet name is not found in sheet config
     if not sheet_config:
         logging.error(f"Sheet '{sheet_name}' not found in sheet definitions.")
         return
@@ -33,13 +38,27 @@ def parse_sheet_qt(globals, sheet_name, file_list=None):
         show_toast(globals, f"No valid workbook for sheet '{sheet_name}'.", _type="error")
         return
 
+    # Use correct workbook
+    if not globals.legacy_mode:
+        globals.workbook = workbook_path
+
+    # Extract workbook to memory object and return if empty
     wb = encryption_handler(globals)
     if not wb:
+        return
+
+    # Ensure chosen sheet name is in workbook sheet names
+    wb_sheets = wb.sheetnames
+    logging.debug(f"Available Sheets: {wb_sheets}")
+    if sheet_name not in wb_sheets:
+        logging.warning(f"{sheet_name} not found in workbook.")
+        show_toast(globals, message=f"{sheet_name} not in workbook")
         return
 
     try:
         base_names = [os.path.basename(f) for f in file_list]
         sheet = wb[sheet_config.get("sheet_name", sheet_name)]
+        logging.debug(f"Sheet Name: {sheet}")
 
         starting_row = sheet_config.get("first_row", 3)
         starting_column = sheet_config.get("first_column", 1)
@@ -74,6 +93,7 @@ def parse_sheet_qt(globals, sheet_name, file_list=None):
 
     except Exception as e:
         logging.error(f"Qt sheet parsing error for '{sheet_name}': {e}")
+        show_toast(globals, message=f"Error: '{sheet_name}': {e}", _type="error")
 
 
 def paths_check(globals):
