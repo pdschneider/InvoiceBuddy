@@ -1,4 +1,4 @@
-# Interface/Settings/spreadsheet_settings.py
+# src/interface/settings/spreadsheet_settings.py
 import customtkinter as ctk
 from tkinter import messagebox
 from PySide6.QtWidgets import QMessageBox
@@ -12,12 +12,12 @@ import subprocess
 import sys
 
 
-def create_spreadsheet_settings_tab(globals, spreadsheet_tab):
+def create_spreadsheet_settings_tab(globs, spreadsheet_tab):
     """
     Create the Settings tab for configuring paths and advanced settings.
 
     Args:
-        globals (globals): The global configuration object
+        globs (globs): The global configuration object
         containing UI variables and settings.
     """
 
@@ -34,11 +34,11 @@ def create_spreadsheet_settings_tab(globals, spreadsheet_tab):
     components_list = ["Company", "Date", "Invoice #", "Card Number", ""]
 
     # Invoices
-    globals.invoice_sheet_label = ctk.CTkLabel(
+    globs.invoice_sheet_label = ctk.CTkLabel(
         scrollable_frame,
         font=fonts.title_font,
-        text=globals.sheet_invoices)
-    globals.invoice_sheet_label.pack(
+        text=globs.sheet_invoices)
+    globs.invoice_sheet_label.pack(
         pady=20, fill="x", anchor="center", padx=10)
 
     # Invoice Paths Frame
@@ -55,7 +55,7 @@ def create_spreadsheet_settings_tab(globals, spreadsheet_tab):
 
     ctk.CTkEntry(invoice_paths_section,
                  width=200,
-                 textvariable=globals.sheet_invoices_var
+                 textvariable=globs.sheet_invoices_var
                  ).grid(row=0, column=1, padx=(0, 10), sticky="w")
 
     # Invoice Table
@@ -66,7 +66,7 @@ def create_spreadsheet_settings_tab(globals, spreadsheet_tab):
 
     ctk.CTkEntry(invoice_paths_section,
                  width=200,
-                 textvariable=globals.table_InvoiceTable_var
+                 textvariable=globs.table_InvoiceTable_var
                  ).grid(row=1, column=1, padx=(0, 10), sticky="w")
 
     # Invoice Starting Row
@@ -80,14 +80,14 @@ def create_spreadsheet_settings_tab(globals, spreadsheet_tab):
     slider_frame_1.grid(row=2, column=1, padx=(0, 10), sticky="w")
 
     slider_1 = ctk.CTkSlider(slider_frame_1,
-                             variable=globals.invoice_starting_row_var,
+                             variable=globs.invoice_starting_row_var,
                              from_=1, to=10, number_of_steps=9,
                              width=200)
     slider_1.pack(side="left", padx=(0, 8))
 
     slider_label_1 = ctk.CTkLabel(
         slider_frame_1,
-        textvariable=globals.invoice_starting_row_var)
+        textvariable=globs.invoice_starting_row_var)
     slider_label_1.pack(side="left")
 
     # Invoice Starting Column
@@ -101,14 +101,14 @@ def create_spreadsheet_settings_tab(globals, spreadsheet_tab):
     slider_frame_2.grid(row=3, column=1, padx=(0, 10), sticky="w")
 
     slider_2 = ctk.CTkSlider(slider_frame_2,
-                             variable=globals.invoice_starting_column_var,
+                             variable=globs.invoice_starting_column_var,
                              from_=1, to=10, number_of_steps=9,
                              width=200)
     slider_2.pack(side="left", padx=(0, 8))
 
     slider_label_2 = ctk.CTkLabel(
         slider_frame_2,
-        textvariable=globals.invoice_starting_column_var)
+        textvariable=globs.invoice_starting_column_var)
     slider_label_2.pack(side="left")
 
     ctk.CTkLabel(invoice_paths_section,
@@ -123,22 +123,22 @@ def create_spreadsheet_settings_tab(globals, spreadsheet_tab):
 
     invoice_a_box = ctk.CTkComboBox(invoice_components_frame,
                                     values=components_list,
-                                    variable=globals.invoice_com_a_var)
+                                    variable=globs.invoice_com_a_var)
     invoice_a_box.grid(row=1, column=1, padx=5)
 
     invoice_b_box = ctk.CTkComboBox(invoice_components_frame,
                                     values=components_list,
-                                    variable=globals.invoice_com_b_var)
+                                    variable=globs.invoice_com_b_var)
     invoice_b_box.grid(row=1, column=2, padx=5)
 
     invoice_c_box = ctk.CTkComboBox(invoice_components_frame,
                                     values=components_list,
-                                    variable=globals.invoice_com_c_var)
+                                    variable=globs.invoice_com_c_var)
     invoice_c_box.grid(row=1, column=3, padx=5)
 
     invoice_d_box = ctk.CTkComboBox(invoice_components_frame,
                                     values=components_list,
-                                    variable=globals.invoice_com_d_var)
+                                    variable=globs.invoice_com_d_var)
     invoice_d_box.grid(row=1, column=4, padx=5)
 
     # Invoice Icon
@@ -149,7 +149,7 @@ def create_spreadsheet_settings_tab(globals, spreadsheet_tab):
     invoice_icon_button = ctk.CTkButton(invoice_paths_section,
                                         text=None,
                                         width=45,
-                                        image=globals.invoice_icon)
+                                        image=globs.invoice_icon)
     invoice_icon_button.grid(row=5, column=1, padx=5, sticky="w")
 
     ctk.CTkLabel(invoice_paths_section,
@@ -164,17 +164,17 @@ def create_spreadsheet_settings_tab(globals, spreadsheet_tab):
 
     def switch_invoice_icon(current_icon):
         """Switches invoice icon to selected icon"""
-        globals.invoice_icon_path = current_icon
-        globals.invoice_icon = CTkImage(
+        globs.invoice_icon_path = current_icon
+        globs.invoice_icon = CTkImage(
             light_image=Image.open(
-                load_data_path("config", globals.invoice_icon_path)),
+                load_data_path("config", globs.invoice_icon_path)),
             dark_image=Image.open(
-                load_data_path("config", globals.invoice_icon_path)),
+                load_data_path("config", globs.invoice_icon_path)),
             size=(30, 30))
 
-        invoice_icon_button.configure(image=globals.invoice_icon)
+        invoice_icon_button.configure(image=globs.invoice_icon)
 
-    for icon in globals.icons_list:
+    for icon in globs.icons_list:
         new_icon = CTkImage(
             light_image=Image.open(load_data_path("config", icon)),
             dark_image=Image.open(load_data_path("config", icon)),
@@ -187,10 +187,10 @@ def create_spreadsheet_settings_tab(globals, spreadsheet_tab):
             image=new_icon).pack(side="left", padx=4, pady=4)
 
     # Cards
-    globals.card_sheet_label = ctk.CTkLabel(scrollable_frame,
+    globs.card_sheet_label = ctk.CTkLabel(scrollable_frame,
                                             font=fonts.title_font,
-                                            text=globals.sheet_CreditCards)
-    globals.card_sheet_label.pack(pady=20, fill="x", anchor="center", padx=10)
+                                            text=globs.sheet_CreditCards)
+    globs.card_sheet_label.pack(pady=20, fill="x", anchor="center", padx=10)
 
     # Cards Paths Frame
     cards_paths_section = ctk.CTkFrame(
@@ -206,7 +206,7 @@ def create_spreadsheet_settings_tab(globals, spreadsheet_tab):
 
     ctk.CTkEntry(cards_paths_section,
                  width=200,
-                 textvariable=globals.sheet_CreditCards_var
+                 textvariable=globs.sheet_CreditCards_var
                  ).grid(row=0, column=1, padx=(0, 10), sticky="w")
 
     # Cards Table
@@ -217,7 +217,7 @@ def create_spreadsheet_settings_tab(globals, spreadsheet_tab):
 
     ctk.CTkEntry(cards_paths_section,
                  width=200,
-                 textvariable=globals.table_CreditCards_var
+                 textvariable=globs.table_CreditCards_var
                  ).grid(row=1, column=1, padx=(0, 10), sticky="w")
 
     # Cards Starting Row
@@ -230,13 +230,13 @@ def create_spreadsheet_settings_tab(globals, spreadsheet_tab):
     slider_frame_3.grid(row=2, column=1, padx=(0, 10), sticky="w")
 
     slider_3 = ctk.CTkSlider(slider_frame_3,
-                             variable=globals.card_starting_row_var,
+                             variable=globs.card_starting_row_var,
                              from_=1, to=10, number_of_steps=9,
                              width=200)
     slider_3.pack(side="left", padx=(0, 8))
 
     slider_label_3 = ctk.CTkLabel(slider_frame_3,
-                                  textvariable=globals.card_starting_row_var)
+                                  textvariable=globs.card_starting_row_var)
     slider_label_3.pack(side="left")
 
     # Cards Starting Column
@@ -249,14 +249,14 @@ def create_spreadsheet_settings_tab(globals, spreadsheet_tab):
     slider_frame_4.grid(row=3, column=1, padx=(0, 10), sticky="w")
 
     slider_4 = ctk.CTkSlider(slider_frame_4,
-                             variable=globals.card_starting_column_var,
+                             variable=globs.card_starting_column_var,
                              from_=1, to=10, number_of_steps=9,
                              width=200)
     slider_4.pack(side="left", padx=(0, 8))
 
     slider_label_4 = ctk.CTkLabel(
         slider_frame_4,
-        textvariable=globals.card_starting_column_var)
+        textvariable=globs.card_starting_column_var)
     slider_label_4.pack(side="left")
 
     ctk.CTkLabel(cards_paths_section,
@@ -271,22 +271,22 @@ def create_spreadsheet_settings_tab(globals, spreadsheet_tab):
 
     card_a_box = ctk.CTkComboBox(card_components_frame,
                                  values=components_list,
-                                 variable=globals.card_com_a_var)
+                                 variable=globs.card_com_a_var)
     card_a_box.grid(row=1, column=1, padx=5)
 
     card_b_box = ctk.CTkComboBox(card_components_frame,
                                  values=components_list,
-                                 variable=globals.card_com_b_var)
+                                 variable=globs.card_com_b_var)
     card_b_box.grid(row=1, column=2, padx=5)
 
     card_c_box = ctk.CTkComboBox(card_components_frame,
                                  values=components_list,
-                                 variable=globals.card_com_c_var)
+                                 variable=globs.card_com_c_var)
     card_c_box.grid(row=1, column=3, padx=5)
 
     card_d_box = ctk.CTkComboBox(card_components_frame,
                                  values=components_list,
-                                 variable=globals.card_com_d_var)
+                                 variable=globs.card_com_d_var)
     card_d_box.grid(row=1, column=4, padx=5)
 
     ctk.CTkLabel(cards_paths_section,
@@ -296,7 +296,7 @@ def create_spreadsheet_settings_tab(globals, spreadsheet_tab):
     card_icon_button = ctk.CTkButton(cards_paths_section,
                                      text=None,
                                      width=45,
-                                     image=globals.card_icon)
+                                     image=globs.card_icon)
     card_icon_button.grid(row=5, column=1, padx=5, sticky="w")
 
     ctk.CTkLabel(cards_paths_section,
@@ -306,22 +306,22 @@ def create_spreadsheet_settings_tab(globals, spreadsheet_tab):
 
     def switch_card_icon(current_icon):
         """Switches invoice icon to selected icon"""
-        globals.card_icon_path = current_icon
-        globals.card_icon = CTkImage(
+        globs.card_icon_path = current_icon
+        globs.card_icon = CTkImage(
             light_image=Image.open(
-                load_data_path("config", globals.card_icon_path)),
+                load_data_path("config", globs.card_icon_path)),
             dark_image=Image.open(
-                load_data_path("config", globals.card_icon_path)),
+                load_data_path("config", globs.card_icon_path)),
             size=(30, 30))
 
-        card_icon_button.configure(image=globals.card_icon)
+        card_icon_button.configure(image=globs.card_icon)
 
     # Cards image selection sub-frame
     cards_icons_frame = ctk.CTkFrame(
         cards_paths_section, fg_color="transparent")
     cards_icons_frame.grid(row=6, column=1, padx=(0, 10), sticky="w")
 
-    for icon in globals.icons_list:
+    for icon in globs.icons_list:
         new_icon = CTkImage(
             light_image=Image.open(load_data_path("config", icon)),
             dark_image=Image.open(load_data_path("config", icon)),
@@ -334,10 +334,10 @@ def create_spreadsheet_settings_tab(globals, spreadsheet_tab):
             image=new_icon).pack(side="left", padx=4, pady=4)
 
     # Purchase Orders
-    globals.po_sheet_label = ctk.CTkLabel(scrollable_frame,
+    globs.po_sheet_label = ctk.CTkLabel(scrollable_frame,
                                           font=fonts.title_font,
-                                          text=globals.sheet_PurchaseOrders)
-    globals.po_sheet_label.pack(pady=20, fill="x", anchor="center", padx=10)
+                                          text=globs.sheet_PurchaseOrders)
+    globs.po_sheet_label.pack(pady=20, fill="x", anchor="center", padx=10)
 
     # PO Paths Frame
     po_paths_section = ctk.CTkFrame(scrollable_frame, fg_color="transparent")
@@ -352,7 +352,7 @@ def create_spreadsheet_settings_tab(globals, spreadsheet_tab):
 
     ctk.CTkEntry(po_paths_section,
                  width=200,
-                 textvariable=globals.sheet_PurchaseOrders_var
+                 textvariable=globs.sheet_PurchaseOrders_var
                  ).grid(row=0, column=1, padx=(0, 10), sticky="w")
 
     # Purchase Orders Table
@@ -363,7 +363,7 @@ def create_spreadsheet_settings_tab(globals, spreadsheet_tab):
 
     ctk.CTkEntry(po_paths_section,
                  width=200,
-                 textvariable=globals.table_PurchaseOrders_var
+                 textvariable=globs.table_PurchaseOrders_var
                  ).grid(row=1, column=1, padx=(0, 10), sticky="w")
 
     # Purchase Orders Starting Row
@@ -376,13 +376,13 @@ def create_spreadsheet_settings_tab(globals, spreadsheet_tab):
     slider_frame_5.grid(row=2, column=1, padx=(0, 10), sticky="w")
 
     slider_5 = ctk.CTkSlider(slider_frame_5,
-                             variable=globals.po_starting_row_var,
+                             variable=globs.po_starting_row_var,
                              from_=1, to=10, number_of_steps=9,
                              width=200)
     slider_5.pack(side="left", padx=(0, 8))
 
     slider_label_5 = ctk.CTkLabel(slider_frame_5,
-                                  textvariable=globals.po_starting_row_var)
+                                  textvariable=globs.po_starting_row_var)
     slider_label_5.pack(side="left")
 
     # Purchase Orders Starting Column
@@ -395,13 +395,13 @@ def create_spreadsheet_settings_tab(globals, spreadsheet_tab):
     slider_frame_6.grid(row=3, column=1, padx=(0, 10), sticky="w")
 
     slider_6 = ctk.CTkSlider(slider_frame_6,
-                             variable=globals.po_starting_column_var,
+                             variable=globs.po_starting_column_var,
                              from_=1, to=10, number_of_steps=9,
                              width=200)
     slider_6.pack(side="left", padx=(0, 8))
 
     slider_label_6 = ctk.CTkLabel(slider_frame_6,
-                                  textvariable=globals.po_starting_column_var)
+                                  textvariable=globs.po_starting_column_var)
     slider_label_6.pack(side="left")
 
     ctk.CTkLabel(po_paths_section,
@@ -416,22 +416,22 @@ def create_spreadsheet_settings_tab(globals, spreadsheet_tab):
 
     po_a_box = ctk.CTkComboBox(po_components_frame,
                                values=components_list,
-                               variable=globals.po_com_a_var)
+                               variable=globs.po_com_a_var)
     po_a_box.grid(row=1, column=1, padx=5)
 
     po_b_box = ctk.CTkComboBox(po_components_frame,
                                values=components_list,
-                               variable=globals.po_com_b_var)
+                               variable=globs.po_com_b_var)
     po_b_box.grid(row=1, column=2, padx=5)
 
     po_c_box = ctk.CTkComboBox(po_components_frame,
                                values=components_list,
-                               variable=globals.po_com_c_var)
+                               variable=globs.po_com_c_var)
     po_c_box.grid(row=1, column=3, padx=5)
 
     po_d_box = ctk.CTkComboBox(po_components_frame,
                                values=components_list,
-                               variable=globals.po_com_d_var)
+                               variable=globs.po_com_d_var)
     po_d_box.grid(row=1, column=4, padx=5)
 
     ctk.CTkLabel(po_paths_section,
@@ -441,7 +441,7 @@ def create_spreadsheet_settings_tab(globals, spreadsheet_tab):
     po_icon_button = ctk.CTkButton(po_paths_section,
                                    text=None,
                                    width=45,
-                                   image=globals.po_icon)
+                                   image=globs.po_icon)
     po_icon_button.grid(row=5, column=1, padx=5, sticky="w")
 
     ctk.CTkLabel(po_paths_section,
@@ -451,21 +451,21 @@ def create_spreadsheet_settings_tab(globals, spreadsheet_tab):
 
     def switch_po_icon(current_icon):
         """Switches invoice icon to selected icon"""
-        globals.po_icon_path = current_icon
-        globals.po_icon = CTkImage(
+        globs.po_icon_path = current_icon
+        globs.po_icon = CTkImage(
                 light_image=Image.open(
-                    load_data_path("config", globals.po_icon_path)),
+                    load_data_path("config", globs.po_icon_path)),
                 dark_image=Image.open(
-                    load_data_path("config", globals.po_icon_path)),
+                    load_data_path("config", globs.po_icon_path)),
                 size=(30, 30))
 
-        po_icon_button.configure(image=globals.po_icon)
+        po_icon_button.configure(image=globs.po_icon)
 
     # Purchase Orders image selection sub-frame
     po_icons_frame = ctk.CTkFrame(po_paths_section, fg_color="transparent")
     po_icons_frame.grid(row=6, column=1, padx=(0, 10), sticky="w")
 
-    for icon in globals.icons_list:
+    for icon in globs.icons_list:
         new_icon = CTkImage(
             light_image=Image.open(load_data_path("config", icon)),
             dark_image=Image.open(load_data_path("config", icon)),
@@ -483,44 +483,44 @@ def create_spreadsheet_settings_tab(globals, spreadsheet_tab):
 
     ctk.CTkButton(save_button_frame,
                   text="Save Settings",
-                  command=lambda: save_button(globals)).pack()
+                  command=lambda: save_button(globs)).pack()
 
-    def save_button(globals):
+    def save_button(globs):
         """Saves and prompts for restart if required."""
         prompt_restart = False
-        if globals.github_check != globals.github_check_var.get():
+        if globs.github_check != globs.github_check_var.get():
             prompt_restart = True
-        elif globals.active_theme != globals.theme_var.get():
+        elif globs.active_theme != globs.theme_var.get():
             prompt_restart = True
-        elif globals.beta != globals.beta_var.get():
+        elif globs.beta != globs.beta_var.get():
             prompt_restart = True
-        elif globals.legacy_mode != globals.legacy_mode_var.get():
+        elif globs.legacy_mode != globs.legacy_mode_var.get():
             prompt_restart = True
-        save_all_settings(globals)
+        save_all_settings(globs)
 
         if prompt_restart:
-            if not globals.legacy_mode:
+            if not globs.legacy_mode:
                 reply = QMessageBox.question(
                     None,
                     "Restart Pearl?",
-                    f"Would you like to restart Pearl to apply all changes?",
+                    f"Would you like to restart Invoice Buddy to apply all changes?",
                     QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
                     QMessageBox.StandardButton.Yes)
                 if reply == QMessageBox.StandardButton.Yes:
                     try:
-                        subprocess.Popen(globals.app_path)
+                        subprocess.Popen(globs.app_path)
                         sys.exit(0)
                     except Exception as e:
                         logging.error(f"Could not restart app due to: {e}")
             else:
                     reply = messagebox.askyesno(
-                        parent=globals.root,
+                        parent=globs.root,
                         title="Restart Pearl",
-                        message="Would you like restart Pearl to apply all changes?")
+                        message="Would you like restart Invoice Buddy to apply all changes?")
                     if reply:
                         try:
-                            logging.debug(f"App Path: {globals.app_path}")
-                            subprocess.Popen(globals.app_path)
+                            logging.debug(f"App Path: {globs.app_path}")
+                            subprocess.Popen(globs.app_path)
                         except Exception as e:
                             logging.error(f"Unable to open program due to: {e}")
                         sys.exit(0)

@@ -1,4 +1,4 @@
-#Utils/dependencies.py
+# src/utils/dependencies.py
 import ctypes
 import platform
 import tkinter as tk

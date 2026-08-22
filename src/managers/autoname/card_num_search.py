@@ -1,4 +1,4 @@
-# Managers/Autoname/card_num_search.py
+# src/managers/autoname/card_num_search.py
 import re
 import os
 import logging

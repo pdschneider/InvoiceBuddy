@@ -1,11 +1,11 @@
 # src/qt_interface/qt_components/qt_sidebar.py
 from PySide6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, 
-                               QPushButton, QLabel, QScrollArea, QListWidget, QListWidgetItem)
-from PySide6.QtCore import Qt, QPropertyAnimation, QEasingCurve, QRect
-from PySide6.QtGui import QColor, QFont
+                               QPushButton, QLabel, QListWidget,
+                               QListWidgetItem)
+from PySide6.QtCore import Qt
 from src.managers.file_management import add_files
 
-def create_sidebar(globals):
+def create_sidebar(globs):
     """Creates the Invoice Buddy sidebar with folder navigation."""
 
     sidebar = QWidget()
@@ -26,7 +26,7 @@ def create_sidebar(globals):
     add_btn.setFixedWidth(120)
     add_btn.setStyleSheet("background-color: #2ecc70; color: white; font-weight: bold;")
     add_btn.setCursor(Qt.PointingHandCursor)
-    add_btn.clicked.connect(lambda: add_files(globals))
+    add_btn.clicked.connect(lambda: add_files(globs))
     top_layout.addWidget(add_btn)
 
     top_layout.addStretch()
@@ -67,36 +67,36 @@ def create_sidebar(globals):
         item.setData(Qt.UserRole, folder.lower()) # Store key
         nav_list.addItem(item)
 
-    nav_list.itemClicked.connect(lambda item: on_folder_click(item, globals))
+    nav_list.itemClicked.connect(lambda item: on_folder_click(item, globs))
 
     layout.addWidget(nav_list, stretch=1)
 
     # Store references
-    globals.sidebar = sidebar
-    globals.sidebar_nav_list = nav_list
-    globals.sidebar_is_open = True # Default open for this layout
+    globs.sidebar = sidebar
+    globs.sidebar_nav_list = nav_list
+    globs.sidebar_is_open = True # Default open for this layout
 
     return sidebar
 
 
-def toggle_sidebar(globals, sidebar):
+def toggle_sidebar(globs, sidebar):
     """Toggles sidebar visibility (optional for this layout, but good to have)."""
-    if globals.sidebar_is_open:
+    if globs.sidebar_is_open:
         sidebar.hide()
-        globals.sidebar_is_open = False
+        globs.sidebar_is_open = False
     else:
         sidebar.show()
-        globals.sidebar_is_open = True
+        globs.sidebar_is_open = True
 
 
-def on_folder_click(item, globals):
+def on_folder_click(item, globs):
     """Handles clicking a folder in the sidebar navigation."""
     folder_key = item.data(Qt.UserRole)
 
     if folder_key == 'inbox':
-        globals.current_folder = globals.inbox
+        globs.current_folder = globs.inbox
     elif folder_key == 'archive':
-        globals.current_folder = globals.archive
+        globs.current_folder = globs.archive
     elif folder_key == 'budget':
         return  # Not implemented yet
     elif folder_key == 'trash':
@@ -105,12 +105,12 @@ def on_folder_click(item, globals):
         return
 
     # Clear the preview pane
-    if hasattr(globals, 'preview_meta') and globals.preview_meta:
-        globals.preview_meta.setText("Select a file to view details")
-    if hasattr(globals, 'pdf_viewer') and globals.pdf_viewer:
-        globals.pdf_viewer.doc.close()
-        globals.pdf_viewer.view.setDocument(globals.pdf_viewer.doc)
+    if hasattr(globs, 'preview_meta') and globs.preview_meta:
+        globs.preview_meta.setText("Select a file to view details")
+    if hasattr(globs, 'pdf_viewer') and globs.pdf_viewer:
+        globs.pdf_viewer.doc.close()
+        globs.pdf_viewer.view.setDocument(globs.pdf_viewer.doc)
 
     # Refresh the mailbox
-    if hasattr(globals, 'mailbox') and globals.mailbox:
-        globals.mailbox.refresh_files(globals.current_folder)
+    if hasattr(globs, 'mailbox') and globs.mailbox:
+        globs.mailbox.refresh_files(globs.current_folder)

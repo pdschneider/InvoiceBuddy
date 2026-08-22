@@ -9,7 +9,7 @@ from src.managers.history_manager import load_history, add_update_history
 from src.utils.toast import show_toast
 
 
-def parse_sheet_qt(globals, sheet_name, file_list=None):
+def parse_sheet_qt(globs, sheet_name, file_list=None):
     """
     Qt-mode parser: writes filename data to a user-defined sheet.
     Reads sheet config (workbook, starting row/col, column order) from sheet_data.
@@ -17,12 +17,12 @@ def parse_sheet_qt(globals, sheet_name, file_list=None):
 
     # Exit early if no files are selected
     if not file_list:
-        show_toast(globals, "Please select one or more files to enter.")
+        show_toast(globs, "Please select one or more files to enter.")
         return
 
     # Get sheet config (name, color, workbook path, first row/column, column order)
     sheet_config = None
-    for sheet in globals.sheet_data.get("sheets", []):
+    for sheet in globs.sheet_data.get("sheets", []):
         if sheet.get("name") == sheet_name:
             sheet_config = sheet
             logging.debug(f"Sheet Config: {sheet_config}")
@@ -35,15 +35,15 @@ def parse_sheet_qt(globals, sheet_name, file_list=None):
 
     workbook_path = sheet_config.get("workbook", "")
     if not os.path.isfile(workbook_path):
-        show_toast(globals, f"No valid workbook for sheet '{sheet_name}'.", _type="error")
+        show_toast(globs, f"No valid workbook for sheet '{sheet_name}'.", _type="error")
         return
 
     # Use correct workbook
-    if not globals.legacy_mode:
-        globals.workbook = workbook_path
+    if not globs.legacy_mode:
+        globs.workbook = workbook_path
 
     # Extract workbook to memory object and return if empty
-    wb = encryption_handler(globals)
+    wb = encryption_handler(globs)
     if not wb:
         return
 
@@ -52,7 +52,7 @@ def parse_sheet_qt(globals, sheet_name, file_list=None):
     logging.debug(f"Available Sheets: {wb_sheets}")
     if sheet_name not in wb_sheets:
         logging.warning(f"{sheet_name} not found in workbook.")
-        show_toast(globals, message=f"{sheet_name} not in workbook")
+        show_toast(globs, message=f"{sheet_name} not in workbook")
         return
 
     try:
@@ -93,26 +93,26 @@ def parse_sheet_qt(globals, sheet_name, file_list=None):
 
     except Exception as e:
         logging.error(f"Qt sheet parsing error for '{sheet_name}': {e}")
-        show_toast(globals, message=f"Error: '{sheet_name}': {e}", _type="error")
+        show_toast(globs, message=f"Error: '{sheet_name}': {e}", _type="error")
 
 
-def paths_check(globals):
+def paths_check(globs):
     """Ensures that the workbook is writable and inbox path is valid."""
     try:
         # Check if inbox path is valid
-        if os.path.isdir(globals.inbox):
+        if os.path.isdir(globs.inbox):
             pass
-        elif os.path.isdir(globals.inbox_dir_var.get().strip()):
-            globals.inbox = globals.inbox_dir_var.get().strip()
+        elif os.path.isdir(globs.inbox_dir_var.get().strip()):
+            globs.inbox = globs.inbox_dir_var.get().strip()
         else:
             logging.warning(f"Inbox path not valid - Skipping entering data.")
             return False
 
         # Check if workbook path is valid
-        if os.path.isfile(globals.workbook):
+        if os.path.isfile(globs.workbook):
             pass
-        elif os.path.isfile(globals.workbook_var.get().strip()):
-            globals.workbook = globals.workbook_var.get().strip()
+        elif os.path.isfile(globs.workbook_var.get().strip()):
+            globs.workbook = globs.workbook_var.get().strip()
         else:
             logging.warning(f"Workbook path not valid - Skipping entering data.")
             return False
@@ -120,7 +120,7 @@ def paths_check(globals):
         # Ensure workbook has writable filesystem permissions
         # This only checks for general filesystem permissions,
         # NOT file locks such as when another user has the spreadhseet open.
-        if os.access(globals.workbook, os.W_OK):
+        if os.access(globs.workbook, os.W_OK):
             pass
         else:
             logging.error(f"Permission denied to write to workbook via filesystem permissions.")
@@ -134,7 +134,7 @@ def paths_check(globals):
         return False
 
 
-def encryption_handler(globals):
+def encryption_handler(globs):
     """
     Returns a wb object and handles encrypted workbooks.
     
@@ -145,7 +145,7 @@ def encryption_handler(globals):
 
     try:
         # Check to see if workbook is encrypted
-        with open(globals.workbook, "rb") as f:
+        with open(globs.workbook, "rb") as f:
             workbook_file = msoffcrypto.OfficeFile(f)
             is_encrypted = workbook_file.is_encrypted()
 
@@ -158,7 +158,7 @@ def encryption_handler(globals):
             if password:
                 decrypted = BytesIO()
                 try:
-                    with open(globals.workbook, 'rb') as f:
+                    with open(globs.workbook, 'rb') as f:
                         file = msoffcrypto.OfficeFile(f)
                         file.load_key(password=password)
                         file.decrypt(decrypted)
@@ -169,7 +169,7 @@ def encryption_handler(globals):
                 # Return if password entry failed
                 if is_encrypted:
                     logging.error(f"Decryption failed.")
-                    show_toast(globals, message="Decryption failed - wrong password?")
+                    show_toast(globs, message="Decryption failed - wrong password?")
                     return False
 
                 # Return decrypted workbook
@@ -181,19 +181,19 @@ def encryption_handler(globals):
                 logging.info(f"Exited password entry.")
                 return False
         else: # If not encrypted
-            wb = load_workbook(globals.workbook)
+            wb = load_workbook(globs.workbook)
             return wb
     except Exception as e:
         logging.error(f"Unable to generate workbook object due to: {e}")
         return False
 
 
-def parse_invoices(globals, history_tree, file_list=None):
+def parse_invoices(globs, history_tree, file_list=None):
     """
     Writes filename data to the Invoices sheet of the workbook,
     respecting a configurable starting column.
 
-        globals:        Global variables
+        globs:        Global variables
         history_tree:   Tkinter treeview
         file_list:      list of filepath strings from the inbox view
                         ex: ['/home/phillip/Phillip Inbox/03-04-26 109215.pdf']
@@ -202,16 +202,16 @@ def parse_invoices(globals, history_tree, file_list=None):
                         ex: ['03-04-26 109215.pdf']
     """
     # Return if inbox or workbook paths are not valid
-    if not paths_check(globals):
+    if not paths_check(globs):
         return
 
     # Return if file list is empty
     if not file_list:
-        show_toast(globals, "Please select one or more files to enter.")
+        show_toast(globs, "Please select one or more files to enter.")
         return
 
     # Generate wb object, return if empty
-    wb = encryption_handler(globals)
+    wb = encryption_handler(globs)
     if not wb:
         return
 
@@ -219,19 +219,19 @@ def parse_invoices(globals, history_tree, file_list=None):
         base_names = [os.path.basename(f) for f in file_list]
 
         # Generate sheet object
-        sheet = wb[globals.sheet_invoices]
+        sheet = wb[globs.sheet_invoices]
 
         # Set starting row
-        if globals.invoice_starting_row and isinstance(globals.invoice_starting_row, int):
-            current_row = globals.invoice_starting_row
+        if globs.invoice_starting_row and isinstance(globs.invoice_starting_row, int):
+            current_row = globs.invoice_starting_row
         else:
             current_row = 1
             logging.error(
                 f"Could not read invoice starting row. Defaulting to 1.")
 
         # Set starting column
-        if globals.invoice_starting_column and isinstance(globals.invoice_starting_column, int):
-            starting_column = globals.invoice_starting_column
+        if globs.invoice_starting_column and isinstance(globs.invoice_starting_column, int):
+            starting_column = globs.invoice_starting_column
         else:
             starting_column = 1
             logging.error(
@@ -267,45 +267,45 @@ def parse_invoices(globals, history_tree, file_list=None):
         for full_file_name in base_names:
             add_update_history(
                 filename=full_file_name,
-                src_folder=globals.inbox,
+                src_folder=globs.inbox,
                 file_type="Invoices",
-                entered=globals.user)
+                entered=globs.user)
 
         # Save workbook
-        if os.access(globals.workbook, os.W_OK):
-            wb.save(globals.workbook)
+        if os.access(globs.workbook, os.W_OK):
+            wb.save(globs.workbook)
 
             # Refresh history treeview
             load_history(history_tree)
         else:
-            logging.warning(f"Permission denied to write to {globals.workbook}")
+            logging.warning(f"Permission denied to write to {globs.workbook}")
             raise PermissionError(
-                f"Permission denied to write to {globals.workbook}")
+                f"Permission denied to write to {globs.workbook}")
 
     except Exception as e:
-        logging.error(f"{globals.invoice_sheet_label} processing error: {e}")
+        logging.error(f"{globs.invoice_sheet_label} processing error: {e}")
 
 
-def parse_credit_cards(globals, history_tree, file_list=None):
+def parse_credit_cards(globs, history_tree, file_list=None):
     """
     Writes filename data to the Credit Cards sheet of the workbook,
     respecting a configurable starting column.
 
-        globals:        Global variables
+        globs:        Global variables
         history_tree:   Tkinter treeview
         file_list:      list of filepaths from the inbox view
     """
     # Return if inbox or workbook paths are not valid
-    if not paths_check(globals):
+    if not paths_check(globs):
         return
 
     # Return if file list is empty
     if not file_list:
-        show_toast(globals, "Please select one or more files to enter.")
+        show_toast(globs, "Please select one or more files to enter.")
         return
 
     # Generate wb object, return if empty
-    wb = encryption_handler(globals)
+    wb = encryption_handler(globs)
     if not wb:
         return
 
@@ -313,18 +313,18 @@ def parse_credit_cards(globals, history_tree, file_list=None):
         base_names = [os.path.basename(f) for f in file_list]
 
         # Generate sheet object
-        sheet = wb[globals.sheet_CreditCards]
+        sheet = wb[globs.sheet_CreditCards]
 
         # Starting row (fallback to 3)
-        if globals.card_starting_row and isinstance(globals.card_starting_row, int):
-            current_row = globals.card_starting_row
+        if globs.card_starting_row and isinstance(globs.card_starting_row, int):
+            current_row = globs.card_starting_row
         else:
             current_row = 3
 
 
         # Starting column (fallback to 1)
-        if globals.card_starting_column and isinstance(globals.card_starting_column, int):
-            starting_column = globals.card_starting_column
+        if globs.card_starting_column and isinstance(globs.card_starting_column, int):
+            starting_column = globs.card_starting_column
         else:
             starting_column = 1
 
@@ -360,21 +360,21 @@ def parse_credit_cards(globals, history_tree, file_list=None):
         for full_file_name in base_names:
             add_update_history(
                 filename=full_file_name,
-                src_folder=globals.inbox,
+                src_folder=globs.inbox,
                 file_type="Credit Cards",
-                entered=globals.user)
+                entered=globs.user)
 
         # Save workbook
-        if os.access(globals.workbook, os.W_OK):
-            wb.save(globals.workbook)
-            logging.info(f"Saved workbook to {globals.workbook}")
+        if os.access(globs.workbook, os.W_OK):
+            wb.save(globs.workbook)
+            logging.info(f"Saved workbook to {globs.workbook}")
 
             # Refresh history treeview
             load_history(history_tree)
         else:
             logging.warning("Permission denied to write to workbook.")
             raise PermissionError(
-                f"Permission denied to write to {globals.workbook}")
+                f"Permission denied to write to {globs.workbook}")
 
     except Exception as e:
-        logging.error(f"{globals.card_sheet_label} processing error: {e}")
+        logging.error(f"{globs.card_sheet_label} processing error: {e}")

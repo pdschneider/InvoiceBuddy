@@ -1,15 +1,14 @@
-# Connections/github.py
+# src/connections/updater.py
 import requests
 import logging
 import webbrowser
-import time
 from PySide6.QtWidgets import QMessageBox
 from PySide6.QtGui import QIcon
 import sys
 from src.utils.load_settings import load_data_path
 
 
-def version_check(globals):
+def version_check(globs):
     """Checks to see which version is most recent."""
 
     def ver_tuple(v):
@@ -22,7 +21,7 @@ def version_check(globals):
 
     # Determine Endpoint & Headers
     repo = "pdschneider/InvoiceBuddy"
-    if globals.beta:
+    if globs.beta:
         print(f"Beta updates active. Using beta channel.")
         url = f"https://api.github.com/repos/{repo}/releases"
     else:
@@ -32,7 +31,7 @@ def version_check(globals):
 
     try:
         # Query github for the version
-        if globals.beta:
+        if globs.beta:
             response = requests.get(url, headers=headers, params={"per_page": 10}, timeout=10)
         else:
             response = requests.get(url, headers=headers, timeout=10)
@@ -47,17 +46,17 @@ def version_check(globals):
             return
 
         # Parse just the version number from data
-        if globals.beta:
+        if globs.beta:
             data = response.json()[0]
         else:
             data = response.json()
-        globals.latest_version = data["tag_name"].replace('v', '')
+        globs.latest_version = data["tag_name"].replace('v', '')
     except Exception as e:
         logging.error(f"An error occurred while parsing GitHub response: {e}")
 
     try:
         # Determine if newest version is in beta
-        beta = "-beta" in globals.latest_version
+        beta = "-beta" in globs.latest_version
 
         # Pull html and changelog from latest release
         latest_version_url = data["html_url"]
@@ -89,10 +88,10 @@ def version_check(globals):
         for asset in assets:
             download_url = asset["browser_download_url"]
             # print(f"DOWNLOAD URL: {download_url}")  # <-- Prints Download URL
-            if download_url.endswith(".AppImage") and globals.app_type == "AppImage":
+            if download_url.endswith(".AppImage") and globs.app_type == "AppImage":
                 linux_download_url = download_url
                 break
-            elif download_url.endswith(".deb") and globals.app_type == "Deb":
+            elif download_url.endswith(".deb") and globs.app_type == "Deb":
                 linux_download_url = download_url
                 break
             elif download_url.endswith(".exe"):
@@ -104,22 +103,22 @@ def version_check(globals):
             return
 
         # Gracefully exit if the latest version is still not found
-        if not globals.latest_version:
+        if not globs.latest_version:
             logging.warning(f"Latest version not found.")
             return
 
         # Is current version in beta?
-        if "-beta" in globals.current_version:
+        if "-beta" in globs.current_version:
             current_beta = True
         else:
             current_beta = False
 
         # Convert to numeric tuples so 0.3.9 < 0.3.10 works correctly
-        current_comp = ver_tuple(globals.current_version)
-        latest_comp = ver_tuple(globals.latest_version)
+        current_comp = ver_tuple(globs.current_version)
+        latest_comp = ver_tuple(globs.latest_version)
 
         # Check if this is the latest version
-        if not globals.beta:
+        if not globs.beta:
             should_update = current_comp < latest_comp
         else:
             # Beta users get next beta OR stable upgrade of same version number
@@ -128,13 +127,13 @@ def version_check(globals):
 
         if should_update:
             logging.info(
-                f"An update to Invoice Buddy is available! Latest Version: {globals.latest_version}")
+                f"An update to Invoice Buddy is available! Latest Version: {globs.latest_version}")
             
             # Create a messagebox
             msg = QMessageBox()
             msg.setWindowTitle("Update Available")
             msg.setText(f"Would you like to download the latest version of Invoice Buddy?")
-            msg.setInformativeText(f"Current Version: {globals.current_version} | Latest Version: {globals.latest_version}")
+            msg.setInformativeText(f"Current Version: {globs.current_version} | Latest Version: {globs.latest_version}")
             msg.setDetailedText(f"{changelog}")
             try:
                 msg.setIconPixmap(QIcon(load_data_path("config", "assets/icon.png")).pixmap(64, 64))
@@ -149,9 +148,9 @@ def version_check(globals):
             
             # Open correct download path if user chooses yes
             if reply == QMessageBox.StandardButton.Yes:
-                if globals.os_name.startswith("Linux"):
+                if globs.os_name.startswith("Linux"):
                     webbrowser.open(url=linux_download_url)
-                elif globals.os_name.startswith("Windows"):
+                elif globs.os_name.startswith("Windows"):
                     logging.debug(f"Attempting to open URL... {windows_download_url}")
                     webbrowser.open(url=windows_download_url)
                 else:

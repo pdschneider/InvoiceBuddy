@@ -1,3 +1,4 @@
+# src/qt_interface/qt_components/qt_changelog.py
 from PySide6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, 
                                QLabel, QPushButton, QScrollArea)
 from PySide6.QtCore import Qt
@@ -6,10 +7,10 @@ from src.interface.changelog import parse_changelog, markdown_to_plain
 import logging
 
 
-def create_changelog_panel(globals):
+def create_changelog_panel(globs):
     """Creates the changelog overlay panel with phone-like dimensions."""
 
-    changelog_panel = QWidget(globals.window)
+    changelog_panel = QWidget(globs.window)
     changelog_panel.setFixedSize(400, 650)
     changelog_panel.setStyleSheet("""
         background-color: rgb(43, 43, 43);
@@ -32,7 +33,7 @@ def create_changelog_panel(globals):
     close_header_btn.setFixedSize(30, 30)
     close_header_btn.setStyleSheet("background-color: transparent; color: white; border: none; font-size: 18px;")
     close_header_btn.setCursor(QCursor(Qt.PointingHandCursor))
-    close_header_btn.clicked.connect(lambda: toggle_changelog_panel(globals))
+    close_header_btn.clicked.connect(lambda: toggle_changelog_panel(globs))
     header_layout.addWidget(close_header_btn)
 
     layout.addLayout(header_layout)
@@ -100,36 +101,36 @@ def create_changelog_panel(globals):
         }
     """)
     close_btn.setCursor(QCursor(Qt.PointingHandCursor))
-    close_btn.clicked.connect(lambda: toggle_changelog_panel(globals))
+    close_btn.clicked.connect(lambda: toggle_changelog_panel(globs))
     layout.addWidget(close_btn)
 
-    globals.changelog_panel = changelog_panel
+    globs.changelog_panel = changelog_panel
     return changelog_panel
 
 
-def toggle_changelog_panel(globals):
+def toggle_changelog_panel(globs):
     """Shows or hides the changelog panel, centered on the window."""
-    if globals.changelog_panel.isVisible():
-        globals.changelog_panel.hide()
-        globals.dim_overlay.hide()
+    if globs.changelog_panel.isVisible():
+        globs.changelog_panel.hide()
+        globs.dim_overlay.hide()
     else:
         # Close any active settings panels first
-        if hasattr(globals, 'settings_panel') and globals.settings_panel.isVisible():
-            globals.settings_panel.hide()
+        if hasattr(globs, 'settings_panel') and globs.settings_panel.isVisible():
+            globs.settings_panel.hide()
 
-        globals.dim_overlay.resize(globals.window.width(), globals.window.height() - 35)
-        globals.dim_overlay.move(0, 35)
-        globals.dim_overlay.show()
-        globals.dim_overlay.raise_()
+        globs.dim_overlay.resize(globs.window.width(), globs.window.height() - 35)
+        globs.dim_overlay.move(0, 35)
+        globs.dim_overlay.show()
+        globs.dim_overlay.raise_()
 
-        parent_w = globals.window.width()
-        parent_h = globals.window.height()
-        panel_w = globals.changelog_panel.width()
-        panel_h = globals.changelog_panel.height()
+        parent_w = globs.window.width()
+        parent_h = globs.window.height()
+        panel_w = globs.changelog_panel.width()
+        panel_h = globs.changelog_panel.height()
 
         x = (parent_w - panel_w) // 2
         y = (parent_h - panel_h) // 2
 
-        globals.changelog_panel.move(x, y)
-        globals.changelog_panel.show()
-        globals.changelog_panel.raise_()
+        globs.changelog_panel.move(x, y)
+        globs.changelog_panel.show()
+        globs.changelog_panel.raise_()

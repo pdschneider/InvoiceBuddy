@@ -1,4 +1,4 @@
-# Utils/observers.py
+# src/utils/observers.py
 import time
 import os
 import platform
@@ -23,15 +23,15 @@ if PYSIDE6_AVAILABLE:
 
 class FolderEventHandler(FileSystemEventHandler):
     """Handles filesystem events for a single watched folder"""
-    def __init__(self, globals, update_callback, debounce_delay=0.6):
-        self.globals = globals
+    def __init__(self, globs, update_callback, debounce_delay=0.6):
+        self.globs = globs
         self.update_callback = update_callback
         self.debounce_delay = debounce_delay
         self.last_event_time = 0
         self.scheduled_update = None
 
         # Qt mode: Set up thread-safe signaling
-        if PYSIDE6_AVAILABLE and hasattr(globals, 'legacy_mode') and not globals.legacy_mode:
+        if PYSIDE6_AVAILABLE and hasattr(globs, 'legacy_mode') and not globs.legacy_mode:
             self._signaler = _WatchdogSignaler()
             self._signaler.file_changed.connect(self._on_file_changed_qt)
             # Persistent timer that lives in the main thread
@@ -59,16 +59,16 @@ class FolderEventHandler(FileSystemEventHandler):
 
         current_time = time.time()
 
-        if PYSIDE6_AVAILABLE and hasattr(self.globals, 'legacy_mode') and not self.globals.legacy_mode:
+        if PYSIDE6_AVAILABLE and hasattr(self.globs, 'legacy_mode') and not self.globs.legacy_mode:
             self._signaler.file_changed.emit()
         else:
             # Tkinter Mode: Cancel and reschedule
             if self.scheduled_update:
-                self.globals.root.after_cancel(self.scheduled_update)
+                self.globs.root.after_cancel(self.scheduled_update)
                 self.scheduled_update = None
 
             delay_ms = int(self.debounce_delay * 1000)
-            self.scheduled_update = self.globals.root.after(
+            self.scheduled_update = self.globs.root.after(
                 delay_ms, self._trigger_update)
 
         self.last_event_time = current_time
@@ -85,7 +85,7 @@ class FolderEventHandler(FileSystemEventHandler):
         logging.debug(f"Watchdog: Folder change detected, updated counts.")
 
 
-def is_network_drive(globals, path):
+def is_network_drive(globs, path):
     """
     Check if a path is on a network drive (Windows only).
     Returns False on Linux.
@@ -96,31 +96,31 @@ def is_network_drive(globals, path):
     if drive:
         drive_type = ctypes.windll.kernel32.GetDriveTypeW(drive + '\\')
         logging.debug(f"{path} is a network drive.")
-        globals.network_drive = True
+        globs.network_drive = True
         return drive_type == 4  # DRIVE_REMOTE (network drive)
     return False
 
 
-def setup_observer(globals, direct, key, callback=None):
+def setup_observer(globs, direct, key, callback=None):
     """Sets up watchdog observers."""
     directory = direct
     if not directory or not os.path.isdir(directory):
         logging.warning(
             f"Cannot setup observer for {key}: Invalid directory {directory}")
         return None
-    if key in globals.observers and globals.observers[key] and globals.observers[key].is_alive():
-        globals.observers[key].stop()
-        globals.observers[key].join()
+    if key in globs.observers and globs.observers[key] and globs.observers[key].is_alive():
+        globs.observers[key].stop()
+        globs.observers[key].join()
 
     if callback is None:
-        if hasattr(globals, 'update_file_counts'):
-            callback = globals.update_file_counts
+        if hasattr(globs, 'update_file_counts'):
+            callback = globs.update_file_counts
         else:
-            logging.warning("No callback provided and no globals.update_file_counts found.")
+            logging.warning("No callback provided and no globs.update_file_counts found.")
             return None
 
-    handler = FolderEventHandler(globals, callback)
-    if is_network_drive(globals, directory):
+    handler = FolderEventHandler(globs, callback)
+    if is_network_drive(globs, directory):
         observer = PollingObserver(timeout=1)
         logging.info(
             f"Using PollingObserver for network drive: {directory} (key: {key})")

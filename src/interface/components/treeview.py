@@ -8,8 +8,8 @@ if not hasattr(ctk, "CTkScrollableFrame"):
 
 
 class Treeview:
-    def __init__(self, globals_obj, parent, get_dir=None):
-        self.globals = globals_obj
+    def __init__(self, globs_obj, parent, get_dir=None):
+        self.globs = globs_obj
         self.parent = parent
         self._rows = []
         self._selected = set()
@@ -17,13 +17,13 @@ class Treeview:
         self._rename_bind_id = None
 
         if get_dir is None:
-            self.get_dir = self.globals.sources["inbox"]
+            self.get_dir = self.globs.sources["inbox"]
         elif callable(get_dir):
             self.get_dir = get_dir
         else:
             self.get_dir = lambda: str(get_dir)
-        if not hasattr(self.globals, "file_identity"):
-            self.globals.file_identity = {}
+        if not hasattr(self.globs, "file_identity"):
+            self.globs.file_identity = {}
         self._build_ui()
 
     def _build_ui(self):
@@ -59,7 +59,7 @@ class Treeview:
             base_name = os.path.splitext(file)[0]
 
             identity_state = {"cycle": 0}
-            icons = [self.globals.invoice_icon, self.globals.card_icon, self.globals.po_icon]
+            icons = [self.globs.invoice_icon, self.globs.card_icon, self.globs.po_icon]
             types = ["Invoice", "Card", "Purchase"]
 
             full_path = os.path.join(self.get_dir(), file)
@@ -67,7 +67,7 @@ class Treeview:
 
             if saved_type in types:
                 identity_state["cycle"] = types.index(saved_type)
-            self.globals.file_identity[file] = saved_type
+            self.globs.file_identity[file] = saved_type
 
             identity = ctk.CTkButton(
                 row,
@@ -152,7 +152,7 @@ class Treeview:
 
         types = ["Invoice", "Card", "Purchase"]
         current_type = types[state["cycle"]]
-        self.globals.file_identity[filename] = current_type
+        self.globs.file_identity[filename] = current_type
         logging.info(f"{filename} changed to {current_type}")
 
         self.selection_frame.bind(
@@ -311,7 +311,7 @@ class Treeview:
             base_name = os.path.splitext(file)[0]
 
             identity_state = {"cycle": 0}
-            icons = [self.globals.invoice_icon, self.globals.card_icon, self.globals.po_icon]
+            icons = [self.globs.invoice_icon, self.globs.card_icon, self.globs.po_icon]
             types = ["Invoice", "Card", "Purchase"]
 
             full_path = os.path.join(self.get_dir(), file)
@@ -319,7 +319,7 @@ class Treeview:
 
             if saved_type in types:
                 identity_state["cycle"] = types.index(saved_type)
-            self.globals.file_identity[file] = saved_type
+            self.globs.file_identity[file] = saved_type
 
             identity = ctk.CTkButton(
                 row,

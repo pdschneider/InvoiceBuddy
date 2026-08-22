@@ -1,4 +1,4 @@
-# Managers/Autoname/date_search.py
+# src/managers/autoname/date_search.py
 import logging
 import re
 import os

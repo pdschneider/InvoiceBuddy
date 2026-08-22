@@ -32,12 +32,12 @@ def count_files(directory, extension=None):
         return 0
 
 
-def browse_file(globals, var, _type=None):
+def browse_file(globs, var, _type=None):
     """
     Open a file dialog to select a single file and set the variable.
 
         var:        Variable to change
-                    ex: globals.workbook_var
+                    ex: globs.workbook_var
     """
     if _type == "workbook":
         file_types = [("All files", "*.*"), ("XLSX files", "*.xlsx"), ("XLSM files", "*.xlsm"), ("XLST files", "*.xlst"), ("XLTM files", "*.xltm")]
@@ -45,7 +45,7 @@ def browse_file(globals, var, _type=None):
         file_types = [("All files", "*.*"), ("CSV files", "*.csv")]
     else:
         file_types = [("All files", "*.*"), ("CSV files", "*.csv"), ("Excel files", "*.xlsx")]
-    if globals.legacy_mode:
+    if globs.legacy_mode:
         file_path = filedialog.askopenfilename(
             filetypes=file_types)
         if file_path:
@@ -58,14 +58,14 @@ def browse_file(globals, var, _type=None):
             logging.info(f"Selected file: {file_path}")
 
 
-def browse_directory(globals, var):
+def browse_directory(globs, var):
     """
     Open a directory dialog to select a directory and set the variable.
 
         var:        Variable to change
-                    ex: globals.inbox_dir_var
+                    ex: globs.inbox_dir_var
     """
-    if globals.legacy_mode:
+    if globs.legacy_mode:
         dir_path = filedialog.askdirectory()
     else:
         dir_path = QFileDialog.getExistingDirectory(None, "Select Folder", "")
@@ -86,42 +86,42 @@ def browse_directory(globals, var):
         return ""
 
 
-def open_workbook(globals, workbook_path=None):
+def open_workbook(globs, workbook_path=None):
     """
     Opens an Excel workbook at the specified file path.
-    Falls back to globals.workbook if no path is provided.
+    Falls back to globs.workbook if no path is provided.
 
-        globals:            Global variables
+        globs:            Global variables
         workbook_path:      Path to the workbook file (optional)
     """
     if not workbook_path:
-        workbook_path = globals.workbook
+        workbook_path = globs.workbook
 
     if os.path.isfile(workbook_path):
         try:
-            if globals.os_name.startswith("Windows"):
+            if globs.os_name.startswith("Windows"):
                 os.startfile(workbook_path)
             else:
                 subprocess.run(['xdg-open', workbook_path], check=True)
         except PermissionError as e:
-            show_toast(globals, f"Permission Error. Is the workbook already open?", _type="error")
+            show_toast(globs, f"Permission Error. Is the workbook already open?", _type="error")
             logging.error(f"Permission Error accessing {workbook_path}: {e}")
             return
         except Exception as e:
-            show_toast(globals, "Failed to open workbook", _type="error")
+            show_toast(globs, "Failed to open workbook", _type="error")
             logging.error(f"Error opening workbook: {e}")
             return
     else:
-        show_toast(globals, f"Invalid workbook path", _type="error")
+        show_toast(globs, f"Invalid workbook path", _type="error")
         logging.error(f"Cannot open workbook. Invalid file path {workbook_path}")
         return
 
 
-def add_files(globals):
+def add_files(globs):
     """
     Moves files to the inbox.
     
-        globals:        Global variables
+        globs:        Global variables
 
         files_tuple:    Tuple of selected files
                         ex: ('/home/phillip/ZZZ-Unnamed- Ice Melt V24533.pdf',
@@ -132,18 +132,18 @@ def add_files(globals):
     """
 
     # Uses path from var if saved path isn't valid
-    if globals.legacy_mode:
-        if not os.path.isdir(globals.inbox) and os.path.isdir(globals.inbox_dir_var.get().strip()):
-            globals.inbox = globals.inbox_dir_var.get().strip()
+    if globs.legacy_mode:
+        if not os.path.isdir(globs.inbox) and os.path.isdir(globs.inbox_dir_var.get().strip()):
+            globs.inbox = globs.inbox_dir_var.get().strip()
             logging.debug(f"Inbox not a valid path. Using path from paths settings.")
     else:
-        if not os.path.isdir(globals.inbox):
+        if not os.path.isdir(globs.inbox):
             logging.error(f"Unable to reach inbox folder.")
             return
 
-    if os.path.isdir(globals.inbox):
+    if os.path.isdir(globs.inbox):
         # Open file selection box
-        if globals.legacy_mode:
+        if globs.legacy_mode:
             files_tuple = filedialog.askopenfilenames(
                 title="Select Files", filetypes=[("PDF files", "*.pdf")], multiple=True)
         else:
@@ -165,12 +165,12 @@ def add_files(globals):
                         logging.warning(f"Only PDF files can be added.")
 
                 # Save metadata to retain identities before inbox rebuilds
-                save_metadata(globals)
+                save_metadata(globs)
 
                 # Copy files to the inbox
                 logging.debug(f"Attempting to add files: {files_list}...")
                 for file in files_list:
-                        shutil.copy2(file, globals.inbox)
+                        shutil.copy2(file, globs.inbox)
                 logging.info(f"Added files!")
 
             else: # Return if nothing is selected
@@ -179,22 +179,22 @@ def add_files(globals):
         except Exception as e:
             for file in files_tuple:
                 logging.error(f"Could not add {file} to inbox due to: {e}")
-            show_toast(globals, f"Unable to add files.", _type="error")
+            show_toast(globs, f"Unable to add files.", _type="error")
     else:
         logging.error(f"Cannot add files to an invalid inbox path.")
-        show_toast(globals, f"Unable to add file - Select a valid inbox path first", _type="error")
+        show_toast(globs, f"Unable to add file - Select a valid inbox path first", _type="error")
 
 
-def open_directory(directory):
+def open_directory(globs, directory):
     """
     Opens the directory of the current tab.
     
         directory:      Directory path to open
-                        ex: globals.inbox
+                        ex: globs.inbox
     """
     try:
         if not directory or not os.path.isdir(directory):
-            show_toast(globals, "Invalid directory", _type="error")
+            show_toast(globs, "Invalid directory", _type="error")
             logging.error(f"Cannot open directory: Invalid path {directory}")
             return
         try:
@@ -203,24 +203,24 @@ def open_directory(directory):
             subprocess.run(['xdg-open', directory], check=True)
         logging.info(f"Opened directory: {directory}")
     except Exception as e:
-        show_toast(globals, f"Failed to open directory", _type="error")
+        show_toast(globs, f"Failed to open directory", _type="error")
         logging.error(f"Error opening directory {directory}: {e}")
 
 
-def open_selected_folders(globals):
+def open_selected_folders(globs):
     """
     Opens the folders that the files at selected treeview rows are located in.
     Designed to be used in the history tab.
     
-        globals:        Global variables
+        globs:        Global variables
     """
-    selected_items = globals.history_tree.selection()
+    selected_items = globs.history_tree.selection()
     if not selected_items:
-        show_toast(globals, "No items selected to open folders.")
+        show_toast(globs, "No items selected to open folders.")
         return
     folders = set()
     for item_id in selected_items:
-        values = globals.history_tree.item(item_id)['values']
+        values = globs.history_tree.item(item_id)['values']
         dst_folder = values[2]
         src_folder= values[1]
         if dst_folder != "N/A" and os.path.isdir(dst_folder):
@@ -228,27 +228,27 @@ def open_selected_folders(globals):
         if not os.path.isdir(dst_folder):
             folders.add(src_folder)
     if not folders:
-        show_toast(globals, "No valid folders found for selected items.")
+        show_toast(globs, "No valid folders found for selected items.")
         return
     for folder in folders:
-        open_directory(folder)
+        open_directory(globs, folder)
     logging.info(f"Opened {len(folders)} unique destination folders.")
 
 
-def archive_files(globals, file_list=None):
+def archive_files(globs, file_list=None):
     """
     Archives files to their end destination.
 
-        globals:        Global variables
+        globs:        Global variables
         file_list:      List of files from inbox view
     """
     errors = []
     moved_files = 0
 
     # Exit early if archive path is not valid
-    if not globals.archive or not os.path.isdir(globals.archive):
-        show_toast(globals, "Archive path not set or invalid!", _type="error")
-        logging.error(f"Cannot archive: invalid archive root '{globals.archive}'")
+    if not globs.archive or not os.path.isdir(globs.archive):
+        show_toast(globs, "Archive path not set or invalid!", _type="error")
+        logging.error(f"Cannot archive: invalid archive root '{globs.archive}'")
         return
 
     # Return if no file list was given
@@ -257,11 +257,11 @@ def archive_files(globals, file_list=None):
         return
 
     # Create list of full paths
-    if not globals.legacy_mode:
+    if not globs.legacy_mode:
         new_file_list = []
-        if not globals.legacy_mode:
+        if not globs.legacy_mode:
             for file in file_list:
-                new_file_list.append(os.path.normpath(os.path.join(globals.inbox, file)))
+                new_file_list.append(os.path.normpath(os.path.join(globs.inbox, file)))
         file_list = new_file_list
 
     logging.debug(f"Attempting to archive files: {file_list}")
@@ -272,17 +272,17 @@ def archive_files(globals, file_list=None):
         first_word = os.path.splitext(filename)[0].split()[0].lower()
 
         # Get the identity from metadata via global dictionary variable
-        file_type = globals.file_identity.get(src_file, "Invoice")
+        file_type = globs.file_identity.get(src_file, "Invoice")
         logging.debug(f"File identity for {src_file}: {file_type}")
 
         # Find matching subfolder
         subfolder_name = next(
-            (folder for words, folder in globals.folder_map.items() if first_word in words),
-            globals.oneoffs_folder)
+            (folder for words, folder in globs.folder_map.items() if first_word in words),
+            globs.oneoffs_folder)
         logging.debug(f"Matched subfolder: {subfolder_name}")
 
         # Generate path for archive destination folder
-        dst_folder = os.path.join(globals.archive, subfolder_name)
+        dst_folder = os.path.join(globs.archive, subfolder_name)
         logging.debug(f"Destination folder: {dst_folder}")
 
         # Create the destination folder if it doesn't already exist
@@ -303,41 +303,41 @@ def archive_files(globals, file_list=None):
             moved_files += 1
             add_update_history(
                 filename=filename,
-                src_folder=globals.inbox,
+                src_folder=globs.inbox,
                 dst_folder=dst_folder,
                 file_type=file_type,
-                moved=globals.user)
+                moved=globs.user)
         except Exception as e:
             errors.append(f"Failed to move {filename} due to: {e}")
             logging.debug(f"Failed to move {filename} due to: {e}")
             continue
 
         # Reload Treeview
-        load_history(globals.history_tree)
+        load_history(globs.history_tree)
 
     if errors:
-        show_toast(globals, f"Error moving some files", _type="error")
+        show_toast(globs, f"Error moving some files", _type="error")
         logging.error(f"Move Errors: \n{errors}")
     elif moved_files == 0:
-        show_toast(globals, f"No files moved in {globals.inbox}.", _type="error")
-        logging.warning(f"No files moved in {globals.inbox}.")
+        show_toast(globs, f"No files moved in {globs.inbox}.", _type="error")
+        logging.warning(f"No files moved in {globs.inbox}.")
     else:
-        show_toast(globals, f"Archived {moved_files} files successfully!")
+        show_toast(globs, f"Archived {moved_files} files successfully!")
 
 
-def send_to_trash(globals, file_list=None):
+def send_to_trash(globs, file_list=None):
     """Safely move selected files to the system trash."""
 
     # Show message if no files are selected
     if not file_list:
-        show_toast(globals, "Please select one or more files to delete.")
+        show_toast(globs, "Please select one or more files to delete.")
         return
 
     # Create list of full paths
     new_file_list = []
-    if not globals.legacy_mode:
+    if not globs.legacy_mode:
         for file in file_list:
-            new_file_list.append(os.path.normpath(os.path.join(globals.inbox, file)))
+            new_file_list.append(os.path.normpath(os.path.join(globs.inbox, file)))
     file_list = new_file_list
 
     logging.debug(f"Attempting to print files: {file_list}")
@@ -348,9 +348,9 @@ def send_to_trash(globals, file_list=None):
     errors = []
 
     # If not on network drive, use safer deletion method
-    if not globals.network_drive:
+    if not globs.network_drive:
         reply = QMessageBox.question(
-            None,
+            globs.window,
             "Confirm Delete",
             f"Move {count} file{'s' if count != 1 else ''} to the Recycle Bin?",
             QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
@@ -372,7 +372,7 @@ def send_to_trash(globals, file_list=None):
     # If on network drive, fall back to permanent deletion method
     else:
         reply = QMessageBox.question(
-            None,
+            globs.window,
             "Confirm Delete",
             f"Permanently delete {count} file{'s' if count != 1 else ''}?",
             QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
@@ -392,31 +392,31 @@ def send_to_trash(globals, file_list=None):
                 logging.error(f"Failed to delete {file_path}: {e}")
 
     # Refresh UI
-    if globals.legacy_mode:
-        globals.update_file_counts()
+    if globs.legacy_mode:
+        globs.update_file_counts()
 
     # Feedback
     if trashed_count == len(file_list):
-        show_toast(globals,
+        show_toast(globs,
                     f"Moved {trashed_count} file{'s' if trashed_count != 1 else ''} to trash.")
     elif trashed_count > 0:
         logging.warning(f"Trashed {trashed_count} files.\n\nFailed: \n" + "\n".join(errors))
-        show_toast(globals,
+        show_toast(globs,
                     f"Trashed {trashed_count} files - Some Failed to Trash\n",
                     _type="error")
     else:
         logging.error(
             f"Could not move any files to trash.\n\n" + "\n".join(errors))
-        show_toast(globals,
+        show_toast(globs,
                     f"Could not move any files to trash.",
                     _type="error")
     
     return True
 
 
-def open_logs(globals):
+def open_logs(globs):
     """Opens the logs folder."""
-    if globals.os_name.startswith("Windows"):
+    if globs.os_name.startswith("Windows"):
         logging.debug(f"Opening logs folder on Windows...")
         os.startfile(load_data_path("cache", "logs"))
     else:
@@ -425,9 +425,9 @@ def open_logs(globals):
             ['xdg-open', load_data_path("cache", "logs")], check=True)
 
 
-def open_config(globals):
+def open_config(globs):
     """Opens the settings folder."""
-    if globals.os_name.startswith("Windows"):
+    if globs.os_name.startswith("Windows"):
         logging.debug(f"Opening settings folder on Windows...")
         os.startfile(load_data_path("config"))
     else:

@@ -1,4 +1,4 @@
-# Managers/pdfsearch.py
+# src/managers/autoname/pdfsearch.py
 import re
 import logging
 import os
@@ -15,7 +15,7 @@ from src.managers.autoname.card_num_search import card_number_search
 from pypdf import PdfReader
 
 
-def apply_auto_naming(globals, directory, file_list=None):
+def apply_auto_naming(globs, directory, file_list=None):
     """
     Master auto-namer: extracts text once per file,
     calls company/date/invoice searches sequentially,
@@ -70,7 +70,7 @@ def apply_auto_naming(globals, directory, file_list=None):
         try:
             reader = PdfReader(full_path)
             if reader.metadata:
-                if globals.legacy_mode:
+                if globs.legacy_mode:
                     # Legacy: check /Identity first
                     if "/Identity" in reader.metadata:
                         val = str(reader.metadata["/Identity"])
@@ -210,11 +210,11 @@ def apply_auto_naming(globals, directory, file_list=None):
             normalized_texts=normalized_texts)
 
         # Get user-defined field order based on the file's Identity
-        if globals.legacy_mode:
-            order = get_field_order(globals, identity, filename)
+        if globs.legacy_mode:
+            order = get_field_order(globs, identity, filename)
         else:
             order = ["", "", "", ""]
-            sheets = globals.sheet_data.get("sheets", [])
+            sheets = globs.sheet_data.get("sheets", [])
             for s in sheets:
                 if s.get("name") == identity:
                     order = s.get("column_order", ["Company", "Date", "Invoice #", ""])

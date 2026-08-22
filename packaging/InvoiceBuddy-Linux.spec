@@ -12,6 +12,7 @@ a = Analysis(
     binaries=[],
     datas=[
         ('../defaults', 'defaults'),
+        ('../docs', 'docs'),
         ('../CHANGELOG.md', '.'),
         ('../README.md', '.'),
     ],

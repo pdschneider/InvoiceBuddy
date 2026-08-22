@@ -1,4 +1,4 @@
-# Utils/setup.py
+# src/utils/setup.py
 import logging
 import sys
 import os
@@ -13,13 +13,13 @@ from src.utils.icons import load_icons
 from src.connections.updater import version_check
 
 
-def setup(globals):
+def setup(globs):
     """Initiate setup sequence."""
     setup_logging()
     logging.info(f"Python Version: {sys.version}")
-    logging.info(f"Invoice Buddy Version: {globals.current_version}")
-    if globals.github_check:
-        version_check(globals)
+    logging.info(f"Invoice Buddy Version: {globs.current_version}")
+    if globs.github_check:
+        version_check(globs)
     setup_company_map()
     setup_folder_maps()
     setup_settings()
@@ -30,9 +30,9 @@ def setup(globals):
     setup_themes()
     company_map_check()
     folder_maps_check()
-    create_vars(globals)
-    load_icons(globals)
-    get_executable_path(globals)
+    create_vars(globs)
+    load_icons(globs)
+    get_executable_path(globs)
 
 
 def setup_logging():
@@ -736,7 +736,7 @@ def make_legacy_compatible():
         logging.error(f"Failed to set up archive path: {e}")
 
 
-def get_executable_path(globals):
+def get_executable_path(globs):
     """Get the correct path to the app file."""
     
     # Script path (ex: /usr/bin/spawn)
@@ -745,10 +745,10 @@ def get_executable_path(globals):
 
     # Check if AppImage
     if 'APPIMAGE' in os.environ:
-        globals.app_type = "AppImage"
-        globals.app_path = os.environ['APPIMAGE']
-        logging.debug(f"Path to executable (AppImage): {globals.app_path}")
-        logging.debug(f"App Type: {globals.app_type}")
+        globs.app_type = "AppImage"
+        globs.app_path = os.environ['APPIMAGE']
+        logging.debug(f"Path to executable (AppImage): {globs.app_path}")
+        logging.debug(f"App Type: {globs.app_type}")
         return os.environ['APPIMAGE']
     
     # Check if .deb
@@ -756,24 +756,24 @@ def get_executable_path(globals):
           script_path_2.startswith("/usr/local/bin/invoice-buddy")
           ) or (script_path.startswith("/usr/bin/invoice-buddy") or
                 script_path.startswith("/usr/local/bin/invoice-buddy")):
-        globals.app_type = "Deb"
-        globals.app_path = script_path
+        globs.app_type = "Deb"
+        globs.app_path = script_path
         logging.debug(f"Path to executable (.deb/system): {os.path.realpath(sys.executable)} | Path to script: {script_path_2}")
-        logging.debug(f"App Type: {globals.app_type}")
+        logging.debug(f"App Type: {globs.app_type}")
         return script_path_2
 
     # Check if running as an .exe
     elif platform.platform().startswith("Windows") and (getattr(sys, 'frozen', False) or '__compiled__' in dir(sys.modules.get('__main__', {})) or 'onefile' in sys.executable.lower() or '_MEIPASS' in sys.executable):
-        globals.app_type = "Exe"
-        globals.app_path = script_path
+        globs.app_type = "Exe"
+        globs.app_path = script_path
         logging.debug(f"Path to executable (frozen / Inno Setup): {sys.executable} | Path to Script: {script_path}")
-        logging.debug(f"App Type: {globals.app_type}")
+        logging.debug(f"App Type: {globs.app_type}")
         return script_path
     
     # Fallback to Development Mode
     else:
-        globals.app_type = "Development"
-        globals.app_path = [sys.executable, script_path]
+        globs.app_type = "Development"
+        globs.app_path = [sys.executable, script_path]
         logging.debug(f"Path to executable: {script_path}")
-        logging.debug(f"App Type: {globals.app_type}")
+        logging.debug(f"App Type: {globs.app_type}")
         return [sys.executable, script_path]

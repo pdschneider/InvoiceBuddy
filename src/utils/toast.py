@@ -1,7 +1,6 @@
 # src/utils/toast.py
 from PySide6.QtWidgets import QLabel
 from PySide6.QtCore import QTimer, Qt
-from PySide6.QtGui import QCursor
 import tkinter as tk
 import src.utils.fonts as fonts
 import logging
@@ -15,12 +14,12 @@ def _place_toast(root, toast):
     toast.geometry(f"+{x}+{y}")
 
 
-def show_toast(globals, message, duration=3000, _type=None):
+def show_toast(globs, message, duration=3000, _type=None):
     """Shows a toast notification at the bottom right of the screen."""
     
-    if globals.legacy_mode:
+    if globs.legacy_mode:
         # Create the toast window
-        toast = tk.Toplevel(globals.root)
+        toast = tk.Toplevel(globs.root)
         toast.overrideredirect(True)
 
         # Styling
@@ -28,7 +27,7 @@ def show_toast(globals, message, duration=3000, _type=None):
             if _type == "error":
                 background = "#8B0000"
             else:
-                background = globals.theme_dict["CTkFrame"]["text_color"]
+                background = globs.theme_dict["CTkFrame"]["text_color"]
         except Exception:
             logging.warning("Theme lookup failed – using dark background")
             background = "#333333"
@@ -40,14 +39,14 @@ def show_toast(globals, message, duration=3000, _type=None):
         lbl.pack()
 
         # Initial placement
-        _place_toast(globals.root, toast)
+        _place_toast(globs.root, toast)
 
         # Keep the toast glued to the parent while it moves/resizes
         def on_parent_move(event):
-            _place_toast(globals.root, toast)
+            _place_toast(globs.root, toast)
 
         # bind() returns an identifier string – store it so we can unbind later
-        bind_id = globals.root.bind("<Configure>", on_parent_move)
+        bind_id = globs.root.bind("<Configure>", on_parent_move)
 
         # Handles auto-close
         after_id = None   # will hold the `after` timer id
@@ -58,7 +57,7 @@ def show_toast(globals, message, duration=3000, _type=None):
                 toast.after_cancel(after_id)
 
             # Remove the configure binding using the stored id
-            globals.root.unbind("<Configure>", bind_id)
+            globs.root.unbind("<Configure>", bind_id)
 
             # Finally destroy the toast window
             toast.destroy()
@@ -75,7 +74,7 @@ def show_toast(globals, message, duration=3000, _type=None):
         else:
             bg_color = "#1a5276"
 
-        toast = QLabel(message, globals.window)
+        toast = QLabel(message, globs.window)
         toast.setWindowFlags(Qt.ToolTip | Qt.FramelessWindowHint)
         toast.setStyleSheet(f"""
             background-color: {bg_color}; color: white;
@@ -84,7 +83,7 @@ def show_toast(globals, message, duration=3000, _type=None):
         toast.adjustSize()
 
         # Position at bottom-right of main window
-        win = globals.window
+        win = globs.window
         x = win.x() + win.width() - toast.width() - 20
         y = win.y() + win.height() - toast.height() - 20
         toast.move(x, y)

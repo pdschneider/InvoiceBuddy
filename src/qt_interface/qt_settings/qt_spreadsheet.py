@@ -1,11 +1,9 @@
 # src/qt_interface/qt_settings/qt_spreadsheet.py
-from src.managers.file_management import browse_file
-from PySide6.QtWidgets import (QWidget, QVBoxLayout, QLabel, QSlider,
+from PySide6.QtWidgets import (QWidget, QVBoxLayout, QLabel,
                                QHBoxLayout, QPushButton, QLineEdit,
                                QColorDialog, QMessageBox, QScrollArea,
-                               QSpinBox, QComboBox, QFileDialog,
-                               QFrame)
-from PySide6.QtCore import Qt, QSize
+                               QSpinBox, QComboBox, QFrame)
+from PySide6.QtCore import Qt
 from PySide6.QtGui import QColor
 import logging
 import os
@@ -13,7 +11,7 @@ import os
 COLUMN_OPTIONS = ["Company", "Date", "Invoice #", "Card Number", ""]
 
 
-def create_spreadsheet_settings_tab(globals):
+def create_spreadsheet_settings_tab(globs):
     """Create the Spreadsheet Settings tab."""
 
     tab_widget = QWidget()
@@ -40,7 +38,7 @@ def create_spreadsheet_settings_tab(globals):
     scroll_layout.setSpacing(8)
     scroll_layout.setAlignment(Qt.AlignTop)
 
-    globals.sheets_scroll_layout = scroll_layout
+    globs.sheets_scroll_layout = scroll_layout
 
     scroll_area.setWidget(scroll_content)
     layout.addWidget(scroll_area, stretch=1)
@@ -55,11 +53,11 @@ def create_spreadsheet_settings_tab(globals):
         }
         QPushButton:hover { background-color: #27ae60; }
     """)
-    add_button.clicked.connect(lambda: on_add_sheet(globals))
+    add_button.clicked.connect(lambda: on_add_sheet(globs))
     layout.addWidget(add_button)
 
     # Populate initially
-    populate_sheets_list(globals)
+    populate_sheets_list(globs)
 
     return tab_widget
 
@@ -75,20 +73,20 @@ def generate_unique_name(existing_names):
     return candidate
 
 
-def populate_sheets_list(globals):
-    """Build the sheets list from globals.sheet_data."""
-    layout = globals.sheets_scroll_layout
+def populate_sheets_list(globs):
+    """Build the sheets list from globs.sheet_data."""
+    layout = globs.sheets_scroll_layout
     while layout.count():
         child = layout.takeAt(0)
         if child.widget():
             child.widget().deleteLater()
 
-    sheet_defs = globals.sheet_data.get("sheets", [])
+    sheet_defs = globs.sheet_data.get("sheets", [])
 
     sheet_defs[:] = [s for s in sheet_defs if s.get("workbook")]
     if len(sheet_defs) == 0:
         sheet_defs.append({"name": "Sheet", "color": "#2ecc71", "workbook": ""})
-        globals.sheet_data["sheets"] = sheet_defs
+        globs.sheet_data["sheets"] = sheet_defs
 
     if len(sheet_defs) == 0:
         sheet_defs.append({
@@ -96,14 +94,14 @@ def populate_sheets_list(globals):
             "first_row": 3, "first_column": 1,
             "column_order": ["Company", "Date", "Invoice #", ""]
         })
-        globals.sheet_data["sheets"] = sheet_defs
+        globs.sheet_data["sheets"] = sheet_defs
 
     for idx, sheet in enumerate(sheet_defs):
         sheet.setdefault("first_row", 3)
         sheet.setdefault("first_column", 1)
         sheet.setdefault("column_order", ["Company", "Date", "Invoice #", ""])
         sheet.setdefault("workbook", "")
-        row = create_sheet_row(globals, idx, sheet)
+        row = create_sheet_row(globs, idx, sheet)
         layout.addWidget(row)
 
 
@@ -139,7 +137,13 @@ class WorkbookSourceDialog(QWidget):
 
         # Title
         title = QLabel("Select Source")
-        title.setStyleSheet("color: white; font-size: 13px; font-weight: bold; margin-bottom: 4px;")
+        title.setStyleSheet("""
+            color: white;
+            font-size: 13px; 
+            font-weight: bold; 
+            margin-bottom: 4px;
+            border: none;
+        """)
         layout.addWidget(title)
 
         # Local Spreadsheet button
@@ -154,19 +158,6 @@ class WorkbookSourceDialog(QWidget):
         """)
         local_btn.clicked.connect(lambda: self._handle_local())
         layout.addWidget(local_btn)
-
-        # Google Sheets button
-        google_btn = QPushButton("Google Sheets")
-        google_btn.setFixedHeight(36)
-        google_btn.setStyleSheet("""
-            QPushButton {
-                background-color: #2ecc71; color: white; border: none;
-                border-radius: 4px; font-size: 13px;
-            }
-            QPushButton:hover { background-color: #27ae60; }
-        """)
-        google_btn.clicked.connect(lambda: self._handle_google())
-        layout.addWidget(google_btn)
 
         layout.addStretch()
         main_layout.addWidget(container)
@@ -339,7 +330,7 @@ def _label_style():
     return "color: #aaa; font-size: 12px;"
 
 
-def create_sheet_row(globals, idx, sheet):
+def create_sheet_row(globs, idx, sheet):
     """Create a single sheet row widget with two lines."""
 
     # ===== COLLAPSED MODE: No workbook selected yet =====
@@ -365,22 +356,22 @@ def create_sheet_row(globals, idx, sheet):
         def on_browse_collapsed():
             from src.managers.file_management import browse_file
             temp_var = type('obj', (object,), {'setText': lambda s, v: setattr(temp_var, '_val', v)})()
-            browse_file(globals, temp_var, _type="workbook")
+            browse_file(globs, temp_var, _type="workbook")
             if hasattr(temp_var, '_val'):
-                globals.sheet_data["sheets"][idx]["workbook"] = temp_var._val
-                globals.sheet_data["sheets"][idx].setdefault("name", f"Sheet {idx + 1}")
-                globals.sheet_data["sheets"][idx].setdefault("color", "#2ecc71")
-                globals.sheet_data["sheets"][idx].setdefault("first_row", 3)
-                globals.sheet_data["sheets"][idx].setdefault("first_column", 1)
-                globals.sheet_data["sheets"][idx].setdefault("column_order", ["Company", "Date", "Invoice #", ""])
-                populate_sheets_list(globals)
+                globs.sheet_data["sheets"][idx]["workbook"] = temp_var._val
+                globs.sheet_data["sheets"][idx].setdefault("name", f"Sheet {idx + 1}")
+                globs.sheet_data["sheets"][idx].setdefault("color", "#2ecc71")
+                globs.sheet_data["sheets"][idx].setdefault("first_row", 3)
+                globs.sheet_data["sheets"][idx].setdefault("first_column", 1)
+                globs.sheet_data["sheets"][idx].setdefault("column_order", ["Company", "Date", "Invoice #", ""])
+                populate_sheets_list(globs)
 
         add_btn.clicked.connect(lambda checked: on_browse_collapsed())
 
         row_layout.addWidget(add_btn)
 
         # Only show delete if there are other sheets
-        if len(globals.sheet_data.get("sheets", [])) > 1:
+        if len(globs.sheet_data.get("sheets", [])) > 1:
             delete_btn = QPushButton("✕")
             delete_btn.setFixedSize(32, 32)
             delete_btn.setStyleSheet("""
@@ -390,7 +381,7 @@ def create_sheet_row(globals, idx, sheet):
                 }
                 QPushButton:hover { background-color: #c0392b; }
             """)
-            delete_btn.clicked.connect(lambda checked, i=idx: on_delete_sheet(globals, i))
+            delete_btn.clicked.connect(lambda checked, i=idx: on_delete_sheet(globs, i))
             row_layout.addWidget(delete_btn)
 
         return row_widget
@@ -417,7 +408,7 @@ def create_sheet_row(globals, idx, sheet):
         QPushButton:hover {{ border: 2px solid #ffd700; }}
     """)
     color_btn.setToolTip("Click to pick color")
-    color_btn.clicked.connect(lambda checked, i=idx: on_color_click(globals, i))
+    color_btn.clicked.connect(lambda checked, i=idx: on_color_click(globs, i))
     line1.addWidget(color_btn)
 
     # Name input
@@ -426,7 +417,7 @@ def create_sheet_row(globals, idx, sheet):
     name_input.setPlaceholderText("Sheet name")
     name_input.setMinimumWidth(120)
     name_input.setStyleSheet(_input_style())
-    name_input.textChanged.connect(lambda text, i=idx: on_name_changed(globals, i, text))
+    name_input.textChanged.connect(lambda text, i=idx: on_name_changed(globs, i, text))
     line1.addWidget(name_input)
 
     # Workbook path display
@@ -451,7 +442,7 @@ def create_sheet_row(globals, idx, sheet):
         }
         QPushButton:hover { background-color: #555; }
     """)
-    browse_btn.clicked.connect(lambda checked, i=idx, btn=browse_btn, lbl=wb_label: show_source_dialog(globals, i, btn, lbl))
+    browse_btn.clicked.connect(lambda checked, i=idx, btn=browse_btn, lbl=wb_label: show_source_dialog(globs, i, btn, lbl))
     line1.addWidget(browse_btn)
 
     # Delete button
@@ -465,7 +456,7 @@ def create_sheet_row(globals, idx, sheet):
         QPushButton:hover { background-color: #c0392b; }
     """)
     delete_btn.setToolTip("Remove this sheet")
-    delete_btn.clicked.connect(lambda checked, i=idx: on_delete_sheet(globals, i))
+    delete_btn.clicked.connect(lambda checked, i=idx: on_delete_sheet(globs, i))
     line1.addWidget(delete_btn)
 
     row_layout.addLayout(line1)
@@ -483,7 +474,7 @@ def create_sheet_row(globals, idx, sheet):
     row_spin.setRange(1, 50)
     row_spin.setValue(sheet.get("first_row", 3))
     row_spin.setStyleSheet(_spin_style())
-    row_spin.valueChanged.connect(lambda val, i=idx: on_field_changed(globals, i, "first_row", val))
+    row_spin.valueChanged.connect(lambda val, i=idx: on_field_changed(globs, i, "first_row", val))
     line2.addWidget(row_spin)
 
     # First Column
@@ -495,7 +486,7 @@ def create_sheet_row(globals, idx, sheet):
     col_spin.setRange(1, 50)
     col_spin.setValue(sheet.get("first_column", 1))
     col_spin.setStyleSheet(_spin_style())
-    col_spin.valueChanged.connect(lambda val, i=idx: on_field_changed(globals, i, "first_column", val))
+    col_spin.valueChanged.connect(lambda val, i=idx: on_field_changed(globs, i, "first_column", val))
     line2.addWidget(col_spin)
 
     line2.addStretch()
@@ -517,7 +508,7 @@ def create_sheet_row(globals, idx, sheet):
         combo.setCurrentText(current_val)
         combo.setStyleSheet(_combo_style())
         combo.currentTextChanged.connect(
-            lambda text, i=idx, p=pos: on_column_order_changed(globals, i, p, text)
+            lambda text, i=idx, p=pos: on_column_order_changed(globs, i, p, text)
         )
         line3.addWidget(combo)
 
@@ -527,16 +518,16 @@ def create_sheet_row(globals, idx, sheet):
     return row_widget
 
 
-def on_field_changed(globals, index, field, value):
+def on_field_changed(globs, index, field, value):
     """Generic handler for numeric field changes."""
-    sheet_defs = globals.sheet_data.get("sheets", [])
+    sheet_defs = globs.sheet_data.get("sheets", [])
     if 0 <= index < len(sheet_defs):
         sheet_defs[index][field] = value
 
 
-def on_column_order_changed(globals, index, position, value):
+def on_column_order_changed(globs, index, position, value):
     """Update column_order list when a combo box changes."""
-    sheet_defs = globals.sheet_data.get("sheets", [])
+    sheet_defs = globs.sheet_data.get("sheets", [])
     if 0 <= index < len(sheet_defs):
         col_order = sheet_defs[index].setdefault("column_order", ["", "", "", ""])
         while len(col_order) < 4:
@@ -544,9 +535,9 @@ def on_column_order_changed(globals, index, position, value):
         col_order[position] = value
 
 
-def on_color_click(globals, index):
+def on_color_click(globs, index):
     """Open color dialog for sheet at index."""
-    sheet_defs = globals.sheet_data.get("sheets", [])
+    sheet_defs = globs.sheet_data.get("sheets", [])
     current_color = sheet_defs[index].get("color", "#2ecc71")
 
     color = QColorDialog.getColor(QColor(current_color))
@@ -554,55 +545,55 @@ def on_color_click(globals, index):
     if color.isValid():
         hex_color = color.name()
         sheet_defs[index]["color"] = hex_color
-        populate_sheets_list(globals)
+        populate_sheets_list(globs)
 
 
-def on_name_changed(globals, index, value):
+def on_name_changed(globs, index, value):
     """Update sheet name in data model."""
-    sheet_defs = globals.sheet_data.get("sheets", [])
+    sheet_defs = globs.sheet_data.get("sheets", [])
     if 0 <= index < len(sheet_defs):
         sheet_defs[index]["name"] = value.strip() or "Unnamed"
 
 
-def browse_file_wrapper(globals, index, label_widget):
+def browse_file_wrapper(globs, index, label_widget):
     """Wrapper to call the global browse_file with PySide6 mode."""
     from src.managers.file_management import browse_file
     
     # Create a temporary text variable for compatibility
     temp_var = type('obj', (object,), {'setText': lambda s, v: setattr(temp_var, '_val', v)})()
     
-    browse_file(globals, temp_var, _type="workbook")
+    browse_file(globs, temp_var, _type="workbook")
     
     if hasattr(temp_var, '_val'):
         file_path = temp_var._val
-        globals.sheet_data["sheets"][index]["workbook"] = file_path
+        globs.sheet_data["sheets"][index]["workbook"] = file_path
         label_widget.setText(os.path.basename(file_path))
         label_widget.setToolTip(file_path)
         label_widget.setStyleSheet("color: #2ecc71; font-size: 12px;")
 
 
-def show_source_dialog(globals, sheet_index, button_widget, label_widget):
+def show_source_dialog(globs, sheet_index, button_widget, label_widget):
     """Show the source selection dialog positioned near the button."""
     
     def on_local_chosen(index):
         """User chose Local Spreadsheet - open file browser."""
-        browse_file_wrapper(globals, index, label_widget)
+        browse_file_wrapper(globs, index, label_widget)
     
     def on_google_chosen(index):
         """User chose Google Sheets - open URL input dialog."""
         def save_url_callback(idx, url):
             """Called when user saves URL from GoogleSheetsUrlDialog."""
             logging.info(f"Saving Google URL for sheet {idx}: {url}")
-            globals.sheet_data["sheets"][idx]["workbook"] = url
+            globs.sheet_data["sheets"][idx]["workbook"] = url
             label_widget.setText("Google Sheet")
             label_widget.setToolTip(url)
             label_widget.setStyleSheet("color: #3498db; font-size: 12px;")
         
-        dialog = GoogleSheetsUrlDialog(index, save_url_callback, parent=globals.window)
+        dialog = GoogleSheetsUrlDialog(index, save_url_callback, parent=globs.window)
         global_pos = button_widget.mapToGlobal(button_widget.rect().bottomLeft())
         dialog.move(global_pos.x(), global_pos.y() + 32)  # Offset slightly below source dialog
         
-        globals.active_google_dialog = dialog  # Keep reference alive
+        globs.active_google_dialog = dialog  # Keep reference alive
         dialog.show()
         dialog.raise_()
         dialog.activateWindow()
@@ -612,15 +603,15 @@ def show_source_dialog(globals, sheet_index, button_widget, label_widget):
     global_pos = button_widget.mapToGlobal(button_widget.rect().bottomLeft())
     dialog.move(global_pos.x(), global_pos.y())
     
-    globals.active_source_dialog = dialog
+    globs.active_source_dialog = dialog
     dialog.show()
     dialog.raise_()
     dialog.activateWindow()
 
 
-def on_add_sheet(globals):
+def on_add_sheet(globs):
     """Add a new sheet definition."""
-    sheet_defs = globals.sheet_data.setdefault("sheets", [])
+    sheet_defs = globs.sheet_data.setdefault("sheets", [])
 
     existing_names = [s.get("name", "") for s in sheet_defs]
     new_name = generate_unique_name(existing_names)
@@ -641,15 +632,15 @@ def on_add_sheet(globals):
         "column_order": ["Company", "Date", "Invoice #", ""]
     })
 
-    populate_sheets_list(globals)
+    populate_sheets_list(globs)
 
 
-def on_delete_sheet(globals, index):
+def on_delete_sheet(globs, index):
     """Delete sheet after confirmation."""
-    sheet_defs = globals.sheet_data.get("sheets", [])
+    sheet_defs = globs.sheet_data.get("sheets", [])
 
     reply = QMessageBox.question(
-        None,
+        globs.window,
         "Delete Sheet?",
         f"Are you sure you want to delete '{sheet_defs[index].get('name')}'?",
         QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
@@ -658,4 +649,4 @@ def on_delete_sheet(globals, index):
 
     if reply == QMessageBox.StandardButton.Yes:
         sheet_defs.pop(index)
-        populate_sheets_list(globals)
+        populate_sheets_list(globs)

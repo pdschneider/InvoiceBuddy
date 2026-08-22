@@ -2,6 +2,32 @@
 
 All notable changes to **Invoice Buddy** will be located in this file.
 
+## [0.3.0-beta] - 2026-08-21
+
+This update officially launches the new GUI! Users will now land into a much more modern interface by default. Some settings may need to be re-applied.
+
+### Added
+- The new interface is now officially treated as the default interface
+- Configuring and sending to buddies has been brought back to the new GUI
+
+### Changed
+- Changed internal 'globals' variables to 'globs' to free namespace
+- Auto-Name, Enter, and Archive buttons moved to the mailbox view for clarity
+- Removed unused dependencies
+- Improved invoice number detection to reduce false positives
+- Shortened title bar menu buttons for simplicity
+- Minor UI improvements
+- Updated dependencies
+
+### Fixed
+- Dialog boxes now display over the main window by default
+
+### Documentation
+- Updated roadmap.md
+- Added dependencies.md
+- Moved LICENSE.txt to docs folder
+- Docs folder is now bundled with each release
+
 ## [0.2.9] - 2026-08-20
 
 This update shifts from the old onefile mode to the much more robust standalone mode (bundled as a folder under the hood with all dll files signed) as well as improves on documentation and adds 15 new companies!
@@ -20,7 +46,7 @@ This update shifts from the old onefile mode to the much more robust standalone 
 ### Fixed
 - Strengthened app type detection logic, resolving restart and update errors
 - Icon properly displays on Windows
-- Fixed critical bug preventing spreadsheet data entry in the new GUI
+- Fixed critical bug preventing spreadsheet data entry in the new GUI if the chosen workbook was different for each GUI
 
 ### Documentation
 - Added CONTRIBUTING.md

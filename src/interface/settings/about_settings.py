@@ -1,16 +1,16 @@
-# Interface/Settings/about_settings.py
+# src/interface/settings/about_settings.py
 import webbrowser
 import customtkinter as ctk
 import src.utils.fonts as fonts
 from src.interface.setup.setup_wizard import create_wizard
 
 
-def create_about_tab(globals, about_tab):
+def create_about_tab(globs, about_tab):
     """
     Creates the about tab and initializes widgets.
 
         Parameters:
-                globals: Global variables
+                globs: Global variables
                 about_frame: The main frame of the about tab
     """
     ctk.CTkLabel(about_tab,
@@ -32,7 +32,7 @@ def create_about_tab(globals, about_tab):
         ).pack(padx=5, pady=5)
 
     ctk.CTkLabel(about_tab,
-                 text=f"Current Version: {globals.current_version}",
+                 text=f"Current Version: {globs.current_version}",
                  anchor="center").pack(fill="x", pady=20, padx=10)
 
     buttons_frame = ctk.CTkFrame(about_tab, fg_color="transparent")
@@ -45,7 +45,7 @@ def create_about_tab(globals, about_tab):
 
     ctk.CTkButton(buttons_frame,
                   text="Open Wizard",
-                  command=lambda: create_wizard(globals)).grid(
+                  command=lambda: create_wizard(globs)).grid(
                       row=0, column=1, padx=5)
     
     github_button = ctk.CTkButton(buttons_frame,
@@ -56,8 +56,8 @@ def create_about_tab(globals, about_tab):
 
     def show_changelog():
         """Brings up the changelog window."""
-        pages = [globals.settings_page, globals.main_page, globals.onboarding_page]
+        pages = [globs.settings_page, globs.main_page, globs.onboarding_page]
         for page in pages:
             page.pack_forget()
-        globals.changelog.pack(fill="both", expand=True, padx=10, pady=0)
-        globals.title.configure(text="Changelog")
+        globs.changelog.pack(fill="both", expand=True, padx=10, pady=0)
+        globs.title.configure(text="Changelog")

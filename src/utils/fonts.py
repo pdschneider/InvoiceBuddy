@@ -1,14 +1,14 @@
-# Utils/fonts.py
-from config import globals
+# src/utils/fonts.py
+from config import globs
 
 # Fonts
-if globals.os_name.startswith("Windows"):
+if globs.os_name.startswith("Windows"):
     title_font   = ("DejaVu Sans", 18, "bold")
     heading_font = ("DejaVu Sans", 16, "bold")
     body_font    = ("DejaVu Sans", 14)
     mono_font    = ("DejaVu Sans Mono", 10)
     button_font  = ("DejaVu Sans", 30)
-elif globals.os_name.startswith("Linux"):
+elif globs.os_name.startswith("Linux"):
     title_font   = ("Ubuntu", 18, "bold")
     heading_font = ("Ubuntu", 16, "bold")
     body_font    = ("Ubuntu", 14)

@@ -75,12 +75,12 @@ def markdown_to_plain(md: str) -> list[tuple[str, tuple]]:
     return lines_out
 
 
-def create_changelog(globals, changelog_tab):
+def create_changelog(globs, changelog_tab):
     """
     Creates the tab to display setup instructions for new users.
 
             Parameters:
-                    globals: Global variables
+                    globs: Global variables
                     setup_tab: The main frame of the setup window
     """
 
@@ -129,6 +129,6 @@ def create_changelog(globals, changelog_tab):
         Forgets setup and settings pages to return
         the user to a clean main page.
         """
-        globals.changelog.pack_forget()
-        globals.settings_page.pack(fill="both", expand=True, padx=10, pady=0)
-        globals.title.configure(text="Settings")
+        globs.changelog.pack_forget()
+        globs.settings_page.pack(fill="both", expand=True, padx=10, pady=0)
+        globs.title.configure(text="Settings")

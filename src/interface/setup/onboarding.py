@@ -1,4 +1,4 @@
-# Interface/setup_window.py
+# src/interface/onboarding.py
 import customtkinter as ctk
 import src.utils.fonts as fonts
 import shutil
@@ -10,12 +10,12 @@ from src.utils.load_settings import load_data_path
 from src.utils.observers import setup_observer
 
 
-def create_onboarding_page(globals, onboarding_page):
+def create_onboarding_page(globs, onboarding_page):
     """
     Creates the tab to display setup instructions for new users.
 
             Parameters:
-                    globals: Global variables
+                    globs: Global variables
                     onboarding_page: The main frame of the setup window
     """
 
@@ -44,17 +44,17 @@ def create_onboarding_page(globals, onboarding_page):
 
     # Helper Functions
     def on_browse_workbook():
-        browse_file(globals, globals.workbook_var, _type="workbook")
+        browse_file(globs, globs.workbook_var, _type="workbook")
 
     def on_browse_inbox():
-        browse_directory(globals, globals.inbox_dir_var)
+        browse_directory(globs, globs.inbox_dir_var)
         try:
-            globals.update_file_counts()
+            globs.update_file_counts()
         except Exception as e:
             logging.error(f"Error updating file counts after browse: {e}")
 
     def on_browse_archive():
-        browse_directory(globals, globals.archive_path_var)
+        browse_directory(globs, globs.archive_path_var)
 
     # Workbook
     ctk.CTkLabel(paths_frame,
@@ -62,7 +62,7 @@ def create_onboarding_page(globals, onboarding_page):
                  text="Workbook:").grid(row=0, column=0, padx=(20, 10), sticky="w")
 
     ctk.CTkEntry(paths_frame,
-                 textvariable=globals.workbook_var
+                 textvariable=globs.workbook_var
                  ).grid(row=0, column=1, padx=(0, 10), sticky="ew")
 
     ctk.CTkButton(paths_frame,
@@ -77,7 +77,7 @@ def create_onboarding_page(globals, onboarding_page):
                  text="Inbox:").grid(row=1, column=0, padx=(20, 10), sticky="w")
 
     ctk.CTkEntry(paths_frame,
-                 textvariable=globals.inbox_dir_var
+                 textvariable=globs.inbox_dir_var
                  ).grid(row=1, column=1, padx=(0, 10), sticky="ew")
 
     ctk.CTkButton(paths_frame,
@@ -93,7 +93,7 @@ def create_onboarding_page(globals, onboarding_page):
                  ).grid(row=2, column=0, padx=(20, 10), sticky="w")
 
     ctk.CTkEntry(paths_frame,
-                 textvariable=globals.archive_path_var
+                 textvariable=globs.archive_path_var
                  ).grid(row=2, column=1, padx=(0, 10), sticky="ew")
 
     ctk.CTkButton(paths_frame,
@@ -115,23 +115,23 @@ def create_onboarding_page(globals, onboarding_page):
         Forgets setup and settings pages to
         return the user to the main page.
         """
-        save_all_settings(globals, reject_toast=True, reject_metadata=True)
+        save_all_settings(globs, reject_toast=True, reject_metadata=True)
         try:
-            setup_observer(globals, globals.inbox, key='inbox')
+            setup_observer(globs, globs.inbox, key='inbox')
         except Exception as e:
             logging.error(f"Unable to set up observers due to: {e}")
 
         try:
             src_dir = os.path.normpath(
                 load_data_path("local", "Welcome to Invoice Buddy.pdf", default=True))
-            if not os.path.isfile(load_data_path(globals.inbox, os.path.basename(src_dir))):
-                shutil.copy2(src_dir, globals.inbox)
+            if not os.path.isfile(load_data_path(globs.inbox, os.path.basename(src_dir))):
+                shutil.copy2(src_dir, globs.inbox)
                 logging.debug(f"Copied welcome document to inbox successfully!")
         except Exception as e:
             logging.error(f"Cannot load welcome file due to: {e}")
 
-        pages = [globals.settings_page, globals.onboarding_page, globals.changelog]
+        pages = [globs.settings_page, globs.onboarding_page, globs.changelog]
         for page in pages:
             page.pack_forget()
-        globals.main_page.pack(fill="both", expand=True, padx=10, pady=0)
-        globals.title.configure(text="Inbox")
+        globs.main_page.pack(fill="both", expand=True, padx=10, pady=0)
+        globs.title.configure(text="Inbox")

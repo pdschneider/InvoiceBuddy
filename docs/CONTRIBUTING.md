@@ -1,7 +1,5 @@
 # Contributing to Invoice Buddy
 
-*Up to date as of v0.2.9*
-
 ## TL;DR
 
 Invoice Buddy is currently a solo project. If you're interested in contributing, reach out first so we can coordinate.
@@ -56,3 +54,5 @@ Using AI tools to assist with contributions is fine, but:
 - You are responsible for every line of code you submit
 - Do not submit AI-generated code you don't understand
 - Test your changes before committing
+
+*Up to date as of v0.2.9*

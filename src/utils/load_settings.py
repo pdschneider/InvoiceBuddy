@@ -1,4 +1,4 @@
-# Utils/load_settings.py
+# src/utils/load_settings.py
 import logging
 import platform
 import os
@@ -41,16 +41,16 @@ def load_data_path(direct=None, filename=None, default=False):
         # Nuitka (onefile or standalone)
         is_bundled = True
         try:
-            module_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))   # src/utils/
-            bundle_root = os.path.dirname(module_dir)                 # root (where defaults/ lives)
+            module_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))  # src/utils/
+            bundle_root = os.path.dirname(module_dir)  # root (where defaults/ lives)
         except Exception:
             bundle_root = os.path.dirname(sys.executable)
 
     else:
         # === DEVELOPMENT MODE ===
         is_bundled = False
-        base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))   # src/utils/
-        dev_base_dir = os.path.dirname(base_dir)                # project root
+        base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))  # src/utils/
+        dev_base_dir = os.path.dirname(base_dir)  # project root
 
     # ==================== SET bundled_dir and data_dir ====================
     if is_bundled:

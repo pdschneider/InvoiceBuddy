@@ -1,4 +1,4 @@
-# Managers/Autoname/company_search.py
+# src/managers/autoname/company_search.py
 import logging
 import os
 import re

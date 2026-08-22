@@ -1,4 +1,4 @@
-# Interface/Settings/general_settings.py
+# src/interface/settings/general_settings.py
 from tkinter import messagebox
 import customtkinter as ctk
 from src.utils.save_settings import save_all_settings
@@ -11,12 +11,12 @@ import logging
 import sys
 
 
-def create_general_settings_tab(globals, settings_tab):
+def create_general_settings_tab(globs, settings_tab):
     """
     Create the Settings tab for configuring paths and advanced settings.
 
     Args:
-        globals (globals): The global configuration
+        globs (globs): The global configuration
         object containing UI variables and settings.
     """
 
@@ -45,11 +45,11 @@ def create_general_settings_tab(globals, settings_tab):
     def update_theme_var(*args):
         selected_label = theme_label_var.get()
         theme_name = label_to_theme.get(selected_label, "Cosmic Sky")
-        globals.theme_var.set(theme_name)
+        globs.theme_var.set(theme_name)
 
     theme_label_var.trace("w", update_theme_var)
 
-    initial_theme = globals.theme_var.get()
+    initial_theme = globs.theme_var.get()
     initial_label = next(
         (label for label,
          theme in label_to_theme.items() if theme == initial_theme), "Cosmic Sky")
@@ -57,7 +57,7 @@ def create_general_settings_tab(globals, settings_tab):
 
     ctk.CTkLabel(theme_frame,
                  text=None,
-                 image=globals.theme_icon).pack(side="left", padx=6, pady=0)
+                 image=globs.theme_icon).pack(side="left", padx=6, pady=0)
 
     ctk.CTkLabel(theme_frame,
                  text="Theme",
@@ -81,14 +81,14 @@ def create_general_settings_tab(globals, settings_tab):
 
     ctk.CTkLabel(printer_frame,
                 text=None,
-                image=globals.printer_icon).pack(side="left", padx=6, pady=0)
+                image=globs.printer_icon).pack(side="left", padx=6, pady=0)
 
     ctk.CTkLabel(printer_frame,
                 text="Printer",
                 font=fonts.heading_font).pack(side="left", padx=(0, 12))
 
     ctk.CTkComboBox(printer_frame,
-                    variable=globals.default_printer_var,
+                    variable=globs.default_printer_var,
                     values=query_printers(),
                     state="readonly",
                     width=150).pack(side="left")
@@ -101,7 +101,7 @@ def create_general_settings_tab(globals, settings_tab):
 
     ctk.CTkLabel(version_frame,
                  text=None,
-                 image=globals.notification_icon).pack(side="left", padx=6, pady=0)
+                 image=globs.notification_icon).pack(side="left", padx=6, pady=0)
 
     version_check_label = ctk.CTkLabel(version_frame,
                                     text="Check for Updates",
@@ -115,7 +115,7 @@ def create_general_settings_tab(globals, settings_tab):
                pady=5)
 
     ctk.CTkCheckBox(version_frame,
-                    variable=globals.github_check_var,
+                    variable=globs.github_check_var,
                     onvalue=True,
                     text=None,
                     width=0,
@@ -148,7 +148,7 @@ def create_general_settings_tab(globals, settings_tab):
                pady=5)
 
     ctk.CTkCheckBox(beta_frame,
-                    variable=globals.beta_var,
+                    variable=globs.beta_var,
                     onvalue=True,
                     text=None,
                     width=0,
@@ -166,7 +166,7 @@ def create_general_settings_tab(globals, settings_tab):
 
     ctk.CTkLabel(window_frame,
                  text=None,
-                 image=globals.windows_icon).pack(side="left", padx=6, pady=0)
+                 image=globs.windows_icon).pack(side="left", padx=6, pady=0)
 
     window_size_label = ctk.CTkLabel(window_frame,
                                     text="Save Window Placement",
@@ -180,7 +180,7 @@ def create_general_settings_tab(globals, settings_tab):
                pady=5)
 
     ctk.CTkCheckBox(window_frame,
-                    variable=globals.dynamic_window_size_var,
+                    variable=globs.dynamic_window_size_var,
                     onvalue=True,
                     text=None,
                     width=0,
@@ -204,7 +204,7 @@ def create_general_settings_tab(globals, settings_tab):
                pady=5)
 
     ctk.CTkCheckBox(legacy_frame,
-                    variable=globals.legacy_mode_var,
+                    variable=globs.legacy_mode_var,
                     onvalue=True,
                     text=None,
                     width=0,
@@ -220,23 +220,23 @@ def create_general_settings_tab(globals, settings_tab):
 
     ctk.CTkButton(save_button_frame,
                   text="Save Settings",
-                  command=lambda: save_button(globals)).pack()
+                  command=lambda: save_button(globs)).pack()
 
-    def save_button(globals):
+    def save_button(globs):
         """Saves and prompts for restart if required."""
         prompt_restart = False
-        if globals.github_check != globals.github_check_var.get():
+        if globs.github_check != globs.github_check_var.get():
             prompt_restart = True
-        elif globals.active_theme != globals.theme_var.get():
+        elif globs.active_theme != globs.theme_var.get():
             prompt_restart = True
-        elif globals.beta != globals.beta_var.get():
+        elif globs.beta != globs.beta_var.get():
             prompt_restart = True
-        elif globals.legacy_mode != globals.legacy_mode_var.get():
+        elif globs.legacy_mode != globs.legacy_mode_var.get():
             prompt_restart = True
-        save_all_settings(globals)
+        save_all_settings(globs)
 
         if prompt_restart:
-            if not globals.legacy_mode:
+            if not globs.legacy_mode:
                 reply = QMessageBox.question(
                     None,
                     "Restart Invoice Buddy?",
@@ -245,19 +245,19 @@ def create_general_settings_tab(globals, settings_tab):
                     QMessageBox.StandardButton.Yes)
                 if reply == QMessageBox.StandardButton.Yes:
                     try:
-                        subprocess.Popen(globals.app_path)
+                        subprocess.Popen(globs.app_path)
                         sys.exit(0)
                     except Exception as e:
                         logging.error(f"Could not restart app due to: {e}")
             else:
                     reply = messagebox.askyesno(
-                        parent=globals.root,
+                        parent=globs.root,
                         title="Restart Invoice Buddy",
                         message="Would you like restart Invoice Buddy to apply all changes?")
                     if reply:
                         try:
-                            logging.debug(f"App Path: {globals.app_path}")
-                            subprocess.Popen(globals.app_path)
+                            logging.debug(f"App Path: {globs.app_path}")
+                            subprocess.Popen(globs.app_path)
                         except Exception as e:
                             logging.error(f"Unable to open program due to: {e}")
                         sys.exit(0)

@@ -1,4 +1,4 @@
-# Interface/Settings/paths_settings.py
+# src/interface/settings/paths_settings.py
 import customtkinter as ctk
 from tkinter import messagebox
 from PySide6.QtWidgets import QMessageBox
@@ -10,12 +10,12 @@ import logging
 import sys
 
 
-def create_paths_settings_tab(globals, settings_tab):
+def create_paths_settings_tab(globs, settings_tab):
     """
     Create the Settings tab for configuring paths and advanced settings.
 
     Args:
-        globals (globals): The global configuration
+        globs (globs): The global configuration
         object containing UI variables and settings.
     """
 
@@ -40,13 +40,13 @@ def create_paths_settings_tab(globals, settings_tab):
                  ).grid(row=0, column=0, padx=(20, 10), sticky="w")
 
     ctk.CTkEntry(paths_section,
-                 textvariable=globals.workbook_var
+                 textvariable=globs.workbook_var
                  ).grid(row=0, column=1, padx=(0, 10), sticky="ew")
 
     ctk.CTkButton(paths_section,
                   text="Browse",
                   width=140,
-                  command=lambda: browse_file(globals, globals.workbook_var, _type="workbook")
+                  command=lambda: browse_file(globs, globs.workbook_var, _type="workbook")
                   ).grid(row=0, column=2, pady=5)
 
     # Inbox
@@ -56,13 +56,13 @@ def create_paths_settings_tab(globals, settings_tab):
                  ).grid(row=1, column=0, padx=(20, 10), sticky="w")
 
     ctk.CTkEntry(paths_section,
-                 textvariable=globals.inbox_dir_var
+                 textvariable=globs.inbox_dir_var
                  ).grid(row=1, column=1, padx=(0, 10), sticky="ew")
 
     ctk.CTkButton(paths_section,
                   text="Browse",
                   width=140,
-                  command=lambda: [browse_directory(globals, globals.inbox_dir_var), globals.update_file_counts()]
+                  command=lambda: [browse_directory(globs, globs.inbox_dir_var), globs.update_file_counts()]
                   ).grid(row=1, column=2, pady=5)
 
     # Archive
@@ -72,19 +72,19 @@ def create_paths_settings_tab(globals, settings_tab):
                  ).grid(row=2, column=0, padx=(20, 10), sticky="w")
 
     ctk.CTkEntry(paths_section,
-                 textvariable=globals.archive_path_var
+                 textvariable=globs.archive_path_var
                  ).grid(row=2, column=1, padx=(0, 10), sticky="ew")
 
     ctk.CTkButton(paths_section,
                   text="Browse",
                   width=140,
-                  command=lambda: [browse_directory(globals, globals.archive_path_var)]
+                  command=lambda: [browse_directory(globs, globs.archive_path_var)]
                   ).grid(row=2, column=2, pady=5)
 
     def add_buddy():
         """Add a buddy to the buddies list."""
-        if len(globals.buddy_pairs) >= globals.max_buddies: return
-        name_var = ctk.StringVar(value=f"Buddy {len(globals.buddy_entries) + 1}")
+        if len(globs.buddy_pairs) >= globs.max_buddies: return
+        name_var = ctk.StringVar(value=f"Buddy {len(globs.buddy_entries) + 1}")
         path_var = ctk.StringVar()
 
         buddy_subframe = ctk.CTkFrame(buddies_frame)
@@ -101,7 +101,7 @@ def create_paths_settings_tab(globals, settings_tab):
         ctk.CTkButton(buddy_subframe,
                       width=105,
                       text="Browse",
-                      command=lambda: browse_directory(globals, path_var)
+                      command=lambda: browse_directory(globs, path_var)
                       ).grid(row=0, column=2, pady=0, padx=5)
         ctk.CTkButton(buddy_subframe,
                       text="-",
@@ -109,27 +109,27 @@ def create_paths_settings_tab(globals, settings_tab):
                       command=lambda f=buddy_subframe: remove_buddy(f)
                       ).grid(row=0, column=3, pady=0)
 
-        globals.buddy_frames.append(buddy_subframe)
-        globals.buddy_entries.append({"frame": buddy_subframe,
+        globs.buddy_frames.append(buddy_subframe)
+        globs.buddy_entries.append({"frame": buddy_subframe,
                                       "name_var": name_var,
                                       "path_var": path_var})
 
         add_button.pack_forget()
         add_button.pack(pady=0, padx=0)
 
-        if len(globals.buddy_entries) >= globals.max_buddies:
+        if len(globs.buddy_entries) >= globs.max_buddies:
             add_button.pack_forget()
 
     def remove_buddy(frame):
         """Find and remove from buddy entries."""
-        for entry in globals.buddy_entries[:]:
+        for entry in globs.buddy_entries[:]:
             if entry["frame"] == frame:
                 frame.destroy()
-                globals.buddy_entries.remove(entry)
+                globs.buddy_entries.remove(entry)
                 break
 
         # Show + button again if space
-        if len(globals.buddy_entries) < globals.max_buddies:
+        if len(globs.buddy_entries) < globs.max_buddies:
             add_button.pack(pady=0, padx=0)
 
     def populate_buddies():
@@ -138,16 +138,16 @@ def create_paths_settings_tab(globals, settings_tab):
         Must be called after `buddies_frame` exists.
         """
         # Grab the first three source entries that aren't the inbox
-        candidates = [(k, v) for k, v in globals.buddies.items() if k != "inbox"][:3]
+        candidates = [(k, v) for k, v in globs.buddies.items() if k != "inbox"][:3]
 
         for name, path in candidates:
             # Stop if we already hit the max allowed buddies
-            if len(globals.buddy_pairs) >= globals.max_buddies:
+            if len(globs.buddy_pairs) >= globs.max_buddies:
                 break
-            # Create a new UI row (adds StringVars to globals.buddy_pairs)
+            # Create a new UI row (adds StringVars to globs.buddy_pairs)
             add_buddy()
             # The newest entry is the last in buddy_entries
-            latest_entry = globals.buddy_entries[-1]
+            latest_entry = globs.buddy_entries[-1]
             latest_entry["name_var"].set(name)
             latest_entry["path_var"].set(path)
 
@@ -196,14 +196,14 @@ def create_paths_settings_tab(globals, settings_tab):
                  ).grid(row=0, column=0, padx=(20, 10), sticky="w")
 
     ctk.CTkEntry(advanced_frame,
-                 textvariable=globals.history_var
+                 textvariable=globs.history_var
                  ).grid(row=0, column=1, padx=(0, 10), sticky="ew")
 
     ctk.CTkButton(advanced_frame,
                   text="Browse",
                   width=140,
                   command=lambda: browse_file(
-                      globals, globals.history_var, _type="history")).grid(row=0, column=2, pady=5)
+                      globs, globs.history_var, _type="history")).grid(row=0, column=2, pady=5)
 
     # Save Button Frame
     save_button_frame = ctk.CTkFrame(settings_tab, fg_color="transparent")
@@ -211,23 +211,23 @@ def create_paths_settings_tab(globals, settings_tab):
 
     ctk.CTkButton(save_button_frame,
                   text="Save Settings",
-                  command=lambda: save_button(globals)).pack()
+                  command=lambda: save_button(globs)).pack()
 
-    def save_button(globals):
+    def save_button(globs):
         """Saves and prompts for restart if required."""
         prompt_restart = False
-        if globals.github_check != globals.github_check_var.get():
+        if globs.github_check != globs.github_check_var.get():
             prompt_restart = True
-        elif globals.active_theme != globals.theme_var.get():
+        elif globs.active_theme != globs.theme_var.get():
             prompt_restart = True
-        elif globals.beta != globals.beta_var.get():
+        elif globs.beta != globs.beta_var.get():
             prompt_restart = True
-        elif globals.legacy_mode != globals.legacy_mode_var.get():
+        elif globs.legacy_mode != globs.legacy_mode_var.get():
             prompt_restart = True
-        save_all_settings(globals)
+        save_all_settings(globs)
 
         if prompt_restart:
-            if not globals.legacy_mode:
+            if not globs.legacy_mode:
                 reply = QMessageBox.question(
                     None,
                     "Restart Pearl?",
@@ -236,19 +236,19 @@ def create_paths_settings_tab(globals, settings_tab):
                     QMessageBox.StandardButton.Yes)
                 if reply == QMessageBox.StandardButton.Yes:
                     try:
-                        subprocess.Popen(globals.app_path)
+                        subprocess.Popen(globs.app_path)
                         sys.exit(0)
                     except Exception as e:
                         logging.error(f"Could not restart app due to: {e}")
             else:
                     reply = messagebox.askyesno(
-                        parent=globals.root,
+                        parent=globs.root,
                         title="Restart Pearl",
                         message="Would you like restart Pearl to apply all changes?")
                     if reply:
                         try:
-                            logging.debug(f"App Path: {globals.app_path}")
-                            subprocess.Popen(globals.app_path)
+                            logging.debug(f"App Path: {globs.app_path}")
+                            subprocess.Popen(globs.app_path)
                         except Exception as e:
                             logging.error(f"Unable to open program due to: {e}")
                         sys.exit(0)

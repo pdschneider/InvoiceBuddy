@@ -1,3 +1,4 @@
+# src/managers/printers.py
 import subprocess
 import platform
 import logging
@@ -33,7 +34,7 @@ def print_selected_files(globals, filenames=None):
     try:
         if platform.platform().startswith("Linux"):
             reply = QMessageBox.question(
-                    None,
+                    globals.window,
                     "Print?",
                     "Would you like to print selected files?",
                     QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
@@ -44,7 +45,7 @@ def print_selected_files(globals, filenames=None):
                 return
             if success:
                 QMessageBox.information(
-                    None,
+                    globals.window,
                     "Print Succeeded",
                     "Print successful!",
                     QMessageBox.StandardButton.Ok,
@@ -52,14 +53,14 @@ def print_selected_files(globals, filenames=None):
                 return
             else:
                 QMessageBox.warning(
-                    None,
+                    globals.window,
                     "Print Failed",
                     "Unable to print.",
                     QMessageBox.StandardButton.Ok,
                     QMessageBox.StandardButton.Ok)
         else:
             reply = QMessageBox.question(
-                    None,
+                    globals.window,
                     "Print?",
                     "Would you like to print selected files?",
                     QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
@@ -70,7 +71,7 @@ def print_selected_files(globals, filenames=None):
                 return
             if success:
                 QMessageBox.information(
-                    None,
+                    globals.window,
                     "Print Succeeded",
                     "Print successful!",
                     QMessageBox.StandardButton.Ok,
@@ -78,7 +79,7 @@ def print_selected_files(globals, filenames=None):
                 return
             else:
                 QMessageBox.warning(
-                    None,
+                    globals.window,
                     "Print Failed",
                     "Unable to print.",
                     QMessageBox.StandardButton.Ok,

@@ -1,9 +1,8 @@
 # src/qt_interface/qt_inbox.py
-from PySide6.QtWidgets import (QWidget, QVBoxLayout, QTableWidget, QTableWidgetItem, 
-                               QHeaderView, QLabel, QFrame)
-from PySide6.QtCore import Qt
+from PySide6.QtWidgets import (QWidget, QVBoxLayout,
+                               QTableWidget, QHeaderView)
 
-def create_inbox_list(globals):
+def create_inbox_list(globs):
     """Creates the central file list pane."""
     
     pane = QWidget()
@@ -41,6 +40,6 @@ def create_inbox_list(globals):
     layout.addWidget(table, stretch=1)
 
     # Store reference
-    globals.file_table = table
+    globs.file_table = table
 
     return pane

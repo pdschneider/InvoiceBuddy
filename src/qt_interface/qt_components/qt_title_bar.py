@@ -3,7 +3,7 @@ from PySide6.QtWidgets import (QWidget, QHBoxLayout,
                                QMenuBar, QToolButton,
                                QMenu, QStyle)
 from PySide6.QtCore import Qt, QPoint
-from PySide6.QtGui import QColor, QAction
+from PySide6.QtGui import  QAction
 
 
 class TitleBar(QWidget):

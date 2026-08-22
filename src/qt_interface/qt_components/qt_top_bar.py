@@ -5,7 +5,7 @@ from PySide6.QtGui import QCursor
 from src.qt_interface.qt_components.qt_sidebar import toggle_sidebar
 from src.qt_interface.qt_settings.qt_settings import toggle_settings_panel
 
-def create_top_bar(globals):
+def create_top_bar(globs):
     """Creates the top navigation bar for Invoice Buddy."""
     top_bar_widget = QWidget()
     top_bar_widget.setFixedHeight(50)
@@ -19,7 +19,7 @@ def create_top_bar(globals):
     hamburger_button = QPushButton("☰")
     hamburger_button.setFixedSize(40, 40)
     hamburger_button.setCursor(QCursor(Qt.PointingHandCursor))
-    hamburger_button.clicked.connect(lambda: toggle_sidebar(globals, globals.sidebar))
+    hamburger_button.clicked.connect(lambda: toggle_sidebar(globs, globs.sidebar))
     top_bar_layout.addWidget(hamburger_button)
 
     # App Title
@@ -55,7 +55,7 @@ def create_top_bar(globals):
     settings_button.setFixedSize(40, 40)
     settings_button.setCursor(QCursor(Qt.PointingHandCursor))
     settings_button.setStyleSheet("background-color: transparent; color: white; font-size: 18px;")
-    settings_button.clicked.connect(lambda: toggle_settings_panel(globals))
+    settings_button.clicked.connect(lambda: toggle_settings_panel(globs))
     top_bar_layout.addWidget(settings_button)
 
     # Help/About

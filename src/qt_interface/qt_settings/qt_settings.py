@@ -7,11 +7,12 @@ from src.qt_interface.qt_settings.qt_paths import create_paths_settings_tab
 from src.qt_interface.qt_settings.qt_spreadsheet import create_spreadsheet_settings_tab
 from src.utils.save_qt import save_qt_settings
 
-def create_settings_panel(globals):
+
+def create_settings_panel(globs):
     """Creates the settings overlay panel with tabs."""
 
     # Main container
-    settings_panel = QWidget(globals.window)
+    settings_panel = QWidget(globs.window)
     settings_panel.setMinimumSize(650, 550)
     settings_panel.setStyleSheet("""
         background-color: rgb(43, 43, 43);
@@ -54,19 +55,19 @@ def create_settings_panel(globals):
     """)
 
     # General tab
-    general_tab = create_general_settings_tab(globals)
+    general_tab = create_general_settings_tab(globs)
     tabs.addTab(general_tab, "General")
 
     # Paths tab
-    paths_tab = create_paths_settings_tab(globals)
+    paths_tab = create_paths_settings_tab(globs)
     tabs.addTab(paths_tab, "Paths")
 
     # Spreadsheet tab
-    spreadsheet_tab = create_spreadsheet_settings_tab(globals)
+    spreadsheet_tab = create_spreadsheet_settings_tab(globs)
     tabs.addTab(spreadsheet_tab, "Spreadsheet")
 
     # Advanced tab
-    advanced_tab = create_advanced_settings_tab(globals)
+    advanced_tab = create_advanced_settings_tab(globs)
     tabs.addTab(advanced_tab, "Advanced")
 
     layout.addWidget(tabs)
@@ -88,43 +89,43 @@ def create_settings_panel(globals):
     close_btn.setCursor(Qt.PointingHandCursor)
     def on_close_click():
         """Save settings before closing the panel."""
-        save_qt_settings(globals)  # Save first
-        toggle_settings_panel(globals)  # Then close
+        save_qt_settings(globs)  # Save first
+        toggle_settings_panel(globs)  # Then close
 
     close_btn.clicked.connect(on_close_click)
     layout.addWidget(close_btn)
 
     # Store references
-    globals.settings_panel = settings_panel
-    globals.settings_tabs = tabs
+    globs.settings_panel = settings_panel
+    globs.settings_tabs = tabs
 
     return settings_panel
 
-def toggle_settings_panel(globals):
+def toggle_settings_panel(globs):
     """Shows or hides the settings panel."""
-    if globals.settings_panel.isVisible():
-        globals.settings_panel.hide()
-        globals.dim_overlay.hide()
+    if globs.settings_panel.isVisible():
+        globs.settings_panel.hide()
+        globs.dim_overlay.hide()
     else:
         # Hide any changelog panels currently open
-        if hasattr(globals, 'changelog_panel') and globals.changelog_panel.isVisible():
-            globals.changelog_panel.hide()
+        if hasattr(globs, 'changelog_panel') and globs.changelog_panel.isVisible():
+            globs.changelog_panel.hide()
 
-        globals.dim_overlay.resize(globals.window.width(), globals.window.height() - 35)
-        globals.dim_overlay.move(0, 35)
-        globals.dim_overlay.show()
-        globals.dim_overlay.raise_()
+        globs.dim_overlay.resize(globs.window.width(), globs.window.height() - 35)
+        globs.dim_overlay.move(0, 35)
+        globs.dim_overlay.show()
+        globs.dim_overlay.raise_()
 
         # Dynamic size: 85% of window, but never below minimum (650x550)
-        parent_w = globals.window.width()
-        parent_h = globals.window.height()
+        parent_w = globs.window.width()
+        parent_h = globs.window.height()
         panel_w = max(650, int(parent_w * 0.85))
         panel_h = max(550, int(parent_h * 0.85))
-        globals.settings_panel.resize(panel_w, panel_h)
+        globs.settings_panel.resize(panel_w, panel_h)
 
         x = (parent_w - panel_w) // 2
         y = (parent_h - panel_h) // 2
 
-        globals.settings_panel.move(x, y)
-        globals.settings_panel.show()
-        globals.settings_panel.raise_()
+        globs.settings_panel.move(x, y)
+        globs.settings_panel.show()
+        globs.settings_panel.raise_()

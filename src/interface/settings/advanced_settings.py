@@ -1,4 +1,4 @@
-# Interface/Settings/advanced_settings.py
+# src/interface/settings/advanced_settings.py
 import customtkinter as ctk
 from src.utils.save_settings import save_all_settings
 from src.utils.load_settings import load_data_path
@@ -10,16 +10,15 @@ from PySide6.QtWidgets import QMessageBox
 from tkinter import messagebox
 import sys
 import logging
-import os
 import subprocess
 
 
-def create_advanced_tab(globals, advanced_frame):
+def create_advanced_tab(globs, advanced_frame):
     """
     Creates the advanced tab and initializes widgets.
 
         Parameters:
-                globals: Global variables
+                globs: Global variables
                 about_frame: The main frame of the about tab
     """
 
@@ -36,7 +35,7 @@ def create_advanced_tab(globals, advanced_frame):
 
     ctk.CTkLabel(logging_frame,
                  text=None,
-                 image=globals.preferences_icon).grid(
+                 image=globs.preferences_icon).grid(
                      row=0, column=0, padx=6, sticky="w")
 
     logging_label = ctk.CTkLabel(logging_frame,
@@ -59,7 +58,7 @@ def create_advanced_tab(globals, advanced_frame):
             logging_frame,
             text=level,
             value=level,
-            variable=globals.logging_level_var
+            variable=globs.logging_level_var
             ).grid(row=0, column=col, padx=5, sticky="w")
         col += 1
 
@@ -71,7 +70,7 @@ def create_advanced_tab(globals, advanced_frame):
 
     ctk.CTkLabel(folders_frame,
                  text=None,
-                 image=globals.note_icon).pack(side="left", padx=6, pady=0)
+                 image=globs.note_icon).pack(side="left", padx=6, pady=0)
 
     ctk.CTkLabel(folders_frame,
                  text="Open Logs",
@@ -80,12 +79,12 @@ def create_advanced_tab(globals, advanced_frame):
     logs_button = ctk.CTkButton(folders_frame,
                                 text="Logs",
                                 width=20,
-                                command=lambda: open_logs(globals))
+                                command=lambda: open_logs(globs))
     logs_button.pack(side="left", padx=(0, 12))
 
     ctk.CTkLabel(folders_frame,
                  text=None,
-                 image=globals.config_icon).pack(side="left", padx=6, pady=0)
+                 image=globs.config_icon).pack(side="left", padx=6, pady=0)
 
     ctk.CTkLabel(folders_frame,
                  text="Open Config",
@@ -94,7 +93,7 @@ def create_advanced_tab(globals, advanced_frame):
     open_config_button = ctk.CTkButton(folders_frame,
                                 text="Config",
                                 width=20,
-                                command=lambda: open_config(globals))
+                                command=lambda: open_config(globs))
     open_config_button.pack(side="left", padx=(0, 12))
 
     # Deletion
@@ -111,7 +110,7 @@ def create_advanced_tab(globals, advanced_frame):
 
     ctk.CTkLabel(top_deletion_frame,
                 text=None,
-                image=globals.garbage_icon).pack(side="left", padx=6, pady=0)
+                image=globs.garbage_icon).pack(side="left", padx=6, pady=0)
 
     ctk.CTkLabel(top_deletion_frame,
                 text="Factory Reset",
@@ -120,7 +119,7 @@ def create_advanced_tab(globals, advanced_frame):
     reset_pearl_button = ctk.CTkButton(top_deletion_frame,
                                 text="Reset",
                                 width=20,
-                                command=lambda: total_factory_reset(globals))
+                                command=lambda: total_factory_reset(globs))
     reset_pearl_button.pack(side="left", padx=(0, 12))
     reset_pearl_button.configure(fg_color="#d62828", hover_color="#ff3b30")
 
@@ -130,23 +129,23 @@ def create_advanced_tab(globals, advanced_frame):
 
     ctk.CTkButton(save_button_frame,
                   text="Save Settings",
-                  command=lambda: save_button(globals)).pack()
+                  command=lambda: save_button(globs)).pack()
 
-    def save_button(globals):
+    def save_button(globs):
         """Saves and prompts for restart if required."""
         prompt_restart = False
-        if globals.github_check != globals.github_check_var.get():
+        if globs.github_check != globs.github_check_var.get():
             prompt_restart = True
-        elif globals.active_theme != globals.theme_var.get():
+        elif globs.active_theme != globs.theme_var.get():
             prompt_restart = True
-        elif globals.beta != globals.beta_var.get():
+        elif globs.beta != globs.beta_var.get():
             prompt_restart = True
-        elif globals.legacy_mode != globals.legacy_mode_var.get():
+        elif globs.legacy_mode != globs.legacy_mode_var.get():
             prompt_restart = True
-        save_all_settings(globals)
+        save_all_settings(globs)
 
         if prompt_restart:
-            if not globals.legacy_mode:
+            if not globs.legacy_mode:
                 reply = QMessageBox.question(
                     None,
                     "Restart Pearl?",
@@ -155,19 +154,19 @@ def create_advanced_tab(globals, advanced_frame):
                     QMessageBox.StandardButton.Yes)
                 if reply == QMessageBox.StandardButton.Yes:
                     try:
-                        subprocess.Popen(globals.app_path)
+                        subprocess.Popen(globs.app_path)
                         sys.exit(0)
                     except Exception as e:
                         logging.error(f"Could not restart app due to: {e}")
             else:
                     reply = messagebox.askyesno(
-                        parent=globals.root,
+                        parent=globs.root,
                         title="Restart Pearl",
                         message="Would you like restart Pearl to apply all changes?")
                     if reply:
                         try:
-                            logging.debug(f"App Path: {globals.app_path}")
-                            subprocess.Popen(globals.app_path)
+                            logging.debug(f"App Path: {globs.app_path}")
+                            subprocess.Popen(globs.app_path)
                         except Exception as e:
                             logging.error(f"Unable to open program due to: {e}")
                         sys.exit(0)

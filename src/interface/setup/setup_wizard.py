@@ -1,4 +1,4 @@
-# Interface/Setup/setup_wizard.py
+# src/interface/setup/setup_wizard.py
 from PySide6.QtWidgets import (QWizard, QWizardPage,
                                QLabel, QPushButton,
                                QVBoxLayout, QHBoxLayout,
@@ -14,7 +14,7 @@ import shutil
 import os
 
 
-def create_wizard(globals):
+def create_wizard(globs):
     """Opens the wizard window."""
     # Create Wizard Window
     wizard = QWizard()
@@ -76,15 +76,15 @@ def create_wizard(globals):
     inbox_entry_layout.addWidget(inbox_label)
 
     inbox_entry = QLineEdit()
-    if globals.inbox:
-        inbox_entry.setPlaceholderText(globals.inbox)
+    if globs.inbox:
+        inbox_entry.setPlaceholderText(globs.inbox)
     else:
         inbox_entry.setPlaceholderText(default_inbox)
     inbox_entry_layout.addWidget(inbox_entry)
 
     inbox_browse = QPushButton()
     inbox_browse.setText("Browse")
-    inbox_browse.clicked.connect(lambda: browse_directory(globals, inbox_entry))
+    inbox_browse.clicked.connect(lambda: browse_directory(globs, inbox_entry))
     inbox_entry_layout.addWidget(inbox_browse)
     inbox_browse.setFixedWidth(150)
 
@@ -101,15 +101,15 @@ def create_wizard(globals):
     workbook_entry_layout.addWidget(workbook_label)
 
     workbook_entry = QLineEdit()
-    if globals.workbook:
-        workbook_entry.setPlaceholderText(globals.workbook)
+    if globs.workbook:
+        workbook_entry.setPlaceholderText(globs.workbook)
     else:
         workbook_entry.setPlaceholderText("Workbook Path (Example: /home/family-pc/workbook.xlsx)")
     workbook_entry_layout.addWidget(workbook_entry)
 
     workbook_browse = QPushButton()
     workbook_browse.setText("Browse")
-    workbook_browse.clicked.connect(lambda: browse_file(globals, workbook_entry, _type="workbook"))
+    workbook_browse.clicked.connect(lambda: browse_file(globs, workbook_entry, _type="workbook"))
     workbook_entry_layout.addWidget(workbook_browse)
     workbook_browse.setFixedWidth(150)
 
@@ -126,15 +126,15 @@ def create_wizard(globals):
     archive_entry_layout.addWidget(archive_label)
 
     archive_entry = QLineEdit()
-    if globals.archive:
-        archive_entry.setPlaceholderText(globals.archive)
+    if globs.archive:
+        archive_entry.setPlaceholderText(globs.archive)
     else:
         archive_entry.setPlaceholderText(default_archive)
     archive_entry_layout.addWidget(archive_entry)
 
     archive_browse = QPushButton()
     archive_browse.setText("Browse")
-    archive_browse.clicked.connect(lambda: browse_directory(globals, archive_entry))
+    archive_browse.clicked.connect(lambda: browse_directory(globs, archive_entry))
     archive_entry_layout.addWidget(archive_browse)
     archive_browse.setFixedWidth(150)
 
@@ -152,8 +152,8 @@ def create_wizard(globals):
         # Save inbox path, make directory if needed
         if str(wizard.field("inbox")):
             inbox_path = str(wizard.field("inbox"))
-        elif globals.inbox:
-            inbox_path = globals.inbox
+        elif globs.inbox:
+            inbox_path = globs.inbox
         else:
             inbox_path = default_inbox
         if not os.path.isdir(inbox_path):
@@ -162,16 +162,16 @@ def create_wizard(globals):
         # Save workbook path
         if str(wizard.field("workbook")):
             workbook_path = str(wizard.field("workbook"))
-        elif globals.workbook:
-            workbook_path = globals.workbook
+        elif globs.workbook:
+            workbook_path = globs.workbook
         else:
             workbook_path = ""
 
         # Save archive path, make directory if needed
         if str(wizard.field("archive")):
             archive_path = str(wizard.field("archive"))
-        elif globals.archive:
-            archive_path = globals.archive
+        elif globs.archive:
+            archive_path = globs.archive
         else:
             archive_path = default_archive
         if not os.path.isdir(archive_path):
@@ -186,28 +186,28 @@ def create_wizard(globals):
         print(f"Workbook: {workbook_path}")
         print(f"Archive: {archive_path}")
 
-        globals.inbox = inbox_path
-        globals.workbook = workbook_path
-        globals.archive = archive_path
+        globs.inbox = inbox_path
+        globs.workbook = workbook_path
+        globs.archive = archive_path
 
-        globals.inbox_dir_var = ctk.StringVar(value=inbox_path)
-        globals.workbook_var = ctk.StringVar(value=workbook_path)
-        globals.archive_path_var = ctk.StringVar(value=archive_path)
+        globs.inbox_dir_var = ctk.StringVar(value=inbox_path)
+        globs.workbook_var = ctk.StringVar(value=workbook_path)
+        globs.archive_path_var = ctk.StringVar(value=archive_path)
         
         # Save paths
-        _apply_paths(globals, sources=new_sources)
+        _apply_paths(globs, sources=new_sources)
 
         # Mimic Continue Button from Onboarding
-        save_all_settings(globals, reject_toast=True, reject_metadata=True)
+        save_all_settings(globs, reject_toast=True, reject_metadata=True)
         try:
-            setup_observer(globals, globals.inbox, key='inbox')
+            setup_observer(globs, globs.inbox, key='inbox')
         except Exception as e:
             logging.error(f"Unable to set up observers due to: {e}")
 
         try:
             src_dir = os.path.normpath(
                 load_data_path("local", "Welcome to Invoice Buddy.pdf"))
-            shutil.copy2(src_dir, globals.inbox)
+            shutil.copy2(src_dir, globs.inbox)
             logging.debug(f"Copied welcome document to inbox successfully!")
         except Exception as e:
             logging.error(f"Cannot load welcome file due to: {e}")
@@ -215,7 +215,7 @@ def create_wizard(globals):
     else:
         logging.info("Wizard cancelled")
 
-def _apply_paths(globals, sources):
+def _apply_paths(globs, sources):
     """Apply paths from the Wizard before exiting."""
     if sources:
-        save_paths(globals, sources=sources)
+        save_paths(globs, sources=sources)

@@ -1,10 +1,9 @@
 # src/qt_interface/qt_settings/qt_advanced.py
-from PySide6.QtWidgets import QWidget, QVBoxLayout, QLabel, QCheckBox, QComboBox
+from PySide6.QtWidgets import (QWidget, QVBoxLayout, QLabel, QComboBox)
 from PySide6.QtCore import Qt
-import logging
 
 
-def create_advanced_settings_tab(globals):
+def create_advanced_settings_tab(globs):
     """
     Create the General Settings tab for Qt interface.
     Returns a QWidget that can be added directly to the tab widget.
@@ -25,12 +24,12 @@ def create_advanced_settings_tab(globals):
 
     # Logging Level
     logging_levels = ["Debug", "Info", "Warning", "Error", "Critical"]
-    globals.logging_level_box = QComboBox()
-    globals.logging_level_box.addItems(logging_levels)
-    globals.logging_level_box.setFixedWidth(100)
-    globals.logging_level_box.setCurrentText(globals.logging_level.capitalize())
+    globs.logging_level_box = QComboBox()
+    globs.logging_level_box.addItems(logging_levels)
+    globs.logging_level_box.setFixedWidth(100)
+    globs.logging_level_box.setCurrentText(globs.logging_level.capitalize())
 
-    layout.addWidget(globals.logging_level_box)
+    layout.addWidget(globs.logging_level_box)
 
     # Add some spacer at the bottom so it doesn't hug the edge
     layout.addStretch()

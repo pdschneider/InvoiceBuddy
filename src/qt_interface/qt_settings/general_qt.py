@@ -5,7 +5,7 @@ from src.managers.printers import query_printers
 import logging
 
 
-def create_general_settings_tab(globals):
+def create_general_settings_tab(globs):
     """
     Create the General Settings tab for Qt interface.
     Returns a QWidget that can be added directly to the tab widget.
@@ -26,25 +26,25 @@ def create_general_settings_tab(globals):
     # Check for Updates
     github_check_checkbox = QCheckBox("Check for Updates on Startup")
     github_check_checkbox.setStyleSheet("color: white; font-size: 14px; margin-left: 10px;")
-    github_check_checkbox.setChecked(globals.github_check)
+    github_check_checkbox.setChecked(globs.github_check)
     layout.addWidget(github_check_checkbox)
 
     # Beta Updates
     beta_checkbox = QCheckBox("Include Beta Updates")
     beta_checkbox.setStyleSheet("color: white; font-size: 14px; margin-left: 10px;")
-    beta_checkbox.setChecked(globals.beta)
+    beta_checkbox.setChecked(globs.beta)
     layout.addWidget(beta_checkbox)
 
     # Save Window Placement
     window_checkbox = QCheckBox("Save Window Placement")
     window_checkbox.setStyleSheet("color: white; font-size: 14px; margin-left: 10px;")
-    window_checkbox.setChecked(globals.dynamic_window_size)
+    window_checkbox.setChecked(globs.dynamic_window_size)
     layout.addWidget(window_checkbox)
 
     # Legacy Mode
     legacy_checkbox = QCheckBox("Legacy Mode")
     legacy_checkbox.setStyleSheet("color: white; font-size: 14px; margin-left: 10px;")
-    legacy_checkbox.setChecked(globals.legacy_mode)
+    legacy_checkbox.setChecked(globs.legacy_mode)
     layout.addWidget(legacy_checkbox)
 
         # --- PRINTER SELECTION START ---
@@ -99,8 +99,8 @@ def create_general_settings_tab(globals):
 
         printer_combo.addItems(printers)
 
-        # Set the current selection based on globals
-        current_printer = getattr(globals, 'default_printer', None)
+        # Set the current selection based on globs
+        current_printer = getattr(globs, 'default_printer', None)
         if current_printer and current_printer in printers:
             printer_combo.setCurrentText(current_printer)
         elif printers:
@@ -114,7 +114,7 @@ def create_general_settings_tab(globals):
     printer_layout.addWidget(printer_combo)
 
     # Store reference for the save function
-    globals.printer_combo = printer_combo
+    globs.printer_combo = printer_combo
 
     # Add the frame to the main layout
     layout.addWidget(printer_frame)
@@ -125,9 +125,9 @@ def create_general_settings_tab(globals):
     layout.addStretch()
 
     # Store references for later use in save function
-    globals.github_check_checkbox = github_check_checkbox
-    globals.beta_checkbox = beta_checkbox
-    globals.window_checkbox = window_checkbox
-    globals.legacy_checkbox = legacy_checkbox
+    globs.github_check_checkbox = github_check_checkbox
+    globs.beta_checkbox = beta_checkbox
+    globs.window_checkbox = window_checkbox
+    globs.legacy_checkbox = legacy_checkbox
 
     return tab_widget

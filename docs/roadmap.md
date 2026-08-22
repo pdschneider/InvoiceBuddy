@@ -47,6 +47,8 @@ The roadmap for Invoice Buddy includes several planned features prior to the off
 - [ ] TUI / Web UI
 - [ ] Rest API
 - [ ] Change the name
+- [ ] Budgeting Feature
+- [ ] In-app transaction record management
 
 ### Improvements for the Auto-Name Feature
 - [ ] Add description (what was purchased)

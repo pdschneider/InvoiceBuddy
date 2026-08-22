@@ -1,4 +1,4 @@
-# Utils/factory_reset.py
+# src/utils/factory_reset.py
 import shutil
 import sys
 import os
@@ -7,7 +7,7 @@ from PySide6.QtWidgets import QMessageBox
 from src.utils.load_settings import load_data_path
 
 
-def factory_reset_config(globals, error=None):
+def factory_reset_config(globs, error=None):
     """Deletes the entire configuration folder for Invoice Buddy."""
     # Create a messagebox
     msg = QMessageBox()
@@ -38,7 +38,7 @@ Deleting settings files fixes some errors, but not all.""")
         sys.exit(0)
 
 
-def total_factory_reset(globals):
+def total_factory_reset(globs):
     """Completely wipes all Invoice Buddy-related data."""
     answer = QMessageBox.question(
         None,
@@ -58,7 +58,7 @@ Do you wish to completely wipe all Invoice Buddy-related data?""",
 
             # Show success box
             QMessageBox.information(
-                None,
+                globs.window,
                 "Reset Successful!",
                 "Successfully deleted all Pearl-related data!",
                 QMessageBox.StandardButton.Ok,
@@ -68,7 +68,7 @@ Do you wish to completely wipe all Invoice Buddy-related data?""",
         except Exception as e:
             logging.error(f"Unable to perform reset due to: {e}")
             QMessageBox.warning(
-                None,
+                globs.window,
                 "Reset Failed",
                 f"Unable to perform reset due to: {e}",
                 QMessageBox.StandardButton.Ok,

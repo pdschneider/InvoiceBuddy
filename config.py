@@ -18,12 +18,12 @@ from src.utils.load_settings import (load_settings,
                                  load_sheets)
 
 
-# Globals Class
-class Globals:
+# Globs Class
+class Globs:
     """A class to hold all configuration and UI variables for InvoiceBuddy."""
     def __init__(self):
         """Initialize settings from load_settings"""
-        self.refresh_globals()
+        self.refresh_globs()
         self.observers = {}
 
         # Current Version
@@ -192,7 +192,7 @@ class Globals:
         self.inbox_count_var = None
         self.update_file_counts = None
 
-    def refresh_globals(self):
+    def refresh_globs(self):
         """Refreshes settings from settings file"""
         settings = load_settings()
         sources, buddies = load_paths()
@@ -212,7 +212,7 @@ class Globals:
         self.github_check = settings.get("github_check", False)
         self.beta = settings.get("beta", False)
         self.dynamic_window_size = settings.get("dynamic_window_size", True)
-        self.legacy_mode = settings.get("legacy_mode", True)
+        self.legacy_mode = settings.get("legacy_mode", False)
 
         # Paths
         self.inbox = sources.get("inbox", "")
@@ -255,15 +255,15 @@ class Globals:
 def apply_theme(name: str) -> None:
     """Loads the user's chosen theme and applies it to ctk widgets."""
     try:
-        globals.theme_path = os.path.normpath(
+        globs.theme_path = os.path.normpath(
             os.path.join(
-                load_data_path(direct="config"), f"themes/{globals.active_theme}.json"))
+                load_data_path(direct="config"), f"themes/{globs.active_theme}.json"))
         try:
-            with open(globals.theme_path, 'r') as f:
-                globals.theme_dict = json.load(f)
+            with open(globs.theme_path, 'r') as f:
+                globs.theme_dict = json.load(f)
         except:
             logging.warning(f"Unable to load theme into dictionary.")
-        ctk.set_default_color_theme(globals.theme_path)
+        ctk.set_default_color_theme(globs.theme_path)
     except Exception as e:
         logging.warning(f"Could not retrieve CTk active theme due to: {e}")
 
@@ -293,4 +293,4 @@ def get_executable_path():
         print(f"Path to executable: {script_path}")
         return [sys.executable, script_path]
 
-globals = Globals()
+globs = Globs()

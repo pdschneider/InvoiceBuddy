@@ -1,20 +1,21 @@
 # src/qt_interface/qt_components/qt_mailbox.py
 from src.managers.file_management import send_to_trash
 from src.managers.printers import print_selected_files
+from src.interface.components.gui_actions import smart_spreadsheet_button, pdf_button
+from src.managers.file_management import archive_files
 from PySide6.QtWidgets import (QWidget, QVBoxLayout, QListWidget, QListWidgetItem, 
                                QLabel, QHBoxLayout, QPushButton, QFrame, QCheckBox,
                                QLineEdit, QSizePolicy, QScrollArea)
 from PySide6.QtCore import Qt, QSize, QEvent, QPoint
-from PySide6.QtGui import QIcon
 from pypdf import PdfReader
 import os
 import logging
 
 
-def load_sheet_identity(filepath, globals_obj):
+def load_sheet_identity(filepath, globs_obj):
     """Read /Sheet from PDF metadata, default to first sheet."""
 
-    default_sheet = globals_obj.sheet_data.get("sheets", [{}])[0].get("name", "Sheet")
+    default_sheet = globs_obj.sheet_data.get("sheets", [{}])[0].get("name", "Sheet")
 
     try:
         reader = PdfReader(filepath)
@@ -22,7 +23,7 @@ def load_sheet_identity(filepath, globals_obj):
             sheet = reader.metadata.get("/Sheet")
             if sheet:
                 sheet_name = str(sheet)
-                valid_names = [s.get("name") for s in globals_obj.sheet_data.get("sheets", [])]
+                valid_names = [s.get("name") for s in globs_obj.sheet_data.get("sheets", [])]
                 if sheet_name in valid_names:
                     return sheet_name
         return default_sheet
@@ -34,9 +35,9 @@ def load_sheet_identity(filepath, globals_obj):
 class AssignSheetDialog(QWidget):
     """Floating popup panel for bulk-assigning files to a sheet."""
 
-    def __init__(self, globals_obj, checked_files, mailbox, parent=None):
+    def __init__(self, globs_obj, checked_files, mailbox, parent=None):
         super().__init__(parent)
-        self.globals = globals_obj
+        self.globs = globs_obj
         self.checked_files = checked_files
         self.mailbox = mailbox
         self.setWindowFlags(Qt.Popup | Qt.FramelessWindowHint)
@@ -75,7 +76,7 @@ class AssignSheetDialog(QWidget):
         list_layout.setContentsMargins(0, 0, 0, 0)
         list_layout.setSpacing(2)
 
-        sheets = self.globals.sheet_data.get("sheets", [])
+        sheets = self.globs.sheet_data.get("sheets", [])
         for sheet in sheets:
             row = self._create_sheet_item(sheet)
             list_layout.addWidget(row)
@@ -120,18 +121,127 @@ class AssignSheetDialog(QWidget):
     def _select_sheet(self, sheet_name):
         """Assign all checked files to the selected sheet and close."""
         for filename in self.checked_files:
-            self.globals.file_identity[filename] = sheet_name
+            self.globs.file_identity[filename] = sheet_name
         self.mailbox._refresh_pills()
         self.close()
 
 
-class MailboxWidget(QWidget):
-    def __init__(self, globals_obj, parent=None):
+class SendToBuddyDialog(QWidget):
+    """Floating popup panel for sending checked files to a buddy."""
+
+    def __init__(self, globals_obj, checked_files, mailbox, parent=None):
         super().__init__(parent)
         self.globals = globals_obj
-        self.globals.files = []  # Store ALL filenames
+        self.checked_files = checked_files
+        self.mailbox = mailbox
+        self.setWindowFlags(Qt.Popup | Qt.FramelessWindowHint)
+        self.setAttribute(Qt.WA_TranslucentBackground)
+        self.setFixedWidth(220)
+
+        container = QFrame()
+        container.setStyleSheet("""
+            QFrame {
+                background-color: #2d2d30;
+                border: 1px solid #444;
+                border-radius: 8px;
+            }
+        """)
+
+        main_layout = QVBoxLayout(self)
+        main_layout.setContentsMargins(0, 0, 0, 0)
+
+        layout = QVBoxLayout(container)
+        layout.setContentsMargins(12, 12, 12, 12)
+        layout.setSpacing(4)
+
+        title = QLabel("Send to Buddy")
+        title.setStyleSheet("color: white; font-size: 13px; font-weight: bold; margin-bottom: 4px; border: none;")
+        layout.addWidget(title)
+
+        # Filter valid buddies
+        valid_buddies = [(name, folder) for name, folder in self.globals.buddies.items()
+                         if name != "inbox" and folder and os.path.isdir(folder)]
+
+        for name, folder in valid_buddies:
+            row = self._create_buddy_item(name, folder)
+            layout.addWidget(row)
+
+        main_layout.addWidget(container)
+
+    def _create_buddy_item(self, name, folder):
+        """Create a clickable row with envelope icon and buddy name."""
+        row = QFrame()
+        row.setFixedHeight(34)
+        row.setCursor(Qt.PointingHandCursor)
+        row.setStyleSheet("""
+            QFrame { background-color: transparent; border-radius: 4px; }
+            QFrame:hover { background-color: #3a3a40; }
+        """)
+
+        row_layout = QHBoxLayout(row)
+        row_layout.setContentsMargins(8, 4, 8, 4)
+        row_layout.setSpacing(10)
+
+        icon = QLabel("📨")
+        icon.setStyleSheet("background-color: transparent; border: none; font-size: 14px;")
+        row_layout.addWidget(icon)
+
+        label = QLabel(name.capitalize())
+        label.setStyleSheet("color: white; font-size: 13px; background-color: transparent; border: none;")
+        row_layout.addWidget(label)
+        row_layout.addStretch()
+
+        row.mousePressEvent = lambda event, n=name, f=folder: self._send_to_buddy(n, f)
+
+        return row
+
+    def _send_to_buddy(self, name, target_dir):
+        """Move checked files to the buddy's directory."""
+        import shutil
+
+        if not os.path.isdir(target_dir):
+            logging.error(f"Target directory does not exist: {target_dir}")
+            self.close()
+            return
+
+        moved_count = 0
+        errors = []
+
+        for filename in self.checked_files:
+            src_file = os.path.join(self.globals.current_folder, filename)
+            dst_file = os.path.join(target_dir, filename)
+
+            if not os.path.isfile(src_file):
+                errors.append(filename)
+                continue
+
+            if os.path.isfile(dst_file):
+                errors.append(filename)
+                continue
+
+            try:
+                shutil.move(src_file, dst_file)
+                moved_count += 1
+            except Exception as e:
+                logging.error(f"Failed to move {filename}: {e}")
+                errors.append(filename)
+
+        logging.info(f"Moved {moved_count} files to {name}")
+
+        # Refresh the mailbox
+        if hasattr(self.globals, 'mailbox_widget') and self.globals.mailbox_widget:
+            self.globals.mailbox_widget.refresh_files(self.globals.current_folder)
+
+        self.close()
+
+
+class MailboxWidget(QWidget):
+    def __init__(self, globs_obj, parent=None):
+        super().__init__(parent)
+        self.globs = globs_obj
+        self.globs.files = []  # Store ALL filenames
         self.selected_files = set()
-        self.globals.checked_files = set()
+        self.globs.checked_files = set()
 
         # Layout
         layout = QVBoxLayout(self)
@@ -170,6 +280,62 @@ class MailboxWidget(QWidget):
         action_layout = QHBoxLayout(self.action_buttons)
         action_layout.setContentsMargins(0, 0, 0, 0)
         action_layout.setSpacing(5)
+
+        # Auto-Name Button
+        self.auto_name_btn = QPushButton("🪄")
+        self.auto_name_btn.setFixedSize(24, 24)
+        self.auto_name_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #3a3a3a; color: white; border: none;
+                border-radius: 4px; font-size: 16px;
+            }
+            QPushButton:hover { background-color: #4a4a4a; }
+        """)
+        self.auto_name_btn.setCursor(Qt.PointingHandCursor)
+        self.auto_name_btn.clicked.connect(lambda e: pdf_button(self.globs, directory=self.globs.current_folder, file_list=self.globs.checked_files))
+        action_layout.addWidget(self.auto_name_btn)
+
+        # Enter to Spreadsheet Button
+        self.enter_data_btn = QPushButton("✏️")
+        self.enter_data_btn.setFixedSize(24, 24)
+        self.enter_data_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #3a3a3a; color: white; border: none;
+                border-radius: 4px; font-size: 16px;
+            }
+            QPushButton:hover { background-color: #4a4a4a; }
+        """)
+        self.enter_data_btn.setCursor(Qt.PointingHandCursor)
+        self.enter_data_btn.clicked.connect(lambda e: smart_spreadsheet_button(self.globs, file_list=self.globs.checked_files))
+        action_layout.addWidget(self.enter_data_btn)
+
+        # Archive Button
+        self.archive_btn = QPushButton("📁")
+        self.archive_btn.setFixedSize(24, 24)
+        self.archive_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #3a3a3a; color: white; border: none;
+                border-radius: 4px; font-size: 16px;
+            }
+            QPushButton:hover { background-color: #4a4a4a; }
+        """)
+        self.archive_btn.setCursor(Qt.PointingHandCursor)
+        self.archive_btn.clicked.connect(lambda e: archive_files(self.globs, self.globs.checked_files))
+        action_layout.addWidget(self.archive_btn)
+
+        # Send Button
+        self.send_btn = QPushButton("📨")
+        self.send_btn.setFixedSize(24, 24)
+        self.send_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #3a3a3a; color: white; border: none;
+                border-radius: 4px; font-size: 16px;
+            }
+            QPushButton:hover { background-color: #4a4a4a; }
+        """)
+        self.send_btn.setCursor(Qt.PointingHandCursor)
+        self.send_btn.clicked.connect(lambda: self._on_send_clicked())
+        action_layout.addWidget(self.send_btn)
 
         # Assign Sheets Button
         self.assign_btn = QPushButton("🏷️")
@@ -250,14 +416,14 @@ class MailboxWidget(QWidget):
         layout.addWidget(self.list_widget)
 
         # Store reference
-        globals_obj.mailbox_widget = self
+        globs_obj.mailbox_widget = self
 
     def refresh_files(self, folder_path):
         """Clears the list and repopulates with PDFs from folder."""
         self.list_widget.clear()
-        self.globals.files = []
+        self.globs.files = []
         self.selected_files.clear()
-        self.globals.checked_files.clear()
+        self.globs.checked_files.clear()
         self.action_buttons.hide()
 
         # Reset Master Checkbox
@@ -271,7 +437,7 @@ class MailboxWidget(QWidget):
                             if f.lower().endswith(".pdf")])
 
         for filename in pdf_files:
-            self.globals.files.append(filename)
+            self.globs.files.append(filename)
 
             item = QListWidgetItem()
             item.setSizeHint(QSize(0, 50))
@@ -319,12 +485,12 @@ class MailboxWidget(QWidget):
 
         # PILL
         full_path = os.path.join(folder_path, filename)
-        sheet_name = load_sheet_identity(full_path, self.globals)
-        self.globals.file_identity[filename] = sheet_name
+        sheet_name = load_sheet_identity(full_path, self.globs)
+        self.globs.file_identity[filename] = sheet_name
 
         # Find matching color
         sheet_color = "#888"
-        for s in self.globals.sheet_data.get("sheets", []):
+        for s in self.globs.sheet_data.get("sheets", []):
             if s.get("name") == sheet_name:
                 sheet_color = s.get("color", "#888")
                 break
@@ -350,26 +516,26 @@ class MailboxWidget(QWidget):
     def _on_item_click(self, item):
         """Handle single click."""
         # Get the filename from our internal list
-        filename = self.globals.files[self.list_widget.row(item)]
-        self.globals.selected_file = filename
+        filename = self.globs.files[self.list_widget.row(item)]
+        self.globs.selected_file = filename
 
         # Construct the full path
-        if hasattr(self.globals, 'current_folder') and self.globals.current_folder:
-            full_path = os.path.join(self.globals.current_folder, filename)
+        if hasattr(self.globs, 'current_folder') and self.globs.current_folder:
+            full_path = os.path.join(self.globs.current_folder, filename)
 
             logging.debug(f"Attempting to load: {full_path}")
 
             # Check if the viewer exists and load the file
-            if hasattr(self.globals, 'pdf_viewer') and self.globals.pdf_viewer:
-                self.globals.pdf_viewer.load_pdf(full_path)
+            if hasattr(self.globs, 'pdf_viewer') and self.globs.pdf_viewer:
+                self.globs.pdf_viewer.load_pdf(full_path)
             else:
-                logging.error("PDF Viewer not found in globals!")
+                logging.error("PDF Viewer not found in globs!")
         else:
-            logging.error("Inbox path not set in globals!")
+            logging.error("Inbox path not set in globs!")
 
     def _on_double_click(self, item):
         """Handle double click (start editing)."""
-        filename = self.globals.files[self.list_widget.row(item)]
+        filename = self.globs.files[self.list_widget.row(item)]
         row_widget = self.list_widget.itemWidget(item)
 
         if row_widget and hasattr(row_widget, 'file_data'):
@@ -385,15 +551,15 @@ class MailboxWidget(QWidget):
     def _on_checkbox_toggled(self, filename, checked):
         """Tracks which files have their checkboxes checked and updates master."""
         if checked:
-            self.globals.checked_files.add(filename)
+            self.globs.checked_files.add(filename)
         else:
-            self.globals.checked_files.discard(filename)
+            self.globs.checked_files.discard(filename)
 
         # Update Master Checkbox State
         # BLOCK SIGNALS so this doesn't trigger _toggle_all recursively
         self.master_checkbox.blockSignals(True)
 
-        if len(self.globals.checked_files) == len(self.globals.files) and len(self.globals.files) > 0:
+        if len(self.globs.checked_files) == len(self.globs.files) and len(self.globs.files) > 0:
             self.master_checkbox.setChecked(True)
         else:
             self.master_checkbox.setChecked(False)
@@ -403,18 +569,19 @@ class MailboxWidget(QWidget):
         logging.debug(f"Checked: {filename}")
 
         # Show/hide contextual buttons
-        if len(self.globals.checked_files) > 0:
+        if len(self.globs.checked_files) > 0:
             self.action_buttons.show()
+            self._update_send_button_visibility()
         else:
             self.action_buttons.hide()
 
     def _cycle_sheet(self, filename):
         """Cycle through sheets when pill is clicked."""
-        sheets = self.globals.sheet_data.get("sheets", [])
+        sheets = self.globs.sheet_data.get("sheets", [])
         if not sheets:
             return
 
-        current = self.globals.file_identity.get(filename, sheets[0].get("name", "Sheet"))
+        current = self.globs.file_identity.get(filename, sheets[0].get("name", "Sheet"))
         names = [s.get("name", "Sheet") for s in sheets]
 
         if current in names:
@@ -424,7 +591,7 @@ class MailboxWidget(QWidget):
 
         new_name = names[next_idx]
         new_color = sheets[next_idx].get("color", "#888")
-        self.globals.file_identity[filename] = new_name
+        self.globs.file_identity[filename] = new_name
 
         # Update the pill in place
         for i in range(self.list_widget.count()):
@@ -448,15 +615,15 @@ class MailboxWidget(QWidget):
 
     def get_checked_files(self):
         """Returns a list of filenames whose checkboxes are checked."""
-        return list(self.globals.checked_files)
+        return list(self.globs.checked_files)
 
     def _toggle_all(self, checked):
         """Checks or unchecks all files based on the master checkbox."""
         # Update internal state
         if checked:
-            self.globals.checked_files = set(self.globals.files)
+            self.globs.checked_files = set(self.globs.files)
         else:
-            self.globals.checked_files.clear()
+            self.globs.checked_files.clear()
 
         # Update the UI of all rows
         # BLOCK SIGNALS on the list items so we don't trigger _on_checkbox_toggled recursively
@@ -542,17 +709,17 @@ class MailboxWidget(QWidget):
 
             try:
                 os.rename(old_path, new_path)
-                if filename in self.globals.files:
-                    self.globals.files[self.globals.files.index(filename)] = new_filename
+                if filename in self.globs.files:
+                    self.globs.files[self.globs.files.index(filename)] = new_filename
                 label.setText(new_base)
                 line_edit.deleteLater()
                 label.show()
                 self.active_editor = None
 
-                if hasattr(self.globals, 'selected_file') and self.globals.selected_file == filename:
-                    self.globals.selected_file = new_filename
-                    if hasattr(self.globals, 'pdf_viewer'):
-                        self.globals.pdf_viewer.load_pdf(new_path)
+                if hasattr(self.globs, 'selected_file') and self.globs.selected_file == filename:
+                    self.globs.selected_file = new_filename
+                    if hasattr(self.globs, 'pdf_viewer'):
+                        self.globs.pdf_viewer.load_pdf(new_path)
             except Exception as e:
                 logging.error(f"Rename failed: {e}")
                 line_edit.deleteLater()
@@ -621,9 +788,9 @@ class MailboxWidget(QWidget):
             os.rename(old_path, new_path)
 
             # Update internal file list
-            if old_filename in self.globals.files:
-                idx = self.globals.files.index(old_filename)
-                self.globals.files[idx] = new_filename
+            if old_filename in self.globs.files:
+                idx = self.globs.files.index(old_filename)
+                self.globs.files[idx] = new_filename
 
             # Update the label text
             label.setText(new_base)
@@ -635,10 +802,10 @@ class MailboxWidget(QWidget):
             logging.debug(f"Renamed: {old_filename} -> {new_filename}")
 
             # Refresh the PDF viewer if this file is currently selected
-            if hasattr(self.globals, 'selected_file') and self.globals.selected_file == old_filename:
-                self.globals.selected_file = new_filename
-                if hasattr(self.globals, 'pdf_viewer') and self.globals.pdf_viewer:
-                    self.globals.pdf_viewer.load_pdf(new_path)
+            if hasattr(self.globs, 'selected_file') and self.globs.selected_file == old_filename:
+                self.globs.selected_file = new_filename
+                if hasattr(self.globs, 'pdf_viewer') and self.globs.pdf_viewer:
+                    self.globs.pdf_viewer.load_pdf(new_path)
 
         except Exception as e:
             logging.error(f"Failed to rename file: {e}")
@@ -646,15 +813,15 @@ class MailboxWidget(QWidget):
             label.show()
 
     def _refresh_pills(self):
-        """Update all pill colors and text from globals.file_identity."""
-        sheets = self.globals.sheet_data.get("sheets", [])
+        """Update all pill colors and text from globs.file_identity."""
+        sheets = self.globs.sheet_data.get("sheets", [])
 
         for i in range(self.list_widget.count()):
             item = self.list_widget.item(i)
             row_widget = self.list_widget.itemWidget(item)
             if row_widget and hasattr(row_widget, 'file_data'):
                 filename = row_widget.file_data['filename']
-                sheet_name = self.globals.file_identity.get(filename, "Sheet")
+                sheet_name = self.globs.file_identity.get(filename, "Sheet")
 
                 sheet_color = "#888"
                 for s in sheets:
@@ -676,21 +843,49 @@ class MailboxWidget(QWidget):
 
     def _on_contextual_delete(self):
         """Delete all checked files."""
-        result = send_to_trash(self.globals, list(self.globals.checked_files))
+        result = send_to_trash(self.globs, list(self.globs.checked_files))
         if not result:
             return
 
     def _on_contextual_print(self):
         """Print all checked files."""
-        print_selected_files(self.globals, list(self.globals.checked_files))
+        print_selected_files(self.globs, list(self.globs.checked_files))
 
     def _on_assign_clicked(self):
         """Open assign sheet dialog for checked files."""
-        checked = list(self.globals.checked_files)
+        checked = list(self.globs.checked_files)
         if not checked:
             return
 
-        dialog = AssignSheetDialog(self.globals, checked, self)
+        dialog = AssignSheetDialog(self.globs, checked, self)
         pos = self.assign_btn.mapToGlobal(QPoint(0, self.assign_btn.height() + 4))
         dialog.move(pos)
         dialog.show()
+
+    def _on_send_clicked(self):
+        """Open send to buddy dialog for checked files."""
+        checked = list(self.globs.checked_files)
+        if not checked:
+            return
+
+        # Check if any buddies exist
+        valid_buddies = [(name, folder) for name, folder in self.globs.buddies.items()
+                         if name != "inbox" and folder and os.path.isdir(folder)]
+
+        if not valid_buddies:
+            logging.warning("No valid buddies configured.")
+            return
+
+        dialog = SendToBuddyDialog(self.globs, checked, self)
+        pos = self.send_btn.mapToGlobal(QPoint(0, self.send_btn.height() + 4))
+        dialog.move(pos)
+        dialog.show()
+
+    def _update_send_button_visibility(self):
+        """Show send button only if valid buddies exist."""
+        valid_buddies = [(name, folder) for name, folder in self.globs.buddies.items()
+                         if name != "inbox" and folder and os.path.isdir(folder)]
+        if valid_buddies:
+            self.send_btn.show()
+        else:
+            self.send_btn.hide()
