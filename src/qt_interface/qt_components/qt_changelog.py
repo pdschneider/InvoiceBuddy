@@ -4,6 +4,7 @@ from PySide6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout,
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QCursor
 from src.interface.changelog import parse_changelog, markdown_to_plain
+from src.qt_interface.qt_styles import dark
 import logging
 
 
@@ -38,25 +39,10 @@ def create_changelog_panel(globs):
 
     layout.addLayout(header_layout)
 
-    # === SCROLLABLE CONTENT ===
+    # Scrollable Area
     scroll_area = QScrollArea()
     scroll_area.setWidgetResizable(True)
-    scroll_area.setStyleSheet("""
-        QScrollArea {
-            border: none;
-            background-color: transparent;
-        }
-        QScrollBar:vertical {
-            background-color: #333;
-            width: 8px;
-            border-radius: 4px;
-        }
-        QScrollBar::handle:vertical {
-            background-color: #4a4a4a;
-            min-height: 50px;
-            border-radius: 4px;
-        }
-    """)
+    scroll_area.setStyleSheet(dark.scroll_area)
 
     content_widget = QWidget()
     content_layout = QVBoxLayout(content_widget)
@@ -86,20 +72,9 @@ def create_changelog_panel(globs):
     scroll_area.setWidget(content_widget)
     layout.addWidget(scroll_area, stretch=1)
 
-    # === CLOSE BUTTON ===
+    # Close Button
     close_btn = QPushButton("Close")
-    close_btn.setStyleSheet("""
-        QPushButton {
-            background-color: #3a3a3a;
-            color: white;
-            padding: 10px;
-            border-radius: 4px;
-            font-weight: bold;
-        }
-        QPushButton:hover {
-            background-color: #4a4a4a;
-        }
-    """)
+    close_btn.setStyleSheet(dark.close_button)
     close_btn.setCursor(QCursor(Qt.PointingHandCursor))
     close_btn.clicked.connect(lambda: toggle_changelog_panel(globs))
     layout.addWidget(close_btn)
@@ -114,12 +89,19 @@ def toggle_changelog_panel(globs):
         globs.changelog_panel.hide()
         globs.dim_overlay.hide()
     else:
-        # Close any active settings panels first
+        # Close any active panels first
         if hasattr(globs, 'settings_panel') and globs.settings_panel.isVisible():
             globs.settings_panel.hide()
+        if hasattr(globs, 'about_panel') and globs.about_panel.isVisible():
+            globs.about_panel.hide()
+        if hasattr(globs, 'report_panel') and globs.report_panel.isVisible():
+            globs.report_panel.hide()
+        if hasattr(globs, 'docs_panel') and globs.docs_panel.isVisible():
+            globs.docs_panel.hide()
 
-        globs.dim_overlay.resize(globs.window.width(), globs.window.height() - 35)
-        globs.dim_overlay.move(0, 35)
+        tb_h = globs.title_bar.height()
+        globs.dim_overlay.resize(globs.window.width(), globs.window.height() - tb_h)
+        globs.dim_overlay.move(0, tb_h)
         globs.dim_overlay.show()
         globs.dim_overlay.raise_()
 

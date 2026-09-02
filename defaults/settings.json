@@ -10,5 +10,6 @@
     "github_check": false,
     "beta": false,
     "dynamic_window_size": true,
-    "legacy_mode": false
+    "legacy_mode": false,
+    "previous_version": "0.1.0"
 }

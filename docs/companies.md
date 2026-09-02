@@ -37,6 +37,7 @@ This document lists every currently supported company with its **full official/l
 - United Rentals, Inc.
 - City and Sign Electrical Services, LLC
 - Cuz Concrete Products, Inc.
+- Horizon Distribution, Inc.
 
 ## Facility Maintenance & Services
 
@@ -66,6 +67,8 @@ This document lists every currently supported company with its **full official/l
 - Precision Analytical Labortories
 - Parts Town
 - Global Equipment Company Inc. (Global Industrial)
+- Clean Harbors, Inc.
+- Ferguson Enterprises, LLC.
 
 ## Government, Utilities & Public Agencies
 
@@ -191,6 +194,7 @@ This document lists every currently supported company with its **full official/l
 - Jiffy Lube International, Inc.
 - Code Blue Corporation
 - Les Schwab Tire Center
+- Proton AG
 
 ---
 

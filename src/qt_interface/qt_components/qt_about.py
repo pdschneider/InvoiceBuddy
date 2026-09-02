@@ -1,8 +1,10 @@
 # src/qt_interface/qt_components/qt_about.py
 from PySide6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, 
                                QLabel, QPushButton, QScrollArea)
-from PySide6.QtCore import Qt
+from PySide6.QtCore import Qt, QSize
 from PySide6.QtGui import QCursor
+from src.qt_interface.qt_styles import dark
+import webbrowser
 
 
 def create_about_panel(globs):
@@ -20,7 +22,7 @@ def create_about_panel(globs):
     layout.setContentsMargins(20, 20, 20, 20)
     layout.setSpacing(15)
 
-    # === HEADER ===
+    # Header
     header_layout = QHBoxLayout()
     title = QLabel("About")
     title.setStyleSheet("font-size: 20px; font-weight: bold; color: white;")
@@ -36,32 +38,17 @@ def create_about_panel(globs):
 
     layout.addLayout(header_layout)
 
-    # === SCROLLABLE CONTENT ===
+    # Scrollable Area
     scroll_area = QScrollArea()
     scroll_area.setWidgetResizable(True)
-    scroll_area.setStyleSheet("""
-        QScrollArea {
-            border: none;
-            background-color: transparent;
-        }
-        QScrollBar:vertical {
-            background-color: #333;
-            width: 8px;
-            border-radius: 4px;
-        }
-        QScrollBar::handle:vertical {
-            background-color: #4a4a4a;
-            min-height: 50px;
-            border-radius: 4px;
-        }
-    """)
+    scroll_area.setStyleSheet(dark.scroll_area)
 
     content_widget = QWidget()
     content_layout = QVBoxLayout(content_widget)
     content_layout.setContentsMargins(0, 0, 0, 0)
     content_layout.setSpacing(10)
 
-    # === ABOUT TEXT ===
+    # Description
     desc_label = QLabel(
         "Invoice Buddy is your helper to automate the invoice entry process.\n\n"
         "The program does three things:\n\n"
@@ -86,20 +73,34 @@ def create_about_panel(globs):
     scroll_area.setWidget(content_widget)
     layout.addWidget(scroll_area, stretch=1)
 
-    # === CLOSE BUTTON ===
+    # Socials Layout
+    socials_layout = QHBoxLayout()
+
+    # GitHub
+    github_btn = QPushButton()
+    github_btn.setIcon(globs.github_icon)
+    github_btn.setIconSize(QSize(40,40))
+    github_btn.setStyleSheet(dark.social_button)
+    github_btn.setToolTip("View Source Code on GitHub")
+    github_btn.clicked.connect(lambda: webbrowser.open(
+        url="https://github.com/pdschneider/InvoiceBuddy"))
+    socials_layout.addWidget(github_btn)
+
+    # Codeberg
+    codeberg_btn = QPushButton()
+    codeberg_btn.setIcon(globs.codeberg_icon)
+    codeberg_btn.setIconSize(QSize(40,40))
+    codeberg_btn.setStyleSheet(dark.social_button)
+    codeberg_btn.setToolTip("View Source Code on Codeberg")
+    codeberg_btn.clicked.connect(lambda: webbrowser.open(
+            url="https://codeberg.org/pdschneider/InvoiceBuddy"))
+    socials_layout.addWidget(codeberg_btn)
+
+    layout.addLayout(socials_layout)
+
+    # Close Button
     close_btn = QPushButton("Close")
-    close_btn.setStyleSheet("""
-        QPushButton {
-            background-color: #3a3a3a;
-            color: white;
-            padding: 10px;
-            border-radius: 4px;
-            font-weight: bold;
-        }
-        QPushButton:hover {
-            background-color: #4a4a4a;
-        }
-    """)
+    close_btn.setStyleSheet(dark.close_button)
     close_btn.setCursor(QCursor(Qt.PointingHandCursor))
     close_btn.clicked.connect(lambda: toggle_about_panel(globs))
     layout.addWidget(close_btn)
@@ -118,9 +119,14 @@ def toggle_about_panel(globs):
             globs.settings_panel.hide()
         if hasattr(globs, 'changelog_panel') and globs.changelog_panel.isVisible():
             globs.changelog_panel.hide()
+        if hasattr(globs, 'report_panel') and globs.report_panel.isVisible():
+            globs.report_panel.hide()
+        if hasattr(globs, 'docs_panel') and globs.docs_panel.isVisible():
+            globs.docs_panel.hide()
 
-        globs.dim_overlay.resize(globs.window.width(), globs.window.height() - 35)
-        globs.dim_overlay.move(0, 35)
+        tb_h = globs.title_bar.height()
+        globs.dim_overlay.resize(globs.window.width(), globs.window.height() - tb_h)
+        globs.dim_overlay.move(0, tb_h)
         globs.dim_overlay.show()
         globs.dim_overlay.raise_()
 

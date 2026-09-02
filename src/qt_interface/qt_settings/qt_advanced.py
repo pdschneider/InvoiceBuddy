@@ -1,6 +1,7 @@
 # src/qt_interface/qt_settings/qt_advanced.py
 from PySide6.QtWidgets import (QWidget, QVBoxLayout, QLabel, QComboBox)
 from PySide6.QtCore import Qt
+from src.qt_interface.qt_styles import dark
 
 
 def create_advanced_settings_tab(globs):
@@ -27,6 +28,7 @@ def create_advanced_settings_tab(globs):
     globs.logging_level_box = QComboBox()
     globs.logging_level_box.addItems(logging_levels)
     globs.logging_level_box.setFixedWidth(100)
+    globs.logging_level_box.setStyleSheet(dark.combobox)
     globs.logging_level_box.setCurrentText(globs.logging_level.capitalize())
 
     layout.addWidget(globs.logging_level_box)

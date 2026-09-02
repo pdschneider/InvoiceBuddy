@@ -4,6 +4,7 @@ from PySide6.QtWidgets import (QWidget, QHBoxLayout,
                                QMenu, QStyle)
 from PySide6.QtCore import Qt, QPoint
 from PySide6.QtGui import  QAction
+from src.qt_interface.qt_styles import dark
 
 
 class TitleBar(QWidget):
@@ -75,22 +76,7 @@ class TitleBar(QWidget):
     def contextMenuEvent(self, event):
         """Show context menu on right-click."""
         menu = QMenu(self)
-        menu.setStyleSheet("""
-            QMenu {
-                background-color: #2d2d2d;
-                color: white;
-                border: 1px solid #444;
-                padding: 4px;
-            }
-            QMenu::item {
-                padding: 6px 30px 6px 8px;
-                min-width: 120px;
-                margin-left: 4px;
-            }
-            QMenu::item:selected {
-                background-color: #444;
-            }
-        """)
+        menu.setStyleSheet(dark.menu)
         
         style = self.style()
         

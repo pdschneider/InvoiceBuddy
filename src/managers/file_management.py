@@ -254,6 +254,7 @@ def archive_files(globs, file_list=None):
     # Return if no file list was given
     if not file_list:
         logging.warning(f"Nothing selected.")
+        show_toast(globs, "Nothing selected")
         return
 
     # Create list of full paths
@@ -263,6 +264,18 @@ def archive_files(globs, file_list=None):
             for file in file_list:
                 new_file_list.append(os.path.normpath(os.path.join(globs.inbox, file)))
         file_list = new_file_list
+
+    # Ask for Confirmation
+    reply = QMessageBox.question(
+        globs.window,
+        "Confirm",
+        f"Archive selected files?",
+        QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+        QMessageBox.StandardButton.No)
+
+    # Exit if yes is not checked
+    if reply == QMessageBox.StandardButton.No:
+        return False
 
     logging.debug(f"Attempting to archive files: {file_list}")
 

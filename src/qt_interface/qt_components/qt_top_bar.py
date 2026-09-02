@@ -4,6 +4,8 @@ from PySide6.QtCore import Qt
 from PySide6.QtGui import QCursor
 from src.qt_interface.qt_components.qt_sidebar import toggle_sidebar
 from src.qt_interface.qt_settings.qt_settings import toggle_settings_panel
+from src.qt_interface.qt_components.qt_docs import toggle_docs_panel
+from src.qt_interface.qt_styles import dark
 
 def create_top_bar(globs):
     """Creates the top navigation bar for Invoice Buddy."""
@@ -15,10 +17,11 @@ def create_top_bar(globs):
     top_bar_layout.setContentsMargins(10, 5, 10, 5)
     top_bar_layout.setSpacing(10)
 
-    # == Left Side ==
+    # Left Side
     hamburger_button = QPushButton("☰")
     hamburger_button.setFixedSize(40, 40)
     hamburger_button.setCursor(QCursor(Qt.PointingHandCursor))
+    hamburger_button.setStyleSheet(dark.hamburger_button)
     hamburger_button.clicked.connect(lambda: toggle_sidebar(globs, globs.sidebar))
     top_bar_layout.addWidget(hamburger_button)
 
@@ -29,27 +32,9 @@ def create_top_bar(globs):
 
     top_bar_layout.addSpacing(20)
 
-    # == Center: Search Bar ==
-    search_bar = QLineEdit()
-    search_bar.setPlaceholderText("Search by Vendor, Invoice #, or Date...")
-    search_bar.setFixedWidth(300)
-    search_bar.setStyleSheet("""
-        QLineEdit {
-            background-color: #333;
-            color: white;
-            border: 1px solid #555;
-            border-radius: 4px;
-            padding: 5px 10px;
-        }
-        QLineEdit:focus {
-            border: 1px solid #2ecc71;
-        }
-    """)
-    top_bar_layout.addWidget(search_bar)
-
+    # Center
     top_bar_layout.addStretch()
 
-    # == Right Side ==
     # Settings
     settings_button = QPushButton("⚙")
     settings_button.setFixedSize(40, 40)
@@ -63,6 +48,7 @@ def create_top_bar(globs):
     help_button.setFixedSize(40, 40)
     help_button.setCursor(QCursor(Qt.PointingHandCursor))
     help_button.setStyleSheet("background-color: transparent; color: white; font-size: 18px;")
+    help_button.clicked.connect(lambda: toggle_docs_panel(globs))
     top_bar_layout.addWidget(help_button)
 
     return top_bar_widget

@@ -3,6 +3,8 @@ from src.managers.file_management import send_to_trash
 from src.managers.printers import print_selected_files
 from src.interface.components.gui_actions import smart_spreadsheet_button, pdf_button
 from src.managers.file_management import archive_files
+from src.utils.toast import show_toast
+from src.qt_interface.qt_styles import dark
 from PySide6.QtWidgets import (QWidget, QVBoxLayout, QListWidget, QListWidgetItem, 
                                QLabel, QHBoxLayout, QPushButton, QFrame, QCheckBox,
                                QLineEdit, QSizePolicy, QScrollArea)
@@ -10,6 +12,7 @@ from PySide6.QtCore import Qt, QSize, QEvent, QPoint
 from pypdf import PdfReader
 import os
 import logging
+import shutil
 
 
 def load_sheet_identity(filepath, globs_obj):
@@ -129,9 +132,9 @@ class AssignSheetDialog(QWidget):
 class SendToBuddyDialog(QWidget):
     """Floating popup panel for sending checked files to a buddy."""
 
-    def __init__(self, globals_obj, checked_files, mailbox, parent=None):
+    def __init__(self, globs_obj, checked_files, mailbox, parent=None):
         super().__init__(parent)
-        self.globals = globals_obj
+        self.globs = globs_obj
         self.checked_files = checked_files
         self.mailbox = mailbox
         self.setWindowFlags(Qt.Popup | Qt.FramelessWindowHint)
@@ -159,7 +162,7 @@ class SendToBuddyDialog(QWidget):
         layout.addWidget(title)
 
         # Filter valid buddies
-        valid_buddies = [(name, folder) for name, folder in self.globals.buddies.items()
+        valid_buddies = [(name, folder) for name, folder in self.globs.buddies.items()
                          if name != "inbox" and folder and os.path.isdir(folder)]
 
         for name, folder in valid_buddies:
@@ -197,8 +200,8 @@ class SendToBuddyDialog(QWidget):
 
     def _send_to_buddy(self, name, target_dir):
         """Move checked files to the buddy's directory."""
-        import shutil
 
+        # Exit if target directory does not exist
         if not os.path.isdir(target_dir):
             logging.error(f"Target directory does not exist: {target_dir}")
             self.close()
@@ -206,31 +209,45 @@ class SendToBuddyDialog(QWidget):
 
         moved_count = 0
         errors = []
+        already_present = []
 
         for filename in self.checked_files:
-            src_file = os.path.join(self.globals.current_folder, filename)
+            src_file = os.path.join(self.globs.current_folder, filename)
             dst_file = os.path.join(target_dir, filename)
 
+            # Append error if source file does not exist
             if not os.path.isfile(src_file):
                 errors.append(filename)
                 continue
 
+            # Append error if file already exists in buddy's folder
             if os.path.isfile(dst_file):
                 errors.append(filename)
+                already_present.append(filename)
                 continue
 
             try:
                 shutil.move(src_file, dst_file)
                 moved_count += 1
+
             except Exception as e:
                 logging.error(f"Failed to move {filename}: {e}")
                 errors.append(filename)
 
-        logging.info(f"Moved {moved_count} files to {name}")
+        # Log and show toast
+        if moved_count:
+            logging.info(f"Sent {moved_count} files to {name} successfully!")
+        if errors:
+            logging.error(f"Unable to move {len(errors)} files: {errors}")
+        if already_present:
+            logging.error(f"Already present in {name}'s inbox: {already_present}")
+            show_toast(self.globs,
+                       message=f"Unable to move {len(already_present)} files - already present in {name}'s inbox",
+                       _type="error")
 
         # Refresh the mailbox
-        if hasattr(self.globals, 'mailbox_widget') and self.globals.mailbox_widget:
-            self.globals.mailbox_widget.refresh_files(self.globals.current_folder)
+        if hasattr(self.globs, 'mailbox_widget') and self.globs.mailbox_widget:
+            self.globs.mailbox_widget.refresh_files(self.globs.current_folder)
 
         self.close()
 
@@ -284,84 +301,54 @@ class MailboxWidget(QWidget):
         # Auto-Name Button
         self.auto_name_btn = QPushButton("🪄")
         self.auto_name_btn.setFixedSize(24, 24)
-        self.auto_name_btn.setStyleSheet("""
-            QPushButton {
-                background-color: #3a3a3a; color: white; border: none;
-                border-radius: 4px; font-size: 16px;
-            }
-            QPushButton:hover { background-color: #4a4a4a; }
-        """)
+        self.auto_name_btn.setStyleSheet(dark.mailbox_button)
         self.auto_name_btn.setCursor(Qt.PointingHandCursor)
+        self.auto_name_btn.setToolTip("Auto-Name")
         self.auto_name_btn.clicked.connect(lambda e: pdf_button(self.globs, directory=self.globs.current_folder, file_list=self.globs.checked_files))
         action_layout.addWidget(self.auto_name_btn)
 
         # Enter to Spreadsheet Button
         self.enter_data_btn = QPushButton("✏️")
         self.enter_data_btn.setFixedSize(24, 24)
-        self.enter_data_btn.setStyleSheet("""
-            QPushButton {
-                background-color: #3a3a3a; color: white; border: none;
-                border-radius: 4px; font-size: 16px;
-            }
-            QPushButton:hover { background-color: #4a4a4a; }
-        """)
+        self.enter_data_btn.setStyleSheet(dark.mailbox_button)
         self.enter_data_btn.setCursor(Qt.PointingHandCursor)
+        self.enter_data_btn.setToolTip("Enter to Spreadsheet")
         self.enter_data_btn.clicked.connect(lambda e: smart_spreadsheet_button(self.globs, file_list=self.globs.checked_files))
         action_layout.addWidget(self.enter_data_btn)
 
         # Archive Button
         self.archive_btn = QPushButton("📁")
         self.archive_btn.setFixedSize(24, 24)
-        self.archive_btn.setStyleSheet("""
-            QPushButton {
-                background-color: #3a3a3a; color: white; border: none;
-                border-radius: 4px; font-size: 16px;
-            }
-            QPushButton:hover { background-color: #4a4a4a; }
-        """)
+        self.archive_btn.setStyleSheet(dark.mailbox_button)
         self.archive_btn.setCursor(Qt.PointingHandCursor)
+        self.archive_btn.setToolTip("Archive Files")
         self.archive_btn.clicked.connect(lambda e: archive_files(self.globs, self.globs.checked_files))
         action_layout.addWidget(self.archive_btn)
 
         # Send Button
         self.send_btn = QPushButton("📨")
         self.send_btn.setFixedSize(24, 24)
-        self.send_btn.setStyleSheet("""
-            QPushButton {
-                background-color: #3a3a3a; color: white; border: none;
-                border-radius: 4px; font-size: 16px;
-            }
-            QPushButton:hover { background-color: #4a4a4a; }
-        """)
+        self.send_btn.setStyleSheet(dark.mailbox_button)
         self.send_btn.setCursor(Qt.PointingHandCursor)
+        self.send_btn.setToolTip("Send to Buddy")
         self.send_btn.clicked.connect(lambda: self._on_send_clicked())
         action_layout.addWidget(self.send_btn)
 
         # Assign Sheets Button
         self.assign_btn = QPushButton("🏷️")
         self.assign_btn.setFixedSize(24, 24)
-        self.assign_btn.setStyleSheet("""
-            QPushButton {
-                background-color: #3a3a3a; color: white; border: none;
-                border-radius: 4px; font-size: 16px;
-            }
-            QPushButton:hover { background-color: #4a4a4a; }
-        """)
+        self.assign_btn.setStyleSheet(dark.mailbox_button)
         self.assign_btn.setCursor(Qt.PointingHandCursor)
+        self.assign_btn.setToolTip("Assign Sheets")
         self.assign_btn.clicked.connect(lambda: self._on_assign_clicked())
         action_layout.addWidget(self.assign_btn)
 
         # Print Button
         self.print_btn = QPushButton("🖨")
         self.print_btn.setFixedSize(24, 24)
-        self.print_btn.setStyleSheet("""
-            QPushButton {
-                background-color: #3a3a3a; color: white; border: none;
-                border-radius: 4px; font-size: 16px;
-            }
-            QPushButton:hover { background-color: #4a4a4a; }
-        """)
+        self.print_btn.setStyleSheet(dark.mailbox_button)
         self.print_btn.setCursor(Qt.PointingHandCursor)
+        self.print_btn.setToolTip("Print")
         self.print_btn.clicked.connect(lambda: self._on_contextual_print())
         action_layout.addWidget(self.print_btn)
 
@@ -369,14 +356,9 @@ class MailboxWidget(QWidget):
         self.delete_btn = QPushButton("🗑")
         self.action_buttons.setFixedHeight(32)
         self.delete_btn.setFixedSize(24, 24)
-        self.delete_btn.setStyleSheet("""
-            QPushButton {
-                background-color: #8B0000; color: white; border: none;
-                border-radius: 4px; font-size: 16px;
-            }
-            QPushButton:hover { background-color: #a00000; }
-        """)
+        self.delete_btn.setStyleSheet(dark.delete_button)
         self.delete_btn.setCursor(Qt.PointingHandCursor)
+        self.delete_btn.setToolTip("Delete")
         self.delete_btn.clicked.connect(lambda: self._on_contextual_delete())
         action_layout.addWidget(self.delete_btn)
 

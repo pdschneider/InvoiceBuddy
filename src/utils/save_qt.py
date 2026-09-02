@@ -66,6 +66,7 @@ def save_qt_settings(globs):
     current_settings["default_printer"] = new_printer
     current_settings["legacy_mode"] = new_legacy_mode
     current_settings["logging_level"] = new_logging_level
+    current_settings["previous_version"] = globs.current_version
 
     # Load current paths to merge with new values
     current_paths, current_buddies = load_paths()

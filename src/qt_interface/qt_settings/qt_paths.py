@@ -5,6 +5,7 @@ from PySide6.QtWidgets import (QWidget, QVBoxLayout,
 from PySide6.QtCore import Qt
 from src.utils.load_settings import load_data_path
 from src.managers.file_management import browse_directory
+from src.qt_interface.qt_styles import dark
 import os
 
 
@@ -43,10 +44,12 @@ def create_paths_settings_tab(globs):
         globs.inbox_entry_box.setPlaceholderText(globs.inbox)
     else:
         globs.inbox_entry_box.setPlaceholderText(default_inbox)
+    globs.inbox_entry_box.setStyleSheet(dark.line_edit)
     inbox_entry_layout.addWidget(globs.inbox_entry_box)
 
     inbox_browse = QPushButton()
     inbox_browse.setText("Browse")
+    inbox_browse.setStyleSheet(dark.browse_button)
     inbox_browse.clicked.connect(lambda: browse_directory(globs, globs.inbox_entry_box))
     inbox_entry_layout.addWidget(inbox_browse)
     inbox_browse.setFixedWidth(150)
@@ -65,10 +68,12 @@ def create_paths_settings_tab(globs):
         globs.archive_entry_box.setPlaceholderText(globs.archive)
     else:
         globs.archive_entry_box.setPlaceholderText(default_archive)
+    globs.archive_entry_box.setStyleSheet(dark.line_edit)
     archive_entry_layout.addWidget(globs.archive_entry_box)
 
     archive_browse = QPushButton()
     archive_browse.setText("Browse")
+    archive_browse.setStyleSheet(dark.browse_button)
     archive_browse.clicked.connect(lambda: browse_directory(globs, globs.archive_entry_box))
     archive_entry_layout.addWidget(archive_browse)
     archive_browse.setFixedWidth(150)
@@ -116,22 +121,26 @@ def create_paths_settings_tab(globs):
         name_input = QLineEdit()
         name_input.setPlaceholderText("Buddy name")
         name_input.setFixedWidth(120)
+        name_input.setStyleSheet(dark.line_edit)
         row_layout.addWidget(name_input)
 
         # Path field
         path_input = QLineEdit()
         path_input.setPlaceholderText("Folder path...")
+        path_input.setStyleSheet(dark.line_edit)
         row_layout.addWidget(path_input)
 
         # Browse button
         browse_btn = QPushButton("Browse")
         browse_btn.setFixedWidth(100)
+        browse_btn.setStyleSheet(dark.browse_button)
         browse_btn.clicked.connect(lambda: browse_directory(globs, path_input))
         row_layout.addWidget(browse_btn)
 
         # Remove button
         remove_btn = QPushButton("-")
         remove_btn.setFixedWidth(30)
+        remove_btn.setStyleSheet(dark.minus_button)
         remove_btn.clicked.connect(lambda checked, r=row: remove_buddy(r))
         row_layout.addWidget(remove_btn)
 

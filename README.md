@@ -54,14 +54,21 @@ care of it for you.
 <details>
 <summary>📸 Invoice Buddy 1</summary>
 
-![Invoice Buddy Screenshot](Screenshots/InvoiceBuddy-1.png)
+![Invoice Buddy Screenshot 1](docs/screenshots/invoice-buddy-1.png)
 
 </details>
 
 <details>
 <summary>📸 Invoice Buddy 2</summary>
 
-![Invoice Buddy Screenshot](Screenshots/InvoiceBuddy-2.png)
+![Invoice Buddy Screenshot 2](docs/screenshots/invoice-buddy-2.png)
+
+</details>
+
+<details>
+<summary>📸 Invoice Buddy 3</summary>
+
+![Invoice Buddy Screenshot 3](docs/screenshots/invoice-buddy-3.png)
 
 </details>
 

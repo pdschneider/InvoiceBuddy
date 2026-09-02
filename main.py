@@ -31,7 +31,7 @@ def on_closing():
             save_all_settings(globs, reject_toast=True)
     except Exception as e:
         logging.error(f"Error occurred when saving settings: {e}")
-    
+
     # Properly shut down
     logging.debug(f"Shutting down...")
     if globs.legacy_mode:

@@ -2,6 +2,7 @@
 from PySide6.QtWidgets import (QWidget, QVBoxLayout,
                                QTableWidget, QHeaderView)
 
+
 def create_inbox_list(globs):
     """Creates the central file list pane."""
     

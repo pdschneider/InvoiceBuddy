@@ -1,151 +1,335 @@
-# This document lists and describes all dependencies of **Invoice Buddy**
+# All Dependencies of **Invoice Buddy**
 
-### certifi
+A full list of dependencies and their current versions are available in [requirements.txt](../packaging/requirements.txt).
+
+## certifi
 Mozilla CA certificate bundle
+
 Required for: requests
 
-### cffi
+LICENSE: Mozilla Public License, v.2.0
+
+Source: https://github.com/certifi/python-certifi
+
+## cffi
 C Foreign Function Interface for Python
+
 Depends on: pycparser
+
 Required for: cryptography
 
-### charset-normalizer
+LICENSE: MIT No Attribution
+
+Source: https://github.com/python-cffi/cffi
+
+## charset-normalizer
 Character encoding detection
+
 Required for: requests
 
-### cryptography
+LICENSE: MIT
+
+Source: https://github.com/jawah/charset_normalizer
+
+## cryptography
 Cryptographic primitives (hashing, signing, etc.)
+
 Depends on: cffi
+
 Required for msoffcrypto-tool
 
-### CTkToolTip
+LICENSE: Apache 2.0 / BSD
+
+Source: https://github.com/pyca/cryptography
+
+## CTkToolTip
 Tooptip widget for customtkinter (old UI - deprecated)
+
 Depends on: customtkinter
 
-### customtkinter
+LICENSE: CC0 1.0 Universal
+
+Source: https://github.com/Akascape/CTkToolTip
+
+## customtkinter
 Modern themed Tkinter widgets (old UI - deprecated)
 
-### darkdetect
+LICENSE: MIT
+
+Source: https://github.com/tomschimansky/customtkinter
+
+## darkdetect
 Detects OS dark/light mode
+
 Dependency of: customtkinter
 
-### et_xmlfile
+LICENSE: All rights reserved.
+
+Source: https://github.com/albertosottile/darkdetect
+
+## et_xmlfile
 Low-memory XML writer
+
 Required for: openpyxl
 
-### idna
+LICENSE: MIT / PYTHON SOFTWARE FOUNDATION LICENSE VERSION 2
+
+Source: https://github.com/biydnd/et_xmlfile
+
+## idna
 International Domain Name Handling
+
 Required for: requests, urllib3
 
-### iniconfig
+LICENSE: BSD 3-Clause License / All rights reserved.
+
+Source: https://github.com/kjd/idna
+
+## iniconfig
 INI file parser
+
 Required for: pytest
 
-### msoffcrypto-tool
+LICENSE: MIT
+
+Source: https://github.com/dmiro/iniconfig
+
+## msoffcrypto-tool
 Decrypt encrypted MS Office files
+
 Depends on: olefile, cryptography
 
-### Nuitka
+LICENSE: MIT
+
+Source: https://github.com/nolze/msoffcrypto-tool
+
+## Nuitka
 Python compiler turning Python into C executables
 
-### olefile
+LICENSE: APGL-3.0
+
+Source: https://github.com/nuitka/nuitka
+
+## olefile
 Parses OLE compound file format (legacy Office files)
+
 Required for: msoffcrypto-tool
 
-### openpyxl
+LICENSE: All rights reserved.
+
+Source: https://github.com/decalage2/olefile
+
+## openpyxl
 Read/write to .xlsx files
 
-### ordered-set
+LICENSE: MIT
+
+Source: https://foss.heptapod.net/openpyxl/openpyxl
+
+## ordered-set
 Ordered set data structure
+
 Required by: Nuitka
 
-### packaging
+LICENSE: MIT
+
+Source: https://github.com/rspeer/ordered-set
+
+## packaging
 Version parsing, packaging utilities
 
-### pdf2image
+LICENSE: Apache 2.0 / BSD
+
+Source: https://github.com/pypa/packaging
+
+## pdf2image
 Converts PDF pages to PIL images
+
 Required for: pillow
 
-### pdfminer.six
+LICNSE: MIT
+
+Source: https://github.com/Belval/pdf2image
+
+## pdfminer.six
 Low-level PDF text/layout extraction
+
 Required for pdfplumber
 
-### pdfplumber
+LICNSE: MIT
+
+Source: https://github.com/pdfminer/pdfminer.six
+
+## pdfplumber
 High-level PDF table/text extraction
 
-### pep8
+LICENSE: MIT
+
+Source: https://github.com/jsvine/pdfplumber
+
+## pep8
 PEP8 style tracker
 
-### pillow
+LICENSE: None
+
+Source: https://github.com/treyhunner/pep8
+
+## pillow
 Image processing library (PIL fork)
 
-### pip
+LICENSE: MIT-CMU
+
+Source: https://github.com/python-pillow/Pillow
+
+## pip
 Package installer
 
-### pluggy
+LICENSE: MIT
+
+Source: https://github.com/pypa/pip
+
+## pluggy
 Plugin management system
+
 Required for: pytest
 
-### psutil
+LICENSE: MIT
+
+Source: https://github.com/pytest-dev/pluggy
+
+## poppler-windows
+Necessary for OCR on Windows
+
+LICENSE: MIT
+
+Source: https://github.com/oschwartz10612/poppler-windows
+
+## psutil
 System process monitoring
 
-### pycparser
+LICENSE: BSD 3-Clause
+
+Source: https://github.com/giampaolo/psutil
+
+## pycparser
 C language parser for Python
+
 Required for: cffi
 
-### Pygments
+LICENSE: All rights reserved.
+
+Source: https://github.com/eliben/pycparser
+
+## Pygments
 Syntax highlighting
+
 Required for: pytest
 
-### pyparsing
+LICENSE: BSD 2-Clause / All rights reserved.
+
+Source: https://github.com/pygments/pygments
+
+## pyparsing
 Text parsing library
+
 Required for: pdfminer.six
 
-### pypdf
+LICENSE: MIT
+
+Source: https://github.com/pyparsing/pyparsing
+
+## pypdf
 Reads/manipulates PDF metadata
 
-### pypdfium2
+LICENSE: All rights reserved.
+
+Source: https://github.com/py-pdf/pypdf
+
+## pypdfium2
 PDF rengering engine
 
-### PySide6
+LICENSE: None
+
+Source: https://github.com/pypdfium2-team/pypdfium2
+
+## PySide6
 Main Qt6 Python bindings
 
-### PySide6_Addons
+## PySide6_Addons
 Addons for Qt6 Python bindings
 
-### PySide6_Essentials
+## PySide6_Essentials
 Essentials for Qt6 Python bindings
 
-### pytesseract
+## pytesseract
 Python wrapper for Tesseract OCR engine
 
-### pytest
+License: Apache 2.0
+
+Source: https://github.com/tesseract-ocr/tesseract
+
+## pytest
 Testing framework
+
 Depends on: pluggy, iniconfig
 
-### requests
+LICENSE: MIT
+
+Source: https://github.com/pytest-dev/pytest
+
+## requests
 HTTP library for making HTTP/HTTPS requests
+
 Depends on: urllib3, idna, certifi, charset-normalizer
 
-### Send2Trash
+LICENSE: Apache 2.0
+
+Source: https://github.com/psf/requests
+
+## Send2Trash
 Cross-platform send-to-trash delete functionality
 
-### setuptools
+LICENSE: BSD 3-Clause
+
+Source: https://github.com/arsenetar/send2trash
+
+## setuptools
 Package building/installation
 
-### shiboken6
+LICENSE: MIT
+
+Source: https://github.com/pypa/setuptools
+
+## shiboken6
 C++ to Python binding generator that powers PySide6
+
 Required for PySide6
 
-### urllib3
+## urllib3
 Lower level HTTP library
+
 Required for: requests
 
-### watchdog
+LICENSE: MIT
+
+Source: https://github.com/urllib3/urllib3
+
+## watchdog
 Filesystem event monitoring
 
-### zstandard
+LICENSE: Apache 2.0
+
+Source: https://github.com/gorakhargosh/watchdog
+
+## zstandard
 Zstandard compression library
+
 Required by: Nuitka
 
-*Up to date as of v0.3.0-beta*
+LICENSE: BSD 3-Clause / All rights reserved.
+
+Source: https://github.com/indygreg/python-zstandard
+
+---
+
+*Up to date as of v0.3.0*

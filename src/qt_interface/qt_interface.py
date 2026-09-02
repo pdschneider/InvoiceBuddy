@@ -15,8 +15,10 @@ from src.utils.observers import setup_observer
 from src.interface.setup.setup_wizard import create_wizard
 from src.qt_interface.qt_components.qt_changelog import create_changelog_panel, toggle_changelog_panel
 from src.qt_interface.qt_components.qt_about import create_about_panel, toggle_about_panel
+from src.qt_interface.qt_components.qt_bug_report import create_report_panel, toggle_report_panel
+from src.qt_interface.qt_components.qt_docs import create_docs_panel, toggle_docs_panel
+from src.utils.icons import load_qt_icons
 import logging
-import webbrowser
 import os
 
 
@@ -166,7 +168,10 @@ def create_qt_interface(globs):
     main_layout.setSpacing(0)
     central_widget.setStyleSheet("background-color: #333339;")
 
-    # ADD NEW TITLE BAR (Draggable + Menus + Buttons)
+    # Load Icons
+    load_qt_icons(globs)
+
+    # Add Title Bar
     title_bar = TitleBar(globs.window)
     main_layout.addWidget(title_bar)
     globs.title_bar = title_bar
@@ -214,18 +219,14 @@ def create_qt_interface(globs):
     help_menu = title_bar.menu_bar.addMenu("Help")
     view_changelog_Q = help_menu.addAction("Changelog")
     open_wizard_Q = help_menu.addAction("Wizard")
-    view_github_Q = help_menu.addAction("Github")
-    view_codeberg_Q = help_menu.addAction("Codeberg")
+    open_report_Q = help_menu.addAction("Bug Report")
     view_about_Q = help_menu.addAction("About")
 
     # Attach Functions to Help Buttons
     view_about_Q.triggered.connect(lambda: toggle_about_panel(globs))
     view_changelog_Q.triggered.connect(lambda: toggle_changelog_panel(globs))
     open_wizard_Q.triggered.connect(lambda: create_wizard(globs))
-    view_github_Q.triggered.connect(lambda: webbrowser.open(
-        url="https://github.com/pdschneider/InvoiceBuddy"))
-    view_codeberg_Q.triggered.connect(lambda: webbrowser.open(
-            url="https://codeberg.org/pdschneider/InvoiceBuddy"))
+    open_report_Q.triggered.connect(lambda: toggle_report_panel(globs))
 
     # Style Menus with Distinct Hover States
     menu_stylesheet = """
@@ -272,6 +273,15 @@ def create_qt_interface(globs):
     # About Panel
     create_about_panel(globs)
 
+    # Report Panel
+    create_report_panel(globs)
+
+    # Docs Panel
+    try:
+        create_docs_panel(globs)
+    except Exception as e:
+        logging.error(f"Unable to create docs panel due to: {e}")
+
     # Dim Overlay for Panels
     dim_overlay = QWidget(globs.window)
     dim_overlay.setAttribute(Qt.WA_StyledBackground, True)
@@ -286,6 +296,10 @@ def create_qt_interface(globs):
             globs.changelog_panel.hide()
         if hasattr(globs, 'about_panel') and globs.about_panel.isVisible():
             globs.about_panel.hide()
+        if hasattr(globs, 'report_panel') and globs.report_panel.isVisible():
+                    globs.report_panel.hide()
+        if hasattr(globs, 'docs_panel') and globs.docs_panel.isVisible():
+                    globs.docs_panel.hide()
         globs.dim_overlay.hide()
 
     dim_overlay.mousePressEvent = close_all_panels
@@ -322,40 +336,6 @@ def create_qt_interface(globs):
         "start_geom": None
     }
 
-    def get_resize_edge_from_global(window, global_pos):
-        """
-        Detects edge based on GLOBAL coordinates.
-        This is the most reliable way for frameless windows.
-        """
-        geom = window.frameGeometry()
-        x, y = global_pos.x(), global_pos.y()
-        
-        left = x <= geom.left() + RESIZE_MARGIN
-        right = x >= geom.right() - RESIZE_MARGIN
-        top = y <= geom.top() + RESIZE_MARGIN
-        bottom = y >= geom.bottom() - RESIZE_MARGIN
-        
-        if top and left: return "TL"
-        if top and right: return "TR"
-        if bottom and left: return "BL"
-        if bottom and right: return "BR"
-        if left: return "L"
-        if right: return "R"
-        if top: return "T"
-        if bottom: return "B"
-        return None
-
-    def get_cursor_shape(edge):
-        """Returns the Qt.CursorShape enum."""
-        shapes = {
-            "L": Qt.SizeHorCursor, "R": Qt.SizeHorCursor,
-            "T": Qt.SizeVerCursor, "B": Qt.SizeVerCursor,
-            "TL": Qt.SizeFDiagCursor, "BR": Qt.SizeFDiagCursor,
-            "TR": Qt.SizeBDiagCursor, "BL": Qt.SizeBDiagCursor,
-            None: Qt.ArrowCursor
-        }
-        return shapes.get(edge, Qt.ArrowCursor)
-
     # Enable mouse tracking so we get MouseMove even without pressing
     globs.window.setMouseTracking(True)
     for child in globs.window.findChildren(QWidget):
@@ -381,25 +361,27 @@ def create_qt_interface(globs):
         QTimer.singleShot(0, update_overlay_geometry)
 
     def update_overlay_geometry():
-        """Updates overlay (settings + changelog) when resizing the window."""
-        globs.dim_overlay.resize(globs.window.width(), globs.window.height() - 35)
-        globs.dim_overlay.move(0, 35)
+        """Updates overlay when resizing the window."""
+        tb_h = globs.title_bar.height()
+        globs.dim_overlay.resize(globs.window.width(), globs.window.height() - tb_h)
+        globs.dim_overlay.move(0, tb_h)
 
-        for panel_attr in ['settings_panel', 'changelog_panel', 'about_panel']:
+        for panel_attr in ['settings_panel', 'changelog_panel',
+                           'about_panel', 'report_panel', 'docs_panel']:
             panel = getattr(globs, panel_attr, None)
             if panel and panel.isVisible():
 
                 # Dynamic resize for settings panel only
-                if panel_attr == 'settings_panel':
+                if panel_attr == 'settings_panel' or panel_attr == 'docs_panel':
                     overlay_w = max(650, int(globs.window.width() * 0.85))
                     overlay_h = max(550, int(globs.window.height() * 0.85))
                     panel.resize(overlay_w, overlay_h)
                 else:
                     overlay_w = max(globs.window.width(), 200)
-                    overlay_h = max(globs.window.height() - 35, 150)
+                    overlay_h = max(globs.window.height() - tb_h, 150)
 
-                globs.dim_overlay.resize(globs.window.width(), globs.window.height() - 35)
-                globs.dim_overlay.move(0, 35)
+                globs.dim_overlay.resize(globs.window.width(), globs.window.height() - tb_h)
+                globs.dim_overlay.move(0, tb_h)
 
                 parent_w = globs.window.width()
                 parent_h = globs.window.height()
@@ -409,6 +391,7 @@ def create_qt_interface(globs):
                 y = max(45, (parent_h - panel_h) // 2)
                 panel.move(x, y)
 
-    globs.dim_overlay.resize(globs.window.width(), globs.window.height() - 35)
-    globs.dim_overlay.move(0, 35)
+    tb_h = globs.title_bar.height()
+    globs.dim_overlay.resize(globs.window.width(), globs.window.height() - tb_h)
+    globs.dim_overlay.move(0, tb_h)
     globs.window.resizeEvent = custom_resize

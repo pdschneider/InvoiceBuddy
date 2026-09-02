@@ -6,6 +6,7 @@ from src.qt_interface.qt_settings.qt_advanced import create_advanced_settings_ta
 from src.qt_interface.qt_settings.qt_paths import create_paths_settings_tab
 from src.qt_interface.qt_settings.qt_spreadsheet import create_spreadsheet_settings_tab
 from src.utils.save_qt import save_qt_settings
+from src.qt_interface.qt_styles import dark
 
 
 def create_settings_panel(globs):
@@ -33,26 +34,7 @@ def create_settings_panel(globs):
 
     # === TABS ===
     tabs = QTabWidget()
-    tabs.setStyleSheet("""
-        QTabWidget::pane {
-            border: 1px solid #444;
-            border-radius: 5px;
-            background-color: #2b2b2b;
-        }
-        QTabBar::tab {
-            background-color: #333;
-            color: #aaa;
-            padding: 10px 20px;
-            margin-right: 2px;
-            border-top-left-radius: 5px;
-            border-top-right-radius: 5px;
-        }
-        QTabBar::tab:selected {
-            background-color: #2b2b2b;
-            color: #2ecc71;
-            font-weight: bold;
-        }
-    """)
+    tabs.setStyleSheet(dark.tabs)
 
     # General tab
     general_tab = create_general_settings_tab(globs)
@@ -72,28 +54,17 @@ def create_settings_panel(globs):
 
     layout.addWidget(tabs)
 
-    # === CLOSE BUTTON ===
-    close_btn = QPushButton("Save")
-    close_btn.setStyleSheet("""
-        QPushButton {
-            background-color: #3a3a3a;
-            color: white;
-            padding: 10px;
-            border-radius: 4px;
-            font-weight: bold;
-        }
-        QPushButton:hover {
-            background-color: #4a4a4a;
-        }
-    """)
-    close_btn.setCursor(Qt.PointingHandCursor)
+    # Save Button
+    save_btn = QPushButton("Save")
+    save_btn.setStyleSheet(dark.save_button)
+    save_btn.setCursor(Qt.PointingHandCursor)
     def on_close_click():
         """Save settings before closing the panel."""
         save_qt_settings(globs)  # Save first
         toggle_settings_panel(globs)  # Then close
 
-    close_btn.clicked.connect(on_close_click)
-    layout.addWidget(close_btn)
+    save_btn.clicked.connect(on_close_click)
+    layout.addWidget(save_btn)
 
     # Store references
     globs.settings_panel = settings_panel
@@ -111,8 +82,9 @@ def toggle_settings_panel(globs):
         if hasattr(globs, 'changelog_panel') and globs.changelog_panel.isVisible():
             globs.changelog_panel.hide()
 
-        globs.dim_overlay.resize(globs.window.width(), globs.window.height() - 35)
-        globs.dim_overlay.move(0, 35)
+        tb_h = globs.title_bar.height()
+        globs.dim_overlay.resize(globs.window.width(), globs.window.height() - tb_h)
+        globs.dim_overlay.move(0, tb_h)
         globs.dim_overlay.show()
         globs.dim_overlay.raise_()
 

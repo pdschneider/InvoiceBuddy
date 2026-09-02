@@ -28,7 +28,9 @@ def load_data_path(direct=None, filename=None, default=False):
         "assets/settings-2.png", "assets/printer-1.png", "assets/printer-2.png", "assets/window-size.png",
         "assets/notification-1.png", "assets/notification-2.png", "assets/notification-3.png",
         "themes/cosmic_sky.json", "themes/pastel_green.json", "themes/trojan_red.json",
-        "themes/dark_cloud.json", "themes/soft_light.json", "sheets.json"
+        "themes/dark_cloud.json", "themes/soft_light.json", "sheets.json",
+        "assets/github-light.svg", "assets/github.svg", "assets/codeberg.svg",
+        "assets/github-light.png", "assets/github.png", "assets/codeberg.png"
     ]
 
     # ==================== DETECT RUN MODE ====================

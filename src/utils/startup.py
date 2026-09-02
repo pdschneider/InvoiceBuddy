@@ -226,6 +226,11 @@ def setup_settings():
             changed = True
             logging.info(
                 f"Added missing or nonconforming 'legacy_mode' key to settings.json")
+        if ("previous_version" not in data) or not isinstance(data["previous_version"], str):
+            data["previous_version"] = "0.1.0"
+            changed = True
+            logging.info(
+                f"Added missing or nonconforming 'previous_version' key to settings.json")
 
         # Check to make sure paths are valid
         if not os.path.isfile(data["history_path"]) and data["history_path"]:

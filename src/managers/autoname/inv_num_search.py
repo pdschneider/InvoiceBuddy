@@ -143,6 +143,14 @@ def invoice_number_search(directory=None, file_list=None, normalized_texts=None)
             matched_pattern = None
             for pattern in triggers:
                 match = re.search(pattern, normalized)
+
+                # Skip if match is invalid
+                if match:
+                    invalid_matches = ["date", "nbr", "net"]
+                    if match.group(1).strip().lower() in invalid_matches:
+                        logging.debug(f"Skipping invalid match: {match.group(1)}")
+                        match = None
+
                 if match:
                     candidate = match.group(1).strip().upper()
                     logging.info(

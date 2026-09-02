@@ -1,0 +1,50 @@
+name: "✨ Feature Request"
+description: "Suggest a new feature or improvement."
+labels: ["Type/Enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        > If your issue was closed but not fully resolved, please **reopen** it or **create a new issue**.
+
+  - type: textarea
+    id: description
+    attributes:
+      label: "Description"
+      description: "A clear description of the feature you'd like."
+      placeholder: |
+        e.g. I'd like to be able to take pictures of receipts and upload the images files.
+    validations:
+      required: true
+
+  - type: textarea
+    id: motivation
+    attributes:
+      label: "Motivation"
+      description: "Why is this feature needed? What problem does it solve?"
+    validations:
+      required: false
+
+  - type: textarea
+    id: proposed-solution
+    attributes:
+      label: "Proposed Solution"
+      description: "How do you think this should work?"
+    validations:
+      required: false
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: "Alternatives Considered"
+      description: "Any alternative solutions or features you've considered."
+    validations:
+      required: false
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: "Additional Context"
+      description: "Any other relevant information"
+    validations:
+      required: false

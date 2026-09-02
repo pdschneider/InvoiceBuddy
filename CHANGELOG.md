@@ -2,31 +2,49 @@
 
 All notable changes to **Invoice Buddy** will be located in this file.
 
-## [0.3.0-beta] - 2026-08-21
+## [0.3.0] - 2026-09-02
 
-This update officially launches the new GUI! Users will now land into a much more modern interface by default. Some settings may need to be re-applied.
+This update officially launches the new GUI! Users will now land into a much more modern interface by default (among many other improvements). Some settings may need to be re-applied.
 
-### Added
+### 🌟 Added
 - The new interface is now officially treated as the default interface
+- New in-app documentation (Windows-only for now - working on a Linux fix)
 - Configuring and sending to buddies has been brought back to the new GUI
+- New Vendors: Clean Harbors, Ferguson Enterprises, Proton AG, Horizon Distribution
+- Tooltips now describe what most buttons do
+- Bug report section
 
-### Changed
+### ⚙️ Changed
 - Changed internal 'globals' variables to 'globs' to free namespace
 - Auto-Name, Enter, and Archive buttons moved to the mailbox view for clarity
 - Removed unused dependencies
 - Improved invoice number detection to reduce false positives
+- Date search now recognizes format DD-MON-YY
 - Shortened title bar menu buttons for simplicity
+- Moved source code to 'Help' > 'About'
+- Revamped issue reporting templates
+- Created central file to store UI styling
+- Added 'previous version' check for later implementation
 - Minor UI improvements
 - Updated dependencies
 
-### Fixed
+### 🛠️ Fixed
 - Dialog boxes now display over the main window by default
+- Removed search bar that was never functional
+- Closed gap between dim overlay and title bar
+- Added confirmation dialog when archiving files to prevent accidental moves
+- Attempting to send files to buddies who have the same filenames currently in their inbox now displays and logs the error rather than silently failing
 
-### Documentation
-- Updated roadmap.md
-- Added dependencies.md
+### 📚 Documentation
+- Updated roadmap
+- Added dependencies documentation
 - Moved LICENSE.txt to docs folder
 - Docs folder is now bundled with each release
+- Updated ReadMe & screenshots
+- Added Auto-Name feature documentation
+- Added Spreadsheet Data Entry documentation
+- Added Archive feature documentation
+- Added Buddies feature documentation
 
 ## [0.2.9] - 2026-08-20
 

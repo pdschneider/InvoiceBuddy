@@ -2,6 +2,7 @@
 from PySide6.QtWidgets import QWidget, QVBoxLayout, QLabel, QCheckBox, QComboBox
 from PySide6.QtCore import Qt
 from src.managers.printers import query_printers
+from src.qt_interface.qt_styles import dark
 import logging
 
 
@@ -47,7 +48,7 @@ def create_general_settings_tab(globs):
     legacy_checkbox.setChecked(globs.legacy_mode)
     layout.addWidget(legacy_checkbox)
 
-        # --- PRINTER SELECTION START ---
+    # --- PRINTER SELECTION START ---
 
     # Create a frame to hold the label and combo box for alignment
     printer_frame = QWidget()
@@ -62,34 +63,7 @@ def create_general_settings_tab(globs):
 
     # Combo Box
     printer_combo = QComboBox()
-    printer_combo.setStyleSheet("""
-        QComboBox {
-            color: white;
-            background-color: #333;
-            border: 1px solid #555;
-            border-radius: 4px;
-            padding: 5px;
-            font-size: 14px;
-            min-width: 200px;
-        }
-        QComboBox::drop-down {
-            border: none;
-            width: 20px;
-        }
-        QComboBox::down-arrow {
-            image: none;
-            border-left: 4px solid transparent;
-            border-right: 4px solid transparent;
-            border-top: 5px solid white;
-            margin-right: 10px;
-        }
-        QComboBox QAbstractItemView {
-            background-color: #333;
-            color: white;
-            selection-background-color: #2ecc71;
-            border: none;
-        }
-    """)
+    printer_combo.setStyleSheet(dark.combobox)
 
     # Populate with current printers
     try:

@@ -115,6 +115,10 @@ class Globs:
         self.printer_icon = None
         self.notification_icon = None
         self.windows_icon = None
+        self.github_icon = None
+        self.github_light_icon = None
+        self.codeberg_icon = None
+        self.mail_icon = None
 
         self.icons_list = ["assets/invoice-1.png",
                            "assets/invoice-2.png",
@@ -213,6 +217,7 @@ class Globs:
         self.beta = settings.get("beta", False)
         self.dynamic_window_size = settings.get("dynamic_window_size", True)
         self.legacy_mode = settings.get("legacy_mode", False)
+        self.previous_version = settings.get("previous_version", 0)
 
         # Paths
         self.inbox = sources.get("inbox", "")
