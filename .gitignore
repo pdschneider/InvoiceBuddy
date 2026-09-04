@@ -3,7 +3,7 @@
 dist/
 build/
 
-# Nuitka / PyInstaller outputs
+# Nuitka / PyInstaller outputs / Binaries
 *.AppImage
 *.deb
 *.bin
@@ -37,3 +37,6 @@ linux.ps1
 .git/
 .DirIcon
 notes/
+
+# Miscellaneous
+nuitka-crash-report.xml

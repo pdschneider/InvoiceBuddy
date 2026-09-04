@@ -4,11 +4,17 @@
 
 set -e
 
-# Refresh desktop database and icon cache
-if [ -x /usr/bin/update-desktop-database ]; then
-    update-desktop-database /usr/share/applications
+# Repair desktop file if a legacy postrm deleted it during upgrade
+if [ ! -f /usr/share/applications/invoice-buddy.desktop ] \
+   && [ -f /usr/share/invoice-buddy/invoice-buddy.desktop ]; then
+    cp /usr/share/invoice-buddy/invoice-buddy.desktop /usr/share/applications/invoice-buddy.desktop || true
+    echo "Restored missing desktop entry"
 fi
-if [ -x /usr/bin/gtk-update-icon-cache ]; then
+
+# Refresh desktop database and icon cache
+if [ -x /usr/bin/update-icon-caches ]; then
+    update-icon-caches /usr/share/icons/hicolor || true
+elif [ -x /usr/bin/gtk-update-icon-cache ]; then
     gtk-update-icon-cache -q -t -f /usr/share/icons/hicolor || true
 fi
 

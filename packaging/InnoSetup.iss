@@ -4,7 +4,7 @@
 
 #define MyAppName "Invoice Buddy"
 #define MyAppPublisher "Phillip Schneider"
-#define MyAppVersion "0.3.0"
+#define MyAppVersion "0.3.1-beta"
 #define MyAppURL "https://github.com/pdschneider/InvoiceBuddy"
 #define MyAppExeName "InvoiceBuddy.exe"
 
@@ -84,7 +84,7 @@ begin
   if PreviousInstallationExists() then
   begin
     case PageID of
-      wpWelcome, wpLicense, wpReady:
+      wpWelcome, wpLicense, wpReady, wpSelectTasks:
         Result := True;
     end;
   end;

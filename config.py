@@ -72,7 +72,7 @@ class Globs:
         self.edit_lock = threading.Lock()
 
         # UI variables
-        self.root = ctk.CTk()
+        self.root = ctk.CTk(className="invoice-buddy")
         self.notebook = None
         self.main_frame = None
         self.main_page = None
@@ -217,7 +217,7 @@ class Globs:
         self.beta = settings.get("beta", False)
         self.dynamic_window_size = settings.get("dynamic_window_size", True)
         self.legacy_mode = settings.get("legacy_mode", False)
-        self.previous_version = settings.get("previous_version", 0)
+        self.previous_version = settings.get("previous_version", "0.1.0")
 
         # Paths
         self.inbox = sources.get("inbox", "")

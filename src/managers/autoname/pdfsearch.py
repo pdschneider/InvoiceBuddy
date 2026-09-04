@@ -12,7 +12,12 @@ from src.managers.autoname.company_search import company_search
 from src.managers.autoname.date_search import date_search
 from src.managers.autoname.inv_num_search import invoice_number_search
 from src.managers.autoname.card_num_search import card_number_search
+from src.utils.save_settings import save_metadata
+from src.utils.save_qt import save_metadata as save_qt_metadata
+from PySide6.QtWidgets import QMessageBox
+from tkinter import messagebox
 from pypdf import PdfReader
+from datetime import datetime
 
 
 def apply_auto_naming(globs, directory, file_list=None):
@@ -22,12 +27,41 @@ def apply_auto_naming(globs, directory, file_list=None):
     scrubs matches from normalized text between calls,
     and renames based on progressive logic.
     """
+
+    # Save metadata first
+    if globs.legacy_mode:
+        save_metadata(globs)
+    else:
+        save_qt_metadata(globs)
+
     # Return if no files are sent
     if not file_list:
+        if not globs.legacy_mode:
+            QMessageBox.information(
+                globs.window,
+                "Nothing Selected",
+                "Please select one or more files to auto-name.",
+                QMessageBox.StandardButton.Ok,
+                QMessageBox.StandardButton.Ok
+            )
+        else:
+            messagebox.showinfo("Nothing Selected", "Please select one or more files to auto-name.")
         return 0
 
-    # Create metadata dictionary
+    # Make File List Work for PySide6
+    new_file_list = []
+    if not globs.legacy_mode:
+        for file in file_list:
+            new_file_list.append(os.path.normpath(os.path.join(globs.inbox, file)))
+        file_list = new_file_list
+
+    logging.debug(f"Attempting to auto-name files: {file_list}")
+
+    search_dir = os.path.normpath(directory or globs.sources['inbox'])
+
+    # Create metadata & dates dictionaries
     metadata_to_write = {}
+    applied_dates = {}
 
     search_dir = os.path.normpath(directory)
     if not os.path.isdir(search_dir):
@@ -152,6 +186,7 @@ def apply_auto_naming(globs, directory, file_list=None):
             if date_result:
                 date, matched = date_result
                 new_parts.append(date)
+                applied_dates[filename] = date
                 logging.info(f"  Applied date: {date}")
 
                 old_length = len(normalized_texts[filename])
@@ -285,4 +320,71 @@ def apply_auto_naming(globs, directory, file_list=None):
 
     logging.info(f"Total renamed: {renamed}")
 
-    return renamed
+    return renamed, applied_dates
+
+
+def pdf_button(globs, companies=None, directory=None, file_list=None):
+    """One-click auto-naming — all logic in apply_auto_naming."""
+
+    # Apply auto-naming and return number of changed files and dates
+    search_dir = os.path.normpath(directory or globs.sources['inbox'])
+    changes, applied_dates = apply_auto_naming(globs, search_dir, file_list)
+    logging.debug(f"Applied Dates: {applied_dates}")
+
+    # Determine today's date and create empty list for any future dates
+    today = datetime.now().date()
+    future_dates = []
+    old_dates = []
+
+    # Parse dates to see if any are past the current date
+    for filename, date_str in applied_dates.items():
+        try:
+            parsed = datetime.strptime(date_str, "%m-%d-%y").date()
+            if parsed > today:
+                future_dates.append((filename, date_str))
+            elif (today - parsed).days > 365:
+                old_dates.append((filename, date_str))
+        except ValueError:
+            logging.warning(f"Could not parse date '{date_str}' for {filename}")
+
+    # Display a messagebox
+    if changes == 0:
+        QMessageBox.information(
+            globs.window,
+            "Nothing to Do",
+            "Files already properly named or no matches found in file contents.",
+            QMessageBox.StandardButton.Ok,
+            QMessageBox.StandardButton.Ok
+        )
+    elif future_dates and old_dates:
+        QMessageBox.information(
+            globs.window,
+            "Complete!",
+            f"Auto-Name Complete! Updated {changes} file(s).\nCaution: {len(future_dates)} files have dates later than today's date and {len(old_dates)} files have dates more than a year old.\nIt might be a good idea to check if these are correct!",
+            QMessageBox.StandardButton.Ok,
+            QMessageBox.StandardButton.Ok
+        )
+    elif future_dates:
+        QMessageBox.information(
+            globs.window,
+            "Complete!",
+            f"Auto-Name Complete! Updated {changes} file(s).\nCaution: {len(future_dates)} files have dates later than today's date.\nIt might be a good idea to check if these are correct!",
+            QMessageBox.StandardButton.Ok,
+            QMessageBox.StandardButton.Ok
+        )
+    elif old_dates:
+        QMessageBox.information(
+            globs.window,
+            "Complete!",
+            f"Auto-Name Complete! Updated {changes} file(s).\nCaution: {len(old_dates)} files have dates more than a year old.\nIt might be a good idea to check if these are correct!",
+            QMessageBox.StandardButton.Ok,
+            QMessageBox.StandardButton.Ok
+        )
+    else:
+        QMessageBox.information(
+            globs.window,
+            "Complete!",
+            f"Auto-Name Complete! Updated {changes} file(s).",
+            QMessageBox.StandardButton.Ok,
+            QMessageBox.StandardButton.Ok
+        )

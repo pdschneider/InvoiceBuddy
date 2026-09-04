@@ -6,10 +6,27 @@ from PySide6.QtWidgets import (QWidget, QVBoxLayout, QLabel, QPushButton,
 from PySide6.QtCore import QUrl
 from src.qt_interface.qt_styles import dark
 import logging
+import sys
 
 
-# Docs live at <project root>/docs/wiki/ — three levels up from this file
-PROJECT_DOCS = os.path.join(os.path.dirname(__file__), "..", "..", "..", "docs")
+# Locate the dist root. argv[0]'s directory works for the .deb
+# (/usr/lib/invoice-buddy/invoice-buddy) and for development
+# (main.py lives in the project root). containing_dir is a fallback
+# for other frozen layouts (AppImage/onefile), where it resolves
+_argv_root = os.path.dirname(os.path.abspath(sys.argv[0]))
+if os.path.isdir(os.path.join(_argv_root, "docs", "wiki")):
+    _DIST_ROOT = _argv_root
+else:
+    try:
+        _DIST_ROOT = __compiled__.containing_dir
+    except NameError:
+        # Development mode: source tree, three levels up
+        _DIST_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", ".."))
+    except Exception as e:
+        logging.error(f"Non-NameError error trying to find the path for wiki's.")
+        _DIST_ROOT = os.path.join(os.path.dirname(__file__), "..", "..", "..")
+
+PROJECT_DOCS = os.path.join(_DIST_ROOT, "docs")
 DOCS_DIR = os.path.join(PROJECT_DOCS, "wiki")
 EXTRA_DOCS = ["companies.md"]
 

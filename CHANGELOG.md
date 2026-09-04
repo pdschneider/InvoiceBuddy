@@ -2,6 +2,34 @@
 
 All notable changes to **Invoice Buddy** will be located in this file.
 
+## [0.3.1-beta] - 2026-09-08
+
+This update adds .ods support for those who prefer a more open-source spreadsheet format. It also fixes a long-standing bug for .deb users preventing the app from properly displaying in the launcher, and more!
+
+### 🌟 Added
+- Added support for .ods files
+
+### ⚙️ Changed
+- Now built in standalone mode on Linux, improving launch time
+- Improved company mapping for SnoPUD
+- Further improved the accuracy of invoice number search
+- Updated app type detection logic
+- Moving files to buddies now shows a toast confirming the move was successful
+- Warnings now appear if dates are found to be later than today's date or older than a year
+- Updating Invoice Buddy on Windows no longer prompts to create a desktop icon
+- Upgraded to Python 3.13.15 on Windows
+- Minor UI improvements
+- Updated dependencies
+
+### 🛠️ Fixed
+- Fixed postrm & postinst scripts to only remove certain files when using remove or purge & properly refreshing icons, fixing launcher issues for .deb users
+- Docs now correctly show up from the '?' menu on Linux systems
+- Customtkinter version now treated as independent app for .deb builds
+- Minor bug fixes
+
+### 📚 Documentation
+- Added licenses to /docs/licenses/
+
 ## [0.3.0] - 2026-09-02
 
 This update officially launches the new GUI! Users will now land into a much more modern interface by default (among many other improvements). Some settings may need to be re-applied.

@@ -1,4 +1,4 @@
-# src/qt_interface/qt_components/qt_about.py
+# src/qt_interface/qt_components/qt_bug_report.py
 from PySide6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, 
                                QLabel, QPushButton, QScrollArea,
                                QMessageBox)
@@ -56,8 +56,6 @@ def create_report_panel(globs):
     desc_label.setWordWrap(True)
     content_layout.addStretch()
     content_layout.addWidget(desc_label)
-
-    layout.addLayout(content_layout)
 
     # Buttons Layout
     buttons_layout = QHBoxLayout()

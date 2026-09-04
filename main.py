@@ -42,6 +42,7 @@ def on_closing():
         globs.app.quit()
     logging.shutdown()
 
+
 if __name__ == "__main__":
     # Initialize GUI
     if not globs.legacy_mode:

@@ -110,6 +110,13 @@ LICENSE: APGL-3.0
 
 Source: https://github.com/nuitka/nuitka
 
+## odfpy
+Handles spreadsheet management for .ods files
+
+LICENSE: GPL-2.0
+
+Source: https://github.com/eea/odfpy
+
 ## olefile
 Parses OLE compound file format (legacy Office files)
 

@@ -205,5 +205,33 @@ dark = SimpleNamespace(
         QToolTip {
             background-color: #2b2b2b; color: white; border: 1px solid #555;
         }
+    """,
+    mail_checkbox = """
+        QCheckBox {
+            background-color: transparent;
+            border: none;
+            spacing: 0;
+        }
+        QCheckBox::indicator {
+            width: 14px;
+            height: 14px;
+            border: 2px solid #555;
+            border-radius: 4px;
+            background-color: #2b2b2b;
+            margin: 1px;
+        }
+        QCheckBox::indicator:hover {
+            border-color: #999;
+        }
+        QCheckBox::indicator:pressed {
+            background-color: #444;
+        }
+        QCheckBox::indicator:checked {
+            background-color: #888;
+            border-color: #777;
+        }
+        QCheckBox::indicator:checked:hover {
+            border-color: #ccc;
+        }
     """
 )

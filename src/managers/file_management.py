@@ -52,7 +52,7 @@ def browse_file(globs, var, _type=None):
             var.set(file_path)
             logging.info(f"Selected file: {file_path}")
     else:
-        file_path, _ = QFileDialog.getOpenFileName(None, "Select File", "", "Excel Files (*.xlsx *.xlsm *.xlst *.xltm)")
+        file_path, _ = QFileDialog.getOpenFileName(None, "Select File", "", "Spreadsheet Files (*.xlsx *.xlsm *.xlst *.xltm, *.ods)")
         if file_path:
             var.setText(file_path)
             logging.info(f"Selected file: {file_path}")

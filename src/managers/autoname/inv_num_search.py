@@ -105,7 +105,12 @@ def invoice_number_search(directory=None, file_list=None, normalized_texts=None)
         # 22: Finds 'receipt' with an optional '#', 'no', 'no.', or 'number', an optional ':' or '#', and captures
         # either a 4-8 digit number or one optionally prefixed with '#' or '-', and optionally followed by a
         # hyphenated 4-digit number
-        r'(?:receipt\s*(?:#|no\.?|number)?\s*[:#]?\s*)([#-]?\d{4,8}(?:-\d{4})?)\b'
+        r'(?:receipt\s*(?:#|no\.?|number)?\s*[:#]?\s*)([#-]?\d{4,8}(?:-\d{4})?)\b',
+
+        # 23: Requires the words 'invoice number', then any text/whitespace/line breaks
+        # within a bounded gap, then exactly 4 letters followed by 7 chars of digits
+        # or 'o'/'0' interchangeable (OCR ambiguity)
+        r'invoice\s+number[\s\S]{0,80}?\b([a-z0][a-z0]{3}[0-9o]{7})\b'
     ]
 
     try:
@@ -141,12 +146,12 @@ def invoice_number_search(directory=None, file_list=None, normalized_texts=None)
             invoice = None
             matched_inv = None
             matched_pattern = None
-            for pattern in triggers:
+            for idx, pattern in enumerate(triggers, start=1):
                 match = re.search(pattern, normalized)
 
                 # Skip if match is invalid
                 if match:
-                    invalid_matches = ["date", "nbr", "net"]
+                    invalid_matches = ["date", "nbr", "net", "umber", "statement", "phone"]
                     if match.group(1).strip().lower() in invalid_matches:
                         logging.debug(f"Skipping invalid match: {match.group(1)}")
                         match = None
@@ -154,7 +159,7 @@ def invoice_number_search(directory=None, file_list=None, normalized_texts=None)
                 if match:
                     candidate = match.group(1).strip().upper()
                     logging.info(
-                        f"Pattern matched: {pattern} becomes candidate: {candidate}")
+                        f"Pattern #{idx} matched: {pattern} becomes candidate: {candidate}")
                     if re.match(r'^[A-Z0-9\-_]{2,20}$', candidate):
                         invoice = candidate
                         matched_inv = match.group(0)

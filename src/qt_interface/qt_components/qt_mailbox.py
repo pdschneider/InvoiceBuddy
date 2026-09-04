@@ -1,7 +1,8 @@
 # src/qt_interface/qt_components/qt_mailbox.py
 from src.managers.file_management import send_to_trash
 from src.managers.printers import print_selected_files
-from src.interface.components.gui_actions import smart_spreadsheet_button, pdf_button
+from src.managers.data_processing import parse_spreadsheet
+from src.managers.autoname.pdfsearch import pdf_button
 from src.managers.file_management import archive_files
 from src.utils.toast import show_toast
 from src.qt_interface.qt_styles import dark
@@ -9,6 +10,7 @@ from PySide6.QtWidgets import (QWidget, QVBoxLayout, QListWidget, QListWidgetIte
                                QLabel, QHBoxLayout, QPushButton, QFrame, QCheckBox,
                                QLineEdit, QSizePolicy, QScrollArea)
 from PySide6.QtCore import Qt, QSize, QEvent, QPoint
+from src.qt_interface.qt_styles import dark
 from pypdf import PdfReader
 import os
 import logging
@@ -237,8 +239,10 @@ class SendToBuddyDialog(QWidget):
         # Log and show toast
         if moved_count:
             logging.info(f"Sent {moved_count} files to {name} successfully!")
+            show_toast(self.globs, message=f"Sent {moved_count} files to {name} successfully!")
         if errors:
             logging.error(f"Unable to move {len(errors)} files: {errors}")
+            show_toast(self.globs, message=f"Unable to move {len(errors)} files", _type="error")
         if already_present:
             logging.error(f"Already present in {name}'s inbox: {already_present}")
             show_toast(self.globs,
@@ -313,7 +317,7 @@ class MailboxWidget(QWidget):
         self.enter_data_btn.setStyleSheet(dark.mailbox_button)
         self.enter_data_btn.setCursor(Qt.PointingHandCursor)
         self.enter_data_btn.setToolTip("Enter to Spreadsheet")
-        self.enter_data_btn.clicked.connect(lambda e: smart_spreadsheet_button(self.globs, file_list=self.globs.checked_files))
+        self.enter_data_btn.clicked.connect(lambda e: parse_spreadsheet(self.globs, file_list=self.globs.checked_files))
         action_layout.addWidget(self.enter_data_btn)
 
         # Archive Button
@@ -436,9 +440,9 @@ class MailboxWidget(QWidget):
         row_layout.setContentsMargins(10, 5, 10, 5)
         row_layout.setSpacing(10)
 
-        # CHECKBOX
+        # Checkbox
         checkbox = QCheckBox()
-        checkbox.setStyleSheet("QCheckBox { spacing: 0; border: 2px solid #555}")
+        checkbox.setStyleSheet(dark.mail_checkbox)
         checkbox.setCursor(Qt.PointingHandCursor)
         checkbox.toggled.connect(lambda checked, f=filename: self._on_checkbox_toggled(f, checked))
         row_layout.addWidget(checkbox)

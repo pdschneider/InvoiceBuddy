@@ -758,9 +758,11 @@ def get_executable_path(globs):
     
     # Check if .deb
     elif (script_path_2.startswith("/usr/bin/invoice-buddy") or
-          script_path_2.startswith("/usr/local/bin/invoice-buddy")
+          script_path_2.startswith("/usr/local/bin/invoice-buddy") or
+          script_path_2.startswith("/usr/lib/invoice-buddy")
           ) or (script_path.startswith("/usr/bin/invoice-buddy") or
-                script_path.startswith("/usr/local/bin/invoice-buddy")):
+                script_path.startswith("/usr/local/bin/invoice-buddy") or
+                script_path.startswith("/usr/lib/invoice-buddy")):
         globs.app_type = "Deb"
         globs.app_path = script_path
         logging.debug(f"Path to executable (.deb/system): {os.path.realpath(sys.executable)} | Path to script: {script_path_2}")

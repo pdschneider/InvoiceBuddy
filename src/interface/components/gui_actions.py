@@ -15,35 +15,10 @@ from PySide6.QtWidgets import QMessageBox
 
 def pdf_button(globs, companies=None, directory=None, file_list=None):
     """One-click auto-naming — all logic in apply_auto_naming."""
-    # Save metadata first
-    if globs.legacy_mode:
-        save_metadata(globs)
-    else:
-        save_qt_metadata(globs)
-
-    if not file_list:
-        if not globs.legacy_mode:
-            QMessageBox.information(
-                globs.window,
-                "Nothing Selected",
-                "Please select one or more files to auto-name.",
-                QMessageBox.StandardButton.Ok,
-                QMessageBox.StandardButton.Ok
-            )
-        else:
-            messagebox.showinfo("Nothing Selected", "Please select one or more files to auto-name.")
-        return
-    
-    new_file_list = []
-    if not globs.legacy_mode:
-        for file in file_list:
-            new_file_list.append(os.path.normpath(os.path.join(globs.inbox, file)))
-        file_list = new_file_list
-
-    logging.debug(f"Attempting to auto-name files: {file_list}")
 
     search_dir = os.path.normpath(directory or globs.sources['inbox'])
-    changes = apply_auto_naming(globs, search_dir, file_list)
+    changes, applied_dates = apply_auto_naming(globs, search_dir, file_list)
+    logging.debug(f"Applied Dates: {applied_dates}")
 
     if changes == 0:
         if not globs.legacy_mode:
