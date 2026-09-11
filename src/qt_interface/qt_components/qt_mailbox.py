@@ -8,8 +8,8 @@ from src.utils.toast import show_toast
 from src.qt_interface.qt_styles import dark
 from PySide6.QtWidgets import (QWidget, QVBoxLayout, QListWidget, QListWidgetItem, 
                                QLabel, QHBoxLayout, QPushButton, QFrame, QCheckBox,
-                               QLineEdit, QSizePolicy, QScrollArea)
-from PySide6.QtCore import Qt, QSize, QEvent, QPoint
+                               QLineEdit, QSizePolicy, QScrollArea, QAbstractItemView)
+from PySide6.QtCore import (Qt, QSize, QEvent, QPoint, QPropertyAnimation, QEasingCurve)
 from src.qt_interface.qt_styles import dark
 from pypdf import PdfReader
 import os
@@ -35,6 +35,31 @@ def load_sheet_identity(filepath, globs_obj):
     except Exception as e:
         logging.debug(f"Could not read /Sheet from {os.path.basename(filepath)}: {e}")
         return default_sheet
+
+
+class SmoothListWidget(QListWidget):
+    """QListWidget with eased, animated wheel scrolling."""
+
+    def wheelEvent(self, event):
+        bar = self.verticalScrollBar()
+
+        steps = event.angleDelta().y() / 120 * -60  # 60px per notch
+
+        start = getattr(self, "_target", bar.value())
+        target = max(bar.minimum(), min(bar.maximum(), start + steps))
+        self._target = target
+
+        # Create the animation once, reuse it every tick
+        if not hasattr(self, "_anim"):
+            self._anim = QPropertyAnimation(bar, b"value", self)
+            self._anim.setDuration(180)
+            self._anim.setEasingCurve(QEasingCurve.OutCubic)
+
+        self._anim.stop()
+        self._anim.setStartValue(bar.value())
+        self._anim.setEndValue(target)
+        self._anim.start()
+        event.accept()
 
 
 class AssignSheetDialog(QWidget):
@@ -72,7 +97,7 @@ class AssignSheetDialog(QWidget):
         scroll = QScrollArea()
         scroll.setWidgetResizable(True)
         scroll.setFrameShape(QFrame.NoFrame)
-        scroll.setStyleSheet("QScrollArea { background-color: transparent; border: none; }")
+        scroll.setStyleSheet(dark.mailbox)
         scroll.setMaximumHeight(250)
 
         list_widget = QWidget()
@@ -278,7 +303,7 @@ class MailboxWidget(QWidget):
 
         # Master Checkbox
         self.master_checkbox = QCheckBox()
-        self.master_checkbox.setStyleSheet("QCheckBox { spacing: 0; border: 2px solid #555}")
+        self.master_checkbox.setStyleSheet(dark.master_checkbox)
         self.master_checkbox.toggled.connect(self._toggle_all)
 
         header_layout.addWidget(self.master_checkbox)
@@ -372,27 +397,10 @@ class MailboxWidget(QWidget):
         layout.addWidget(self.header_widget)
 
         # The List
-        self.list_widget = QListWidget()
-        self.list_widget.setStyleSheet("""
-            QListWidget {
-                background-color: #2b2b2b;
-                border: none;
-                color: white;
-                font-size: 14px;
-                outline: none;
-            }
-            QListWidget::item {
-                padding: 10px;
-                border-bottom: 1px solid #333;
-            }
-            QListWidget::item:selected {
-                background-color: #3a3a3a;
-                color: #2ecc71;
-            }
-            QListWidget::item:hover {
-                background-color: #333;
-            }
-        """)
+        self.list_widget = SmoothListWidget()
+        self.list_widget.setVerticalScrollMode(QAbstractItemView.ScrollPerPixel)
+        self.list_widget.verticalScrollBar().setSingleStep(20)
+        self.list_widget.setStyleSheet(dark.mailbox_list)
         self.list_widget.setSelectionMode(QListWidget.SingleSelection)
 
         # Connect signals
@@ -431,6 +439,9 @@ class MailboxWidget(QWidget):
 
             row_widget = self._create_row_widget(filename, folder_path)
             self.list_widget.setItemWidget(item, row_widget)
+
+        if hasattr(self.globs, 'update_preview_state'):
+            self.globs.update_preview_state()
 
     def _create_row_widget(self, filename, folder_path):
         row = QFrame()
@@ -518,6 +529,9 @@ class MailboxWidget(QWidget):
                 logging.error("PDF Viewer not found in globs!")
         else:
             logging.error("Inbox path not set in globs!")
+
+        if hasattr(self.globs, 'update_preview_state'):
+            self.globs.update_preview_state()
 
     def _on_double_click(self, item):
         """Handle double click (start editing)."""

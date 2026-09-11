@@ -104,12 +104,8 @@ def on_folder_click(item, globs):
     else:
         return
 
-    # Clear the preview pane
-    if hasattr(globs, 'preview_meta') and globs.preview_meta:
-        globs.preview_meta.setText("Select a file to view details")
-    if hasattr(globs, 'pdf_viewer') and globs.pdf_viewer:
-        globs.pdf_viewer.doc.close()
-        globs.pdf_viewer.view.setDocument(globs.pdf_viewer.doc)
+    # Deselect, then let the state machine update the preview
+    globs.selected_file = None
 
     # Refresh the mailbox
     if hasattr(globs, 'mailbox') and globs.mailbox:

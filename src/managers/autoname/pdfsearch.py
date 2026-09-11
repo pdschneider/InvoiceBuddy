@@ -201,8 +201,10 @@ def apply_auto_naming(globs, directory, file_list=None):
 
                 # 2. Exhaustively scrub ALL possible dates using all patterns
                 scrubbed_any = False
-                for pattern, _ in date_patterns:
-                    new_text = re.sub(pattern, ' ', normalized_texts[filename])
+                for pattern, fmt in date_patterns:
+                    def _guarded(match, fmt=fmt):
+                        return ' ' if fmt(match) else match.group(0)
+                    new_text = re.sub(pattern, _guarded, normalized_texts[filename])
                     if new_text != normalized_texts[filename]:
                         normalized_texts[filename] = new_text.strip()
                         logging.debug(
@@ -317,6 +319,8 @@ def apply_auto_naming(globs, directory, file_list=None):
             renamed += 1
         except Exception as e:
             logging.error(f"Rename failed for {filename}: {e}")
+
+        logging.debug(f"{filename} | order={order} | available={list(available.keys())}")
 
     logging.info(f"Total renamed: {renamed}")
 

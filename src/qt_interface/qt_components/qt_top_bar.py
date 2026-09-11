@@ -1,5 +1,5 @@
 # src/qt_interface/qt_components/qt_top_bar.py
-from PySide6.QtWidgets import QHBoxLayout, QLabel, QPushButton, QWidget, QLineEdit
+from PySide6.QtWidgets import QHBoxLayout, QLabel, QPushButton, QWidget
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QCursor
 from src.qt_interface.qt_components.qt_sidebar import toggle_sidebar
@@ -39,15 +39,15 @@ def create_top_bar(globs):
     settings_button = QPushButton("⚙")
     settings_button.setFixedSize(40, 40)
     settings_button.setCursor(QCursor(Qt.PointingHandCursor))
-    settings_button.setStyleSheet("background-color: transparent; color: white; font-size: 18px;")
+    settings_button.setStyleSheet(dark.settings_button)
     settings_button.clicked.connect(lambda: toggle_settings_panel(globs))
     top_bar_layout.addWidget(settings_button)
 
-    # Help/About
+    # Help
     help_button = QPushButton("?")
     help_button.setFixedSize(40, 40)
     help_button.setCursor(QCursor(Qt.PointingHandCursor))
-    help_button.setStyleSheet("background-color: transparent; color: white; font-size: 18px;")
+    help_button.setStyleSheet(dark.settings_button)
     help_button.clicked.connect(lambda: toggle_docs_panel(globs))
     top_bar_layout.addWidget(help_button)
 

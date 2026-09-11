@@ -63,51 +63,54 @@ def invoice_number_search(directory=None, file_list=None, normalized_texts=None)
         # captures 10-16 digits followed by one or more hyphen-separated digit groups
         r'(?:order\s*(?:id|number|#)?\s*[:=]?\s*)([0-9]{10,16}(?:-\d+)+)\b',
 
-        # 12: Captures a standalone 6-8 digit number if not preceded by another digit or a slash, DD-DD pattern,
+        # 12: exactly one digit, one letter, then 4-8 digits
+        r'\b(\d[a-z]\d{4,8})\b',
+
+        # 13: Captures a standalone 6-8 digit number if not preceded by another digit or a slash, DD-DD pattern,
         # DD/DD pattern, or 5 digits followed by a space, and isn't followed by a hyphen and 2 digits
         r'(?<![\d/])(?<!\d{2}-\d{2})(?<!\d{2}/\d{2})(?<!\d{5}\s)\b(\d{6,8})\b(?!\s*-?\s*\d{2})',
 
-        # 13: Captures any standlone 6-8 digit number (word boundary on both sides) as long as it is not
+        # 14: Captures any standlone 6-8 digit number (word boundary on both sides) as long as it is not
         # immediately followed by a slash or hyphen and then 1-2 digits
         r'(?s)\b(\d{6,8})\b(?!\s*[/-]\d{1,2})',
 
-        # 14: Finds 'invoice', an optional colon or hash, and captures a sequence that starts with 4 or more digits,
+        # 15: Finds 'invoice', an optional colon or hash, and captures a sequence that starts with 4 or more digits,
         # optionally followed by any number of lowercase letters, digits, hyphens, or underscores
         r'invoice\s*[:#]?\s*(\d{4,}[a-z0-9\-_]*)',
 
-        # 15: Finds 'order' followed by whitespace, then 'id', an optional colon or hash, and captures 1+ lowercase
+        # 16: Finds 'order' followed by whitespace, then 'id', an optional colon or hash, and captures 1+ lowercase
         # letters or digits with no hyphens or underscores allowed and no length limit
         r'order\s+id\s*[:#]?\s*([a-z0-9]{4,})',
 
-        # 16: Finds 'order' and an optional '#', then captures 2+ digits
+        # 17: Finds 'order' and an optional '#', then captures 2+ digits
         r'order\s*#?\s*([0-9]{2,})',
 
-        # 17: Captures a standalone 6-8 digit number (word boundaries enforced) as long as it is not followed by a
+        # 18: Captures a standalone 6-8 digit number (word boundaries enforced) as long as it is not followed by a
         # hyphen or a slash and another digit
         r'\b(\d{6,8})\b(?![-/]\d)',
 
-        # 18: Finds 'sales slip', an optional '#', an optional ':' or '#', and captures 4-10 digits at a word boundary
+        # 19: Finds 'sales slip', an optional '#', an optional ':' or '#', and captures 4-10 digits at a word boundary
         r'sales\s+slip\s*#?\s*[:#]?\s*(\d{4,10})\b',
 
-        # 19: Optionally starts with 'your', then look for 'order' followed by whitespace, then 'number', 'no', 'no.',
+        # 20: Optionally starts with 'your', then look for 'order' followed by whitespace, then 'number', 'no', 'no.',
         # 'id', or '#', then an optional 'is', ':', 'was', or '=', and captures 1-4 lowercase letters followed
         # by 5-12 digits
         r'(?:your\s+)?order\s+(?:number|no\.?|id|#)\s*(?:is|:|was|=)?\s*([a-z]{1,4}\d{5,12})\b',
 
-        # 20: Optionally starts with 'order', then 'vs' an captures an optional single letter (upper or lowercase),
+        # 21: Optionally starts with 'order', then 'vs' an captures an optional single letter (upper or lowercase),
         # followed by 6-10 digits and a word boundary
         r'(?:order\s+)?vs\s*([a-zA-Z]?\d{6,10})\b',
 
-        # 21: Finds 'id' with an optional '#', or 'order id' with an optional ':' or '#', then captures 20-32
+        # 22: Finds 'id' with an optional '#', or 'order id' with an optional ':' or '#', then captures 20-32
         # hexidecimal characters (digits 0-9 and letters a-f only) at a word boundary
         r'(?:id\s*#?\s*|order\s+id\s*[:#]?\s*)([a-f0-9]{20,32})\b',
 
-        # 22: Finds 'receipt' with an optional '#', 'no', 'no.', or 'number', an optional ':' or '#', and captures
+        # 23: Finds 'receipt' with an optional '#', 'no', 'no.', or 'number', an optional ':' or '#', and captures
         # either a 4-8 digit number or one optionally prefixed with '#' or '-', and optionally followed by a
         # hyphenated 4-digit number
         r'(?:receipt\s*(?:#|no\.?|number)?\s*[:#]?\s*)([#-]?\d{4,8}(?:-\d{4})?)\b',
 
-        # 23: Requires the words 'invoice number', then any text/whitespace/line breaks
+        # 24: Requires the words 'invoice number', then any text/whitespace/line breaks
         # within a bounded gap, then exactly 4 letters followed by 7 chars of digits
         # or 'o'/'0' interchangeable (OCR ambiguity)
         r'invoice\s+number[\s\S]{0,80}?\b([a-z0][a-z0]{3}[0-9o]{7})\b'
@@ -151,7 +154,7 @@ def invoice_number_search(directory=None, file_list=None, normalized_texts=None)
 
                 # Skip if match is invalid
                 if match:
-                    invalid_matches = ["date", "nbr", "net", "umber", "statement", "phone"]
+                    invalid_matches = ["date", "nbr", "net", "umber", "statement", "state", "phone"]
                     if match.group(1).strip().lower() in invalid_matches:
                         logging.debug(f"Skipping invalid match: {match.group(1)}")
                         match = None

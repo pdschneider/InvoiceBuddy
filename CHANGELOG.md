@@ -2,12 +2,14 @@
 
 All notable changes to **Invoice Buddy** will be located in this file.
 
-## [0.3.1-beta] - 2026-09-08
+## [0.3.1] - 2026-09-10
 
 This update adds .ods support for those who prefer a more open-source spreadsheet format. It also fixes a long-standing bug for .deb users preventing the app from properly displaying in the launcher, and more!
 
 ### 🌟 Added
 - Added support for .ods files
+- New vendors: Grating Pacific, K-A General Construction, Safety Sign
+- Copyable pills now display above preview with important metadata
 
 ### ⚙️ Changed
 - Now built in standalone mode on Linux, improving launch time
@@ -17,8 +19,9 @@ This update adds .ods support for those who prefer a more open-source spreadshee
 - Moving files to buddies now shows a toast confirming the move was successful
 - Warnings now appear if dates are found to be later than today's date or older than a year
 - Updating Invoice Buddy on Windows no longer prompts to create a desktop icon
+- Toasts now display in a queue rather than on top of each other
 - Upgraded to Python 3.13.15 on Windows
-- Minor UI improvements
+- Various UI improvements
 - Updated dependencies
 
 ### 🛠️ Fixed

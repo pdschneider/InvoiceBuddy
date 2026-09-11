@@ -47,6 +47,9 @@ class Globs:
         self.mailbox = None
         self.splitter = None
         self.preview_pane = None
+        self.preview_placeholder = None
+        self.pill_bar = None
+        self.pill_layout = None
         self.pdf_viewer = None
         self.github_check_checkbox = None
         self.beta_checkbox = None

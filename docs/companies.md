@@ -38,6 +38,7 @@ This document lists every currently supported company with its **full official/l
 - City and Sign Electrical Services, LLC
 - Cuz Concrete Products, Inc.
 - Horizon Distribution, Inc.
+- Grating Pacific, LLC
 
 ## Facility Maintenance & Services
 
@@ -69,6 +70,8 @@ This document lists every currently supported company with its **full official/l
 - Global Equipment Company Inc. (Global Industrial)
 - Clean Harbors, Inc.
 - Ferguson Enterprises, LLC.
+- K-A General Construction
+- Safety Sign
 
 ## Government, Utilities & Public Agencies
 

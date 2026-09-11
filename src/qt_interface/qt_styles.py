@@ -144,7 +144,8 @@ dark = SimpleNamespace(
     hamburger_button = """
         QPushButton {
             background-color: transparent;
-            border: none;
+            border: 1px solid #555;
+            border-radius: 6px;
             padding: 8px 12px;
             font-size: 22px;
             color: #e0e0e0;
@@ -152,12 +153,12 @@ dark = SimpleNamespace(
 
         QPushButton:hover {
             background-color: #3a3a3d;
-            border-radius: 6px;
+            border-color: #777;
         }
 
         QPushButton:pressed {
             background-color: #2a2a2d;
-            border-radius: 6px;
+            border-color: #777;
         }
     """,
     social_button = """
@@ -232,6 +233,95 @@ dark = SimpleNamespace(
         }
         QCheckBox::indicator:checked:hover {
             border-color: #ccc;
+        }
+    """,
+    mailbox = """
+        QScrollArea {
+            background-color: transparent; border: none;
+    """,
+    mailbox_list = """
+        QListWidget {
+            background-color: #2b2b2b;
+            border: none;
+            color: white;
+            font-size: 14px;
+            outline: none;
+        }
+        QListWidget::item {
+            padding: 10px;
+            border-bottom: 1px solid #333;
+        }
+        QListWidget::item:selected {
+            background-color: #3a3a3a;
+            color: #2ecc71;
+        }
+        QListWidget::item:hover {
+            background-color: #333;
+        }
+        QScrollBar:vertical {
+            background: transparent;
+            width: 10px;
+            margin: 2px;
+        }
+        QScrollBar::handle:vertical {
+            background: #555;
+            border-radius: 3px;
+            min-height: 30px;
+        }
+        QScrollBar::handle:vertical:hover {
+            background: #777;
+        }
+        QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
+            height: 0;
+            width: 0;
+        }
+        QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {
+            background: none;
+        }
+        QScrollBar::corner {
+            background: transparent;
+        }
+    """,
+    master_checkbox = """
+        QCheckBox {
+            background-color: transparent;
+            border: none;
+            spacing: 0;
+        }
+        QCheckBox::indicator {
+            width: 18px;
+            height: 18px;
+            border: 2px solid #666;
+            border-radius: 5px;
+            background-color: #222;
+            margin: 1px;
+        }
+        QCheckBox::indicator:hover {
+            border-color: #2ecc71;
+        }
+        QCheckBox::indicator:checked {
+            background-color: #2ecc71;
+            border-color: #2ecc71;
+        }
+        QCheckBox::indicator:checked:hover {
+            background-color: #35d97e;
+        }
+        QCheckBox::indeterminate {
+            background-color: #1a1a1a;
+            border-color: #2ecc71;
+        }
+    """,
+    settings_button = """
+        QPushButton {
+            background-color: transparent;
+            color: white;
+            font-size: 18px;
+            border: 1px solid #555;
+            border-radius: 8px;
+        }
+        QPushButton:hover {
+            background-color: #3a3a3d;
+            border-color: #777;
         }
     """
 )
