@@ -19,8 +19,13 @@ def invoice_number_search(directory=None, file_list=None, normalized_texts=None)
     # Patterns adjusted for lowercase text (no IGNORECASE)
     triggers = [
 
-        # 1: Finds the word 'order' followed by an optional '#', a colon ':', then 8-30 lowercase letters or digits
-        r'order\s*#?\s*:\s*([a-z0-9]{8,30})',
+        # 0: requires invoice #, then optionally eats up to two dates, then optionally eats the 4-6
+        # digit customer number, and only then captures a hyphenated invoice number
+        r'invoice\s*#\s*(?:(?:\d{1,2}/\d{1,2}/\d{2,4}\s+){0,2})(?:\d{4,6}\s+)?(\d{5,10}-\d{2,4})\b',
+
+        # 1: 'order' (optional '#'), optional ':' or '#', then an 8-30 char
+        # alphanumeric ID containing at least one digit (blocks 'order confirmation')
+        r'order\s*#?\s*[:#]?\s*(?=[a-z0-9]*\d)([a-z0-9]{8,30})\b',
 
         # 2: Finds 'invoice' or 'inv', then 'no', 'no.', 'number', or '#', an optional colon ':' or hash '#',
         # then 3-20 lowercase letters, digits, hyphens, or underscores
@@ -113,7 +118,21 @@ def invoice_number_search(directory=None, file_list=None, normalized_texts=None)
         # 24: Requires the words 'invoice number', then any text/whitespace/line breaks
         # within a bounded gap, then exactly 4 letters followed by 7 chars of digits
         # or 'o'/'0' interchangeable (OCR ambiguity)
-        r'invoice\s+number[\s\S]{0,80}?\b([a-z0][a-z0]{3}[0-9o]{7})\b'
+        r'invoice\s+number[\s\S]{0,80}?\b([a-z0][a-z0]{3}[0-9o]{7})\b',
+
+        # 25: Bandcamp-specific; finds 'bandcamp transaction id', optional ':' or '#',
+        # and captures the 10-digit transaction ID (used as invoice number on Bandcamp receipts)
+        r'bandcamp\s+transaction\s+id\s*[:#]?\s*([0-9]{8,16})\b',
+
+        # 26: Newegg receipts; the two-column layout separates labels from values,
+        # so anchor on the value line instead: '<date> at <time><am/pm> <order#> <invoice#>'
+        # and capture the second 9-digit number, which is the invoice
+        r'\d{1,2}/\d{1,2}/\d{4}\s+at\s+\d{1,2}:\d{2}\s*[ap]m\s+\d{9}\s+(\d{9})\b',
+
+        # 27: Apple receipts; find 'document no.', skip short/letters-only tokens,
+        # consume the Order ID (first qualifying alphanumeric token), then capture the
+        # second qualifying token: the Document No., Apple's actual invoice number
+        r'document\s+no\b\.?(?:\s+(?:[a-z]+\.?|[a-z0-9]{1,5}))*\s+(?=[a-z0-9]*\d)[a-z0-9]{6,14}\b(?:\s+[a-z]+\.?)*\s+([0-9]{9,16})\b'
     ]
 
     try:
@@ -154,7 +173,9 @@ def invoice_number_search(directory=None, file_list=None, normalized_texts=None)
 
                 # Skip if match is invalid
                 if match:
-                    invalid_matches = ["date", "nbr", "net", "umber", "statement", "state", "phone"]
+                    invalid_matches = ["date", "nbr", "net", "umber", "statement",
+                                       "state", "phone", "document", "order",
+                                       "accounting"]
                     if match.group(1).strip().lower() in invalid_matches:
                         logging.debug(f"Skipping invalid match: {match.group(1)}")
                         match = None

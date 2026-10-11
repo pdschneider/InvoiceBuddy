@@ -23,9 +23,14 @@ def create_advanced_settings_tab(globs):
     title.setStyleSheet("font-size: 18px; font-weight: bold; color: white; margin-bottom: 10px;")
     layout.addWidget(title)
 
+    # Tiny class to disable mouse scroll for comboboxes
+    class NoScrollComboBox(QComboBox):
+        def wheelEvent(self, event):
+            event.ignore()
+
     # Logging Level
     logging_levels = ["Debug", "Info", "Warning", "Error", "Critical"]
-    globs.logging_level_box = QComboBox()
+    globs.logging_level_box = NoScrollComboBox()
     globs.logging_level_box.addItems(logging_levels)
     globs.logging_level_box.setFixedWidth(100)
     globs.logging_level_box.setStyleSheet(dark.combobox)

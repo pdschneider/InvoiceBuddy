@@ -5,10 +5,32 @@ from PySide6.QtWidgets import (QWidget, QVBoxLayout, QLabel,
                                QSpinBox, QComboBox, QFrame)
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QColor
+from odf.opendocument import load
+from odf.table import Table
+from openpyxl import load_workbook
 import logging
 import os
+from src.managers.file_management import browse_file
+
 
 COLUMN_OPTIONS = ["Company", "Date", "Invoice #", "Card Number", ""]
+
+
+def get_workbook_sheet_names(workbook_path):
+    """Return the tab names inside a local spreadsheet (.xlsx or .ods)."""
+    try:
+        if workbook_path.lower().endswith(".ods"):
+            doc = load(workbook_path)
+            return [t.getAttribute("name") for t in doc.spreadsheet.getElementsByType(Table)]
+        else:
+            wb = load_workbook(workbook_path, read_only=True)
+            names = wb.sheetnames
+            wb.close()
+            print(f"{workbook_path} names: {names}")
+            return names
+    except Exception as e:
+        logging.warning(f"Could not read sheet names from {workbook_path}: {e}")
+        return []
 
 
 def create_spreadsheet_settings_tab(globs):
@@ -83,7 +105,7 @@ def populate_sheets_list(globs):
 
     sheet_defs = globs.sheet_data.get("sheets", [])
 
-    sheet_defs[:] = [s for s in sheet_defs if s.get("workbook")]
+    # sheet_defs[:] = [s for s in sheet_defs if s.get("workbook")]
     if len(sheet_defs) == 0:
         sheet_defs.append({"name": "Sheet", "color": "#2ecc71", "workbook": ""})
         globs.sheet_data["sheets"] = sheet_defs
@@ -103,6 +125,10 @@ def populate_sheets_list(globs):
         sheet.setdefault("workbook", "")
         row = create_sheet_row(globs, idx, sheet)
         layout.addWidget(row)
+
+    # Rebuild the file menu upon change
+    if callable(getattr(globs, 'rebuild_file_menu', None)):
+        globs.rebuild_file_menu(globs)
 
 
 class WorkbookSourceDialog(QWidget):
@@ -411,14 +437,36 @@ def create_sheet_row(globs, idx, sheet):
     color_btn.clicked.connect(lambda checked, i=idx: on_color_click(globs, i))
     line1.addWidget(color_btn)
 
-    # Name input
-    name_input = QLineEdit()
-    name_input.setText(sheet.get("name", "Sheet"))
-    name_input.setPlaceholderText("Sheet name")
-    name_input.setMinimumWidth(120)
-    name_input.setStyleSheet(_input_style())
-    name_input.textChanged.connect(lambda text, i=idx: on_name_changed(globs, i, text))
-    line1.addWidget(name_input)
+    # Name combo (populated from workbook tabs)
+    name_combo = QComboBox()
+    wb_path_for_names = sheet.get("workbook", "")
+    if wb_path_for_names and not wb_path_for_names.startswith("http"):
+        tab_names = get_workbook_sheet_names(wb_path_for_names)
+        if tab_names:
+            name_combo.addItems(tab_names)
+            current_name = sheet.get("name", "")
+            if current_name in tab_names:
+                name_combo.setCurrentText(current_name)
+            else:
+                taken = {s.get("name") for s in globs.sheet_data.get("sheets", [])}
+                free = [t for t in tab_names if t not in taken]
+                pick = free[0] if free else tab_names[0]
+                sheet["name"] = pick
+                name_combo.setCurrentText(pick)
+                on_name_changed(globs, idx, pick)
+        else:
+            # Couldn't read tabs - editable fallback
+            name_combo.setEditable(True)
+            name_combo.addItem(sheet.get("name", "Sheet"))
+    else:
+        # Google Sheets or no workbook yet - editable fallback
+        name_combo.setEditable(True)
+        name_combo.addItem(sheet.get("name", "Sheet"))
+
+    name_combo.setMinimumWidth(140)
+    name_combo.setStyleSheet(_combo_style())
+    name_combo.currentTextChanged.connect(lambda text, i=idx: on_name_changed(globs, i, text))
+    line1.addWidget(name_combo)
 
     # Workbook path display
     wb_label = QLabel()
@@ -465,12 +513,17 @@ def create_sheet_row(globs, idx, sheet):
     line2 = QHBoxLayout()
     line2.setSpacing(15)
 
+    # Disable mouse scroll for spinboxes
+    class NoScrollSpinBox(QSpinBox):
+        def wheelEvent(self, event):
+            event.ignore()
+
     # First Row
     row_label = QLabel("First Row:")
     row_label.setStyleSheet(_label_style())
     line2.addWidget(row_label)
 
-    row_spin = QSpinBox()
+    row_spin = NoScrollSpinBox()
     row_spin.setRange(1, 50)
     row_spin.setValue(sheet.get("first_row", 3))
     row_spin.setStyleSheet(_spin_style())
@@ -482,7 +535,7 @@ def create_sheet_row(globs, idx, sheet):
     col_label.setStyleSheet(_label_style())
     line2.addWidget(col_label)
 
-    col_spin = QSpinBox()
+    col_spin = NoScrollSpinBox()
     col_spin.setRange(1, 50)
     col_spin.setValue(sheet.get("first_column", 1))
     col_spin.setStyleSheet(_spin_style())
@@ -500,9 +553,14 @@ def create_sheet_row(globs, idx, sheet):
     order_label.setStyleSheet(_label_style())
     line3.addWidget(order_label)
 
+    # Tiny class to disable mouse scroll for comboboxes
+    class NoScrollComboBox(QComboBox):
+        def wheelEvent(self, event):
+            event.ignore()
+
     column_order = sheet.get("column_order", ["Company", "Date", "Invoice #", ""])
     for pos in range(4):
-        combo = QComboBox()
+        combo = NoScrollComboBox()
         combo.addItems(COLUMN_OPTIONS)
         current_val = column_order[pos] if pos < len(column_order) else ""
         combo.setCurrentText(current_val)
@@ -557,7 +615,6 @@ def on_name_changed(globs, index, value):
 
 def browse_file_wrapper(globs, index, label_widget):
     """Wrapper to call the global browse_file with PySide6 mode."""
-    from src.managers.file_management import browse_file
     
     # Create a temporary text variable for compatibility
     temp_var = type('obj', (object,), {'setText': lambda s, v: setattr(temp_var, '_val', v)})()
@@ -570,6 +627,7 @@ def browse_file_wrapper(globs, index, label_widget):
         label_widget.setText(os.path.basename(file_path))
         label_widget.setToolTip(file_path)
         label_widget.setStyleSheet("color: #2ecc71; font-size: 12px;")
+        populate_sheets_list(globs)
 
 
 def show_source_dialog(globs, sheet_index, button_widget, label_widget):
@@ -588,6 +646,7 @@ def show_source_dialog(globs, sheet_index, button_widget, label_widget):
             label_widget.setText("Google Sheet")
             label_widget.setToolTip(url)
             label_widget.setStyleSheet("color: #3498db; font-size: 12px;")
+            populate_sheets_list(globs)
         
         dialog = GoogleSheetsUrlDialog(index, save_url_callback, parent=globs.window)
         global_pos = button_widget.mapToGlobal(button_widget.rect().bottomLeft())

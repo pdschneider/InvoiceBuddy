@@ -13,8 +13,7 @@ a = Analysis(
     datas=[
         ('../defaults', 'defaults'),
         ('../docs', 'docs'),
-        ('../CHANGELOG.md', '.'),
-        ('../README.md', '.'),
+        ('../CHANGELOG.md', '.')
         ('../bin/Poppler', 'bin/Poppler'),
         ('../bin/Tesseract', 'bin/Tesseract'),
     ],

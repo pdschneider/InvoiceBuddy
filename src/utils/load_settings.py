@@ -15,7 +15,7 @@ def load_data_path(direct=None, filename=None, default=False):
     # ==================== DEFAULT FILES ====================
     default_files = [
         "settings.json", "company_map.json", "folder_maps.json",
-        "FY26-Blank_Workbook.xlsx", "paths.json", "spreadsheet.json",
+        "paths.json", "spreadsheet.json",
         "assets/icon.png", "assets/add-1.png", "assets/add-2.png", "assets/add-3.png",
         "assets/archive.png", "assets/auto.png", "assets/card-1.png", "assets/card-2.png",
         "assets/cards-1.png", "assets/cards-2.png", "assets/delete-1.png", "assets/delete-2.png",
@@ -69,7 +69,7 @@ def load_data_path(direct=None, filename=None, default=False):
                 persistent_dir = os.path.normpath(os.path.join(os.getenv("LOCALAPPDATA"), "InvoiceBuddy"))
             else:
                 persistent_dir = os.path.normpath(os.path.expanduser("~/.local/share/InvoiceBuddy"))
-            default_files = []
+            default_files = ["default_spreadsheet.xlsx", "default_spreadsheet.ods"]
         else:  # cache or main
             if platform.system() == "Windows":
                 persistent_dir = os.path.normpath(

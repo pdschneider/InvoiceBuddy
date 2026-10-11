@@ -2,6 +2,7 @@
 import logging
 import re
 import os
+from datetime import datetime
 from src.utils.load_settings import load_company_map
 from src.managers.autoname.search_helpers import (extract_normalized_text,
                                               date_patterns)
@@ -55,6 +56,12 @@ def date_search(companies=None, directory=None, file_list=None, normalized_texts
                 if match:
                     formatted = formatter(match)
                     if formatted and formatted.count('-') == 2:
+                        # Check to make sure the date is possible
+                        try:
+                            datetime.strptime(formatted, "%m-%d-%y")
+                        except ValueError as e:
+                            logging.warning(f"Impossible date found: {e}")
+                            continue
                         found = formatted
                         matched_date = match.group(0)
                         break

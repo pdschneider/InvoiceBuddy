@@ -37,7 +37,7 @@ def create_general_settings_tab(globs):
     layout.addWidget(beta_checkbox)
 
     # Save Window Placement
-    window_checkbox = QCheckBox("Save Window Placement")
+    window_checkbox = QCheckBox("Use Saved Window Placement")
     window_checkbox.setStyleSheet("color: white; font-size: 14px; margin-left: 10px;")
     window_checkbox.setChecked(globs.dynamic_window_size)
     layout.addWidget(window_checkbox)

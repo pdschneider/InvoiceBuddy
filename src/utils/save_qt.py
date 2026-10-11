@@ -1,8 +1,9 @@
-# src/qt_interface/qt_settings/save_qt.py
+# src/utils/save_qt.py
 from src.utils.save_settings import save_settings, save_paths
 from src.utils.load_settings import load_settings, load_paths
 from src.utils.load_settings import load_data_path
 from pypdf import PdfReader, PdfWriter
+from PySide6.QtCore import Qt
 import json
 import logging
 import os
@@ -87,6 +88,36 @@ def save_qt_settings(globs):
 
         if name and path and os.path.isdir(path):
             new_buddies[name] = path
+
+    def save_window_placement(globs):
+        if globs.window.windowState() != Qt.WindowState.WindowMaximized:  # don't save if maximized
+            try:
+                current_geometry = globs.window.geometry()
+                current_width = current_geometry.width()
+                current_height = current_geometry.height()
+                current_horizontal_placement = current_geometry.x()
+                current_vertical_placement = current_geometry.y()
+                
+                logging.debug(f"Window size: {current_width}x{current_height}")
+                logging.debug(f"Window position: ({current_horizontal_placement}, {current_vertical_placement})")
+                
+                # Store geometry in current_settings so it gets saved
+                current_settings["saved_x"] = current_horizontal_placement
+                current_settings["saved_y"] = current_vertical_placement
+                current_settings["saved_width"] = current_width
+                current_settings["saved_height"] = current_height
+                globs.saved_x = current_horizontal_placement
+                globs.saved_y = current_vertical_placement
+                globs.saved_width = current_width
+                globs.saved_height = current_height
+
+            except Exception as e:
+                logging.debug(f"Could not save window placement due to {e}")
+        else:
+            logging.debug("Window is maximized, skipping placement save")
+
+    # Save geometry
+    save_window_placement(globs)
 
     # Save to JSON files
     try:

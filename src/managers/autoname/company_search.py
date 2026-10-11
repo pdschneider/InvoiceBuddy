@@ -56,10 +56,10 @@ def company_search(companies=None, directory=None, file_list=None, normalized_te
             company = None
             for keyword_tuple, comp in company_map.items():
                 for keyword in keyword_tuple:
-                    if keyword.lower() in ['llc', 'inc']:
+                    if keyword.lower().strip('.,') in ['llc', 'inc']:
                         continue
                     normalized_keyword = normalize_text(keyword)
-                    match = re.search(rf'\b{re.escape(normalized_keyword)}\b', normalized)
+                    match = re.search(rf'(?<![a-z0-9_]){re.escape(normalized_keyword)}(?![a-z0-9_])', normalized)
                     if match:
                         company = comp
                         matched_keyword = match.group(0)

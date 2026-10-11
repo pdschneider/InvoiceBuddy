@@ -8,7 +8,7 @@ Invoice Buddy is designed to make the invoice entry process easier. Instead of m
 each filename and then entering the necessary data into your spreadsheet, the application takes
 care of it for you.
 
-<img src="defaults/assets/icon.png" align="right" width="30%" />
+<img src="../defaults/assets/icon.png" align="right" width="30%" />
 
 ### ✨ Features
 

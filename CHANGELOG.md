@@ -2,6 +2,40 @@
 
 All notable changes to **Invoice Buddy** will be located in this file.
 
+## [0.3.2] - 2026-10-10
+
+This update focuses on improving the auto-name feature along with various bug fixes, plus a better first-user experience with an improved wizard and default spreadsheets. 14 new vendors were also added.
+
+### 🌟 New
+- New vendors: Bandcamp, Patreon, Southern Carlson, Central Welding Supply, Anderson Fireplace, Homesite, H&R Block, Everett Community College Bookstore, Daily Journal of Commerce, National Safety Inc, McMaster-Carr, GEICO Insurance Agency, GoFundMe Inc.
+- Starter spreadsheets are now available for new users
+
+### ⚙️ Changed
+- Updated Setup Wizard with new abilities
+- Invoice Buddy now saves on Exit
+- Wizard now triggers for first time users
+- Sheet names are now dynamically generated in settings
+- Workbook links now dynamically generate in file menu
+- Improved company mapping for Waste Management
+- Improved overall company mapping logic
+- Removed some more invoice number false positives
+- Improved invoice number search overall
+- Improved card number search
+- Updated dependencies
+
+### 🛠️ Fixed
+- Fixed missing company mapping keys for Steam and Nintendo
+- Made ARCO less sensitive in auto-name
+- Impossible dates are now rejected in auto-name
+- Settings boxes now reject mouse wheel input
+- Saving window placement now works again in the new GUI
+- Watchdog observers now properly close on app exit in the new GUI
+- Inbox & archive folders now start with usable defaults
+
+### 📚 Documentation
+- Readme moved to /docs
+- LICENSE.txt moved back to root
+
 ## [0.3.1] - 2026-09-10
 
 This update adds .ods support for those who prefer a more open-source spreadsheet format. It also fixes a long-standing bug for .deb users preventing the app from properly displaying in the launcher, and more!
@@ -28,6 +62,7 @@ This update adds .ods support for those who prefer a more open-source spreadshee
 - Fixed postrm & postinst scripts to only remove certain files when using remove or purge & properly refreshing icons, fixing launcher issues for .deb users
 - Docs now correctly show up from the '?' menu on Linux systems
 - Customtkinter version now treated as independent app for .deb builds
+- Fixed a bug where the date search was scrubbing invoice numbers before they could be added
 - Minor bug fixes
 
 ### 📚 Documentation

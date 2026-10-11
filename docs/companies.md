@@ -25,6 +25,7 @@ This document lists every currently supported company with its **full official/l
 - LONG Building Technologies, Inc.
 - Trane
 - Systems Management
+- Anderson Fireplace
 
 ## Electrical & Industrial Supply
 
@@ -39,6 +40,10 @@ This document lists every currently supported company with its **full official/l
 - Cuz Concrete Products, Inc.
 - Horizon Distribution, Inc.
 - Grating Pacific, LLC
+- Southern Carlson
+- Central Welding Supply
+- McMaster-Carr
+- National Safety Inc
 
 ## Facility Maintenance & Services
 
@@ -72,6 +77,7 @@ This document lists every currently supported company with its **full official/l
 - Ferguson Enterprises, LLC.
 - K-A General Construction
 - Safety Sign
+- National Safety Inc
 
 ## Government, Utilities & Public Agencies
 
@@ -96,6 +102,13 @@ This document lists every currently supported company with its **full official/l
 - Chevron Corporation
 - Exxon Mobil Corporation
 - Pilot Travel Centers LLC
+
+## Insurance
+- GEICO Insurance Agency, LLC
+- Homesite Group Incorporated
+
+## Tax Services
+- H&R Block
 
 ## Retail, Consumer & Other Brands
 
@@ -151,7 +164,7 @@ This document lists every currently supported company with its **full official/l
 - ClickPay
 - Mint Mobile
 - NewEgg
-- Nintendo
+- Nintendo of America Inc.
 - Not Pot
 - PRCBD
 - Redbubble
@@ -198,11 +211,15 @@ This document lists every currently supported company with its **full official/l
 - Code Blue Corporation
 - Les Schwab Tire Center
 - Proton AG
+- Bandcamp
+- Patreon, Inc.
+- Everett Community College Bookstore
+- Daily Journal of Commerce
+- GoFundMe Inc.
 
 ---
 
-**Last updated**: August 2026
-**Maintained by**: Phillip Schneider
+**Last updated**: October 2026
 
 **Missing a company?**  
 Open a [GitHub](https://github.com/pdschneider/InvoiceBuddy) issue and attach a sample invoice (with any personal information redacted).

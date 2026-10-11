@@ -27,6 +27,7 @@ def create_changelog_panel(globs):
     header_layout = QHBoxLayout()
     title = QLabel("Changelog")
     title.setStyleSheet("font-size: 20px; font-weight: bold; color: white;")
+    header_layout.addStretch()
     header_layout.addWidget(title)
     header_layout.addStretch()
 
