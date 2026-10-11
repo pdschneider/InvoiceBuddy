@@ -17,6 +17,7 @@ from src.qt_interface.qt_components.qt_changelog import create_changelog_panel, 
 from src.qt_interface.qt_components.qt_about import create_about_panel, toggle_about_panel
 from src.qt_interface.qt_components.qt_bug_report import create_report_panel, toggle_report_panel
 from src.qt_interface.qt_components.qt_docs import create_docs_panel, toggle_docs_panel
+from src.utils.save_qt import save_qt_settings
 from src.utils.icons import load_qt_icons
 import logging
 import os
@@ -152,10 +153,16 @@ def create_qt_interface(globs):
     
     # Set Up Window
     globs.window.setWindowTitle("Invoice Buddy")
-    if globs.saved_width and globs.saved_height and globs.saved_x and globs.saved_y:
+
+    # Restore saved geometry (only if dynamic window size is enabled)
+    if globs.saved_width and globs.saved_height and globs.saved_x and globs.saved_y and globs.dynamic_window_size:
         globs.window.setGeometry(globs.saved_x, globs.saved_y, globs.saved_width, globs.saved_height)
     else:
-        globs.window.resize(900, 850)
+        # Center default-sized window on the primary screen
+        screen_geo = globs.window.screen().availableGeometry()
+        x = (screen_geo.width() - 900) // 2
+        y = (screen_geo.height() - 850) // 2
+        globs.window.setGeometry(x, y, 900, 850)
 
     # Make Window Borderless
     globs.window.setWindowFlags(Qt.FramelessWindowHint)
@@ -176,40 +183,50 @@ def create_qt_interface(globs):
     main_layout.addWidget(title_bar)
     globs.title_bar = title_bar
 
-    # Populate File Title Menu
-    file_menu = title_bar.menu_bar.addMenu("File")
-    open_inbox_Q = file_menu.addAction("Inbox")
+    # Add File Menu
+    globs.file_menu = title_bar.menu_bar.addMenu("File")
 
-    workbook_paths = []
-    seen_paths = set()
-    for sheet in globs.sheet_data.get("sheets", []):
-        wb_path = sheet.get("workbook", "")
-        if wb_path and wb_path not in seen_paths:
-            seen_paths.add(wb_path)
-            workbook_paths.append((wb_path, os.path.splitext(os.path.basename(wb_path))[0]))
+    def populate_file_menu(globs):
+        """Rebuild the File menu from current sheet data."""
+        file_menu = globs.file_menu
+        file_menu.clear()
 
-    if len(workbook_paths) <= 1:
-        open_workbook_Q = file_menu.addAction("Workbook")
-        if workbook_paths:
-            open_workbook_Q.triggered.connect(lambda: open_workbook(globs, workbook_paths[0][0]))
+        open_inbox_Q = file_menu.addAction("Inbox")
+
+        workbook_paths = []
+        seen_paths = set()
+        for sheet in globs.sheet_data.get("sheets", []):
+            wb_path = sheet.get("workbook", "")
+            if wb_path and wb_path not in seen_paths:
+                seen_paths.add(wb_path)
+                workbook_paths.append((wb_path, os.path.splitext(os.path.basename(wb_path))[0]))
+
+        if len(workbook_paths) <= 1:
+            open_workbook_Q = file_menu.addAction("Workbook")
+            if workbook_paths:
+                open_workbook_Q.triggered.connect(lambda: open_workbook(globs, workbook_paths[0][0]))
+            else:
+                open_workbook_Q.setEnabled(False)
         else:
-            open_workbook_Q.setEnabled(False)
-    else:
-        workbook_menu = file_menu.addMenu("Workbook")
-        for wb_path, wb_name in workbook_paths:
-            action = workbook_menu.addAction(wb_name)
-            action.triggered.connect(lambda checked, p=wb_path: open_workbook(globs, p))
+            workbook_menu = file_menu.addMenu("Workbook")
+            for wb_path, wb_name in workbook_paths:
+                action = workbook_menu.addAction(wb_name)
+                action.triggered.connect(lambda checked, p=wb_path: open_workbook(globs, p))
 
-    open_archive_Q = file_menu.addAction("Archive")
-    open_logs_Q = file_menu.addAction("Logs")
-    open_config_Q = file_menu.addAction("Config")
+        open_archive_Q = file_menu.addAction("Archive")
+        open_logs_Q = file_menu.addAction("Logs")
+        open_config_Q = file_menu.addAction("Config")
+        exit_Q = file_menu.addAction("Exit")
 
-    # Attach Actions to File Buttons
-    open_inbox_Q.triggered.connect(lambda: open_directory(globs, globs.inbox))
-    open_archive_Q.triggered.connect(lambda: open_directory(globs, globs.archive))
-    open_logs_Q.triggered.connect(lambda: open_logs(globs))
-    open_config_Q.triggered.connect(lambda: open_config(globs))
-    
+        open_inbox_Q.triggered.connect(lambda: open_directory(globs, globs.inbox))
+        open_archive_Q.triggered.connect(lambda: open_directory(globs, globs.archive))
+        open_logs_Q.triggered.connect(lambda: open_logs(globs))
+        open_config_Q.triggered.connect(lambda: open_config(globs))
+        exit_Q.triggered.connect(lambda: globs.window.close())
+
+    populate_file_menu(globs)
+    globs.rebuild_file_menu = populate_file_menu
+
     # Populate Data Title Menu
     data_menu = title_bar.menu_bar.addMenu("Data")
     data_menu.addAction("Export / Import History (Coming Soon...)")
@@ -395,3 +412,24 @@ def create_qt_interface(globs):
     globs.dim_overlay.resize(globs.window.width(), globs.window.height() - tb_h)
     globs.dim_overlay.move(0, tb_h)
     globs.window.resizeEvent = custom_resize
+
+    # Handle window close: stop observers and save settings
+    original_close = globs.window.closeEvent
+
+    def custom_close(event):
+        try:
+            if hasattr(globs, 'observers'):
+                for observer in globs.observers.values():
+                    if observer and observer.is_alive():
+                        observer.stop()
+                        observer.join(timeout=10.0)
+            logging.debug("Observers successfully shut down!")
+        except Exception as e:
+            logging.error(f"Unable to shut down observers due to: {e}")
+        try:
+            save_qt_settings(globs)
+        except Exception as e:
+            logging.error(f"Error occurred when saving settings: {e}")
+        original_close(event)
+
+    globs.window.closeEvent = custom_close

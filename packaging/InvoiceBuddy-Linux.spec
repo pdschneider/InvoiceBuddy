@@ -13,8 +13,7 @@ a = Analysis(
     datas=[
         ('../defaults', 'defaults'),
         ('../docs', 'docs'),
-        ('../CHANGELOG.md', '.'),
-        ('../README.md', '.'),
+        ('../CHANGELOG.md', '.')
     ],
     hiddenimports=['PIL._tkinter_finder', 'pdfplumber', 'openpyxl', 'watchdog', 'msoffcrypto', 'pytesseract', 'pdf2image', 'PIL', 'packaging', 'pkg_resources', 'PySide6', 'shiboken6'],
     hookspath=[],

@@ -76,7 +76,7 @@ def save_all_settings(globs, reject_toast=False, reject_metadata=False):
     current_legacy_mode = globs.legacy_mode_var.get()
 
     # Save Window Placement
-    if globs.root.state() != "zoomed":  # don't save if maximized
+    if globs.root.state() != "zoomed" and globs.legacy_mode:  # don't save if maximized
         try:
             current_width = globs.root.winfo_width()
             current_height = globs.root.winfo_height()

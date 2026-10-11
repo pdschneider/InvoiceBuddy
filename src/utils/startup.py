@@ -325,6 +325,24 @@ def setup_paths():
             changed = True
             logging.info(f"Sanitizing incorrect path 'archive'")
 
+        # Backfill blank inbox/archive with default locations
+        if not data["sources"]["inbox"]:
+            data["sources"]["inbox"] = os.path.normpath(
+                load_data_path("local", "Inbox"))
+            changed = True
+            logging.info("Blank inbox path defaulted")
+        if not data["sources"]["archive"]:
+            data["sources"]["archive"] = os.path.normpath(
+                load_data_path("local", "Archive"))
+            changed = True
+            logging.info("Blank archive path defaulted")
+
+        # Create the folders if they don't exist
+        for key in ["inbox", "archive"]:
+            folder = data["sources"][key]
+            if folder and not os.path.isdir(folder):
+                os.makedirs(folder, exist_ok=True)
+
         # Write new data to the file again
         if changed:
             with open(paths, 'w', encoding='utf-8') as f:

@@ -62,6 +62,8 @@ class Globs:
         self.spreadsheet_toggle = None
         self.dim_overlay = None
         self.active_source_dialog = None
+        self.file_menu = None
+        self.rebuild_file_menu = None
 
         # PySide6 Inbox
         self.files = []  # ALL filenames without extensions in inbox

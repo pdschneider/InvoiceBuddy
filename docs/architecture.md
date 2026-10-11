@@ -80,9 +80,7 @@ InvoiceBuddy/
 │   ├── prebuild.py           # Pre-build version bumping script
 │   └── *.spec                # PyInstaller spec files
 ├── docs/                     # Documentation
-├── CHANGELOG.md
-├── LICENSE.txt
-└── README.md
+└── CHANGELOG.md
 ```
 
 ## Key Design Decisions

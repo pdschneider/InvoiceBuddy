@@ -154,7 +154,7 @@ Converts PDF pages to PIL images
 
 Required for: pillow
 
-LICNSE: MIT
+LICENSE: MIT
 
 Source: https://github.com/Belval/pdf2image
 
@@ -163,7 +163,7 @@ Low-level PDF text/layout extraction
 
 Required for pdfplumber
 
-LICNSE: MIT
+LICENSE: MIT
 
 Source: https://github.com/pdfminer/pdfminer.six
 

@@ -47,7 +47,12 @@ def card_number_search(directory=None, file_list=None, normalized_texts=None):
         r'(?:x{8,16}|\*{{8,16}|[*x]{12,16})\s*([0-9ol]{4})\b',
 
         # 8. Original safety net (kept strict)
-        r'(visa|mastercard)\s*[: ]?\s*(x{8,16}|\*{{8,16})\s*([0-9ol]{4})']
+        r'(visa|mastercard)\s*[: ]?\s*(x{8,16}|\*{{8,16})\s*([0-9ol]{4})',
+
+        # 9. Masked number using middle-dots (allow spaces between dots and before digits)
+        r'(?:visa|mastercard|amex|discover)\s+[.·•●]{2,8}\s*([0-9]{4})\b'
+
+    ]
 
     try:
         if search_dir and not os.path.isdir(search_dir):
