@@ -5,6 +5,7 @@ from src.qt_interface.qt_settings.general_qt import create_general_settings_tab
 from src.qt_interface.qt_settings.qt_advanced import create_advanced_settings_tab
 from src.qt_interface.qt_settings.qt_paths import create_paths_settings_tab
 from src.qt_interface.qt_settings.qt_spreadsheet import create_spreadsheet_settings_tab
+from src.qt_interface.qt_settings.qt_integrations import create_integrations_settings_tab
 from src.utils.save_qt import save_qt_settings
 from src.qt_interface.qt_styles import dark
 
@@ -47,6 +48,10 @@ def create_settings_panel(globs):
     # Spreadsheet tab
     spreadsheet_tab = create_spreadsheet_settings_tab(globs)
     tabs.addTab(spreadsheet_tab, "Spreadsheet")
+
+    # Integrations tab
+    integrations_tab = create_integrations_settings_tab(globs)
+    tabs.addTab(integrations_tab, "Integrations")
 
     # Advanced tab
     advanced_tab = create_advanced_settings_tab(globs)

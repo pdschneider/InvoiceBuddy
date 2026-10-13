@@ -11,9 +11,12 @@ from openpyxl import load_workbook
 import logging
 import os
 from src.managers.file_management import browse_file
+from src.qt_interface.qt_styles import dark
 
 
-COLUMN_OPTIONS = ["Company", "Date", "Invoice #", "Card Number", ""]
+COLUMN_OPTIONS = ["Counterparty", "Date", "Amount", "Category",
+                  "Subcategory", "Description", "Invoice #", "Card Number", ""]
+MAX_COLUMNS = 10
 
 
 def get_workbook_sheet_names(workbook_path):
@@ -51,7 +54,7 @@ def create_spreadsheet_settings_tab(globs):
     scroll_area = QScrollArea()
     scroll_area.setWidgetResizable(True)
     scroll_area.setFrameShape(QScrollArea.NoFrame)
-    scroll_area.setStyleSheet("QScrollArea { background-color: transparent; border: none; }")
+    scroll_area.setStyleSheet(dark.scrollbar)
 
     scroll_content = QWidget()
     scroll_content.setStyleSheet("background-color: transparent;")
@@ -114,14 +117,14 @@ def populate_sheets_list(globs):
         sheet_defs.append({
             "name": "Sheet", "color": "#2ecc71", "workbook": "",
             "first_row": 3, "first_column": 1,
-            "column_order": ["Company", "Date", "Invoice #", ""]
+            "column_order": ["Counterparty", "Date", "Invoice #", ""]
         })
         globs.sheet_data["sheets"] = sheet_defs
 
     for idx, sheet in enumerate(sheet_defs):
         sheet.setdefault("first_row", 3)
         sheet.setdefault("first_column", 1)
-        sheet.setdefault("column_order", ["Company", "Date", "Invoice #", ""])
+        sheet.setdefault("column_order", ["Counterparty", "Date", "Invoice #", ""])
         sheet.setdefault("workbook", "")
         row = create_sheet_row(globs, idx, sheet)
         layout.addWidget(row)
@@ -389,7 +392,7 @@ def create_sheet_row(globs, idx, sheet):
                 globs.sheet_data["sheets"][idx].setdefault("color", "#2ecc71")
                 globs.sheet_data["sheets"][idx].setdefault("first_row", 3)
                 globs.sheet_data["sheets"][idx].setdefault("first_column", 1)
-                globs.sheet_data["sheets"][idx].setdefault("column_order", ["Company", "Date", "Invoice #", ""])
+                globs.sheet_data["sheets"][idx].setdefault("column_order", ["Counterparty", "Date", "Invoice #", ""])
                 populate_sheets_list(globs)
 
         add_btn.clicked.connect(lambda checked: on_browse_collapsed())
@@ -539,18 +542,23 @@ def create_sheet_row(globs, idx, sheet):
     col_spin.setRange(1, 50)
     col_spin.setValue(sheet.get("first_column", 1))
     col_spin.setStyleSheet(_spin_style())
-    col_spin.valueChanged.connect(lambda val, i=idx: on_field_changed(globs, i, "first_column", val))
+    col_spin.valueChanged.connect(
+        lambda val, i=idx: on_first_column_changed(globs, i, val)
+    )
     line2.addWidget(col_spin)
 
     line2.addStretch()
     row_layout.addLayout(line2)
 
     # ===== LINE 3: Column Order =====
-    line3 = QHBoxLayout()
-    line3.setSpacing(8)
+    line3 = QVBoxLayout()
+    line3.setSpacing(4)
 
-    order_label = QLabel("Order:")
-    order_label.setStyleSheet(_label_style())
+    order_label = QLabel("Column Order")
+    order_label.setStyleSheet(
+        "color: white; font-size: 13px; font-weight: bold;"
+        "border-bottom: 1px solid #444; padding-bottom: 2px;"
+    )
     line3.addWidget(order_label)
 
     # Tiny class to disable mouse scroll for comboboxes
@@ -558,8 +566,34 @@ def create_sheet_row(globs, idx, sheet):
         def wheelEvent(self, event):
             event.ignore()
 
-    column_order = sheet.get("column_order", ["Company", "Date", "Invoice #", ""])
-    for pos in range(4):
+    column_order = sheet.setdefault("column_order", ["Counterparty", "Date", "Invoice #", ""])
+
+    if len(column_order) > MAX_COLUMNS:
+        del column_order[MAX_COLUMNS:]
+
+    def column_letter(pos):
+        """Convert position to spreadsheet letter, e.g. 1->A, 26->Z, 27->AA, 28->AB."""
+        n = (sheet.get("first_column", 1) - 1) + pos + 1
+        letters = ""
+        while n > 0:
+            n, remainder = divmod(n - 1, 26)
+            letters = chr(ord('A') + remainder) + letters
+        return letters
+
+    # Allow for 7 boxes
+    for pos in range(len(column_order)):
+        row = QHBoxLayout()
+        row.setSpacing(8)
+
+        col_label = QLabel(column_letter(pos))
+        col_label.setFixedWidth(36)
+        col_label.setAlignment(Qt.AlignCenter)
+        col_label.setStyleSheet(
+            "color: #2ecc71; font-size: 14px; font-weight: bold;"
+            "background-color: #3a3a3a; border-radius: 4px; padding: 4px;"
+        )
+        row.addWidget(col_label)
+
         combo = NoScrollComboBox()
         combo.addItems(COLUMN_OPTIONS)
         current_val = column_order[pos] if pos < len(column_order) else ""
@@ -568,9 +602,43 @@ def create_sheet_row(globs, idx, sheet):
         combo.currentTextChanged.connect(
             lambda text, i=idx, p=pos: on_column_order_changed(globs, i, p, text)
         )
-        line3.addWidget(combo)
+        row.addWidget(combo)
 
-    line3.addStretch()
+        # Minus button (only if more than one column)
+        if len(column_order) > 1:
+            minus_btn = QPushButton("−")
+            minus_btn.setFixedSize(28, 28)
+            minus_btn.setToolTip("Remove this column")
+            minus_btn.setStyleSheet("""
+                QPushButton {
+                    background-color: #3a3a3a; color: #e74c3c; border: none;
+                    border-radius: 4px; font-size: 16px; font-weight: bold;
+                }
+                QPushButton:hover { background-color: #454545; border: 1px solid #e74c3c; }
+            """)
+            minus_btn.clicked.connect(
+                lambda checked, i=idx, p=pos: on_remove_column(globs, i, p)
+            )
+            row.addWidget(minus_btn)
+
+        row.addStretch()
+        line3.addLayout(row)
+
+    # Add Column row (aligned like a column row)
+    add_btn = QPushButton("+")
+    add_btn.setFixedSize(36, 28)
+    add_btn.setCursor(Qt.PointingHandCursor)
+    add_btn.setToolTip("Add column")
+    add_btn.setStyleSheet("""
+        QPushButton {
+            background-color: #3a3a3a; color: #2ecc71; border: none;
+            border-radius: 4px; font-size: 16px; font-weight: bold;
+        }
+        QPushButton:hover { background-color: #454545; border: 1px solid #2ecc71; }
+    """)
+    add_btn.clicked.connect(lambda checked, i=idx: on_add_column(globs, i))
+    line3.addWidget(add_btn)
+
     row_layout.addLayout(line3)
 
     return row_widget
@@ -583,14 +651,41 @@ def on_field_changed(globs, index, field, value):
         sheet_defs[index][field] = value
 
 
+def on_first_column_changed(globs, index, value):
+    """Update first_column, then rebuild rows so column letters refresh."""
+    sheet_defs = globs.sheet_data.get("sheets", [])
+    if 0 <= index < len(sheet_defs):
+        sheet_defs[index]["first_column"] = value
+        populate_sheets_list(globs)
+
+
 def on_column_order_changed(globs, index, position, value):
     """Update column_order list when a combo box changes."""
     sheet_defs = globs.sheet_data.get("sheets", [])
     if 0 <= index < len(sheet_defs):
-        col_order = sheet_defs[index].setdefault("column_order", ["", "", "", ""])
-        while len(col_order) < 4:
+        col_order = sheet_defs[index].setdefault("column_order", [])
+        while len(col_order) < position + 1:
             col_order.append("")
         col_order[position] = value
+
+
+def on_add_column(globs, index):
+    """Append a new empty column to a sheet's order."""
+    sheet_defs = globs.sheet_data.get("sheets", [])
+    if 0 <= index < len(sheet_defs):
+        col_order = sheet_defs[index].setdefault("column_order", [])
+        col_order.append("")
+        populate_sheets_list(globs)
+
+
+def on_remove_column(globs, index, pos):
+    """Remove a column from a sheet's order, keeping at least one."""
+    sheet_defs = globs.sheet_data.get("sheets", [])
+    if 0 <= index < len(sheet_defs):
+        col_order = sheet_defs[index].setdefault("column_order", [])
+        if len(col_order) > 1 and 0 <= pos < len(col_order):
+            col_order.pop(pos)
+            populate_sheets_list(globs)
 
 
 def on_color_click(globs, index):
@@ -688,7 +783,7 @@ def on_add_sheet(globs):
         "workbook": last_workbook,
         "first_row": 3,
         "first_column": 1,
-        "column_order": ["Company", "Date", "Invoice #", ""]
+        "column_order": ["Counterparty", "Date", "Invoice #", ""]
     })
 
     populate_sheets_list(globs)

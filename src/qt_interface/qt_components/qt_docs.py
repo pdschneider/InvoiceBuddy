@@ -82,10 +82,10 @@ def create_docs_panel(globs):
         tab_name = fname[:-3].replace("-", " ").title()
 
         viewer = QTextBrowser()
-        viewer.setOpenLinks(False)          # we handle internal links ourselves
-        viewer.setOpenExternalLinks(True)   # http links open in web browser
-        viewer.setStyleSheet(
-            "background-color: #333339; color: #ddd; border: none; padding: 10px;")
+
+        viewer.setOpenLinks(False)
+        viewer.setOpenExternalLinks(True)
+        viewer.setStyleSheet(dark.scrollbar)
 
         md_path = os.path.join(DOCS_DIR, fname)
         with open(md_path, "r", encoding="utf-8") as f:
@@ -109,8 +109,7 @@ def create_docs_panel(globs):
         viewer = QTextBrowser()
         viewer.setOpenLinks(False)
         viewer.setOpenExternalLinks(True)
-        viewer.setStyleSheet(
-            "background-color: #333339; color: #ddd; border: none; padding: 10px;")
+        viewer.setStyleSheet(dark.scrollbar)
         with open(md_path, "r", encoding="utf-8") as f:
             viewer.setMarkdown(f.read())
         viewer.document().setBaseUrl(PROJECT_DOCS + "/")

@@ -1,8 +1,9 @@
 # src/qt_interface/qt_preview.py
-from PySide6.QtWidgets import (QWidget, QVBoxLayout,
-                               QLabel, QFrame,
-                               QHBoxLayout, QPushButton,
-                               QApplication)
+from PySide6.QtWidgets import (
+    QWidget, QVBoxLayout, QLabel, QFrame,
+    QHBoxLayout, QPushButton, QApplication,
+    QScrollArea
+)
 from PySide6.QtCore import Qt
 from pypdf import PdfReader
 import os
@@ -10,10 +11,16 @@ from src.qt_interface.qt_components.qt_viewer import NativePdfViewer
 
 
 METADATA_KEYS = {
+    "/Counterparty": "Counterparty",
     "/Date": "Date",
-    "/Company": "Vendor",
-    "/InvoiceNumber": "Inv #",
-    "/CardNumber": "Card",
+    "/Amount": "Amount",
+    "/Category": "Category",
+    "/Subcategory": "Subcategory",
+    "/Description": "Description",
+    "/CardNumber": "Card Number",
+    "/InvoiceNumber": "Invoice Number",
+    "/Net": "Terms (Net)",
+    "/Tax": "Tax",
 }
 
 
@@ -32,25 +39,40 @@ def read_file_metadata(filepath):
     return fields
 
 
-def create_pill(label, value):
+def create_pill(label, value, display=None, is_copy_all=False):
     """Builds one clickable metadata pill."""
-    pill = QPushButton(f"{label}: {value}")
+    pill = QPushButton(display or value)
     pill.setCursor(Qt.PointingHandCursor)
-    pill.setToolTip(f"Click to copy {label}")
+    pill.setToolTip(f"{label} — click to copy '{value}'")
+
+    # Metadata pill styling
     pill.setStyleSheet("""
         QPushButton {
-            background-color: #3a3a3f;
-            color: white;
-            border: 1px solid #555;
-            border-radius: 12px;
-            padding: 2px 10px;
-            font-size: 11px;
+            background-color: #404045;
+            color: #dddddd;
+            border: 1px solid #505055;
+            border-radius: 16px;
+            padding: 4px 14px;
+            font-size: 12px;
         }
         QPushButton:hover {
-            border-color: #2ecc71;
+            background-color: #4a4a50;
             color: #2ecc71;
+            border-color: #2ecc71;
+        }
+        QPushButton:pressed {
+            background-color: #35353a;
+        }
+        QToolTip {
+            background-color: #2b2b2b;
+            color: #dddddd;
+            border: 1px solid #505055;
+            border-radius: 4px;
+            padding: 4px 8px;
+            font-size: 12px;
         }
     """)
+    
     pill.clicked.connect(lambda: QApplication.clipboard().setText(value))
     return pill
 
@@ -63,20 +85,61 @@ def create_preview_pane(globs):
     layout.setContentsMargins(10, 10, 10, 10)
     layout.setSpacing(0)
 
-    # Pill Bar
-    pill_bar = QFrame()
+    # Pill Bar with scroll arrows
+    pill_bar = QWidget()
     pill_bar.setFixedHeight(38)
-    pill_bar.setStyleSheet("""
-        QFrame {
-            background-color: transparent;
-            border: none;
-        }
-    """)
-    pill_layout = QHBoxLayout(pill_bar)
-    pill_layout.setContentsMargins(0, 0, 0, 0)
-    pill_layout.addStretch()
 
-    # placeholder label lives visually inside the bar for now (removed in step 2)
+    arrow_style = """
+        QPushButton {
+            background-color: #404045; color: #dddddd;
+            border: 1px solid #505055; border-radius: 5px;
+            padding: 4px 8px; font-size: 12px;
+        }
+        QPushButton:hover { color: #2ecc71; border-color: #2ecc71; }
+        QPushButton:disabled { color: #555; border-color: #404045; }
+    """
+    pill_back_btn = QPushButton("<")
+    pill_fwd_btn = QPushButton(">")
+    for btn in (pill_back_btn, pill_fwd_btn):
+        btn.setCursor(Qt.PointingHandCursor)
+        btn.setStyleSheet(arrow_style)
+        btn.hide()
+
+    scroll = QScrollArea()
+    scroll.setWidgetResizable(True)
+    scroll.setFrameShape(QFrame.NoFrame)
+    scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+    scroll.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+    scroll.setFixedHeight(34)
+
+    pill_container = QWidget()
+    pill_layout = QHBoxLayout(pill_container)
+    pill_layout.setContentsMargins(0, 0, 0, 0)
+    pill_layout.setSpacing(6)
+    pill_layout.addStretch()
+    scroll.setWidget(pill_container)
+
+    def scroll_pills(delta):
+        bar = scroll.horizontalScrollBar()
+        bar.setValue(bar.value() + delta)
+
+    def update_arrow_visibility():
+        needed = scroll.horizontalScrollBar().maximum() > 0
+        pill_back_btn.setVisible(needed)
+        pill_fwd_btn.setVisible(needed)
+
+    pill_back_btn.clicked.connect(lambda: scroll_pills(-120))
+    pill_fwd_btn.clicked.connect(lambda: scroll_pills(120))
+    scroll.horizontalScrollBar().rangeChanged.connect(
+        lambda *_: update_arrow_visibility())
+
+    bar_layout = QHBoxLayout(pill_bar)
+    bar_layout.setContentsMargins(0, 0, 0, 0)
+    bar_layout.setSpacing(4)
+    bar_layout.addWidget(pill_back_btn)
+    bar_layout.addWidget(scroll, stretch=1)
+    bar_layout.addWidget(pill_fwd_btn)
+
     layout.addWidget(pill_bar)
 
     # PDF preview
@@ -127,7 +190,42 @@ def create_preview_pane(globs):
         elif selected:
             # Populate from metadata
             filepath = os.path.join(globs.current_folder, selected)
-            for label, value in read_file_metadata(filepath).items():
+            fields = read_file_metadata(filepath)
+            
+            # Determine column order from sheet config
+            sheet_name = globs.file_identity.get(selected, "Sheet")
+            sheet_config = next(
+                (s for s in globs.sheet_data.get("sheets", []) if s.get("name") == sheet_name),
+                None
+            )
+            column_order = sheet_config.get("column_order", []) if sheet_config else []
+
+            # Map column_order labels to METADATA_KEYS display labels
+            label_mapping = {
+                "Company": "Counterparty",
+                "Date": "Date",
+                "Invoice #": "Invoice Number",
+                "Card Number": "Card Number",
+                "Amount": "Amount",
+                "Category": "Category",
+                "Subcategory": "Subcategory",
+                "Description": "Description",
+                "Terms (Net)": "Terms (Net)",
+                "Tax": "Tax",
+            }
+
+            # Build ordered list of (display_label, value) tuples
+            ordered_fields = []
+            for col in column_order:
+                if not col:  # Skip empty placeholders
+                    continue
+                # Look up the field label from the mapping
+                field_label = label_mapping.get(col, col)
+                if field_label in fields:
+                    ordered_fields.append((col, fields[field_label]))
+
+            # Render ordered pills
+            for label, value in ordered_fields:
                 pill_layout.addWidget(create_pill(label, value))
 
             stack.setCurrentWidget(pdf_viewer)

@@ -11,5 +11,7 @@
     "beta": false,
     "dynamic_window_size": true,
     "legacy_mode": false,
-    "previous_version": "0.1.0"
+    "previous_version": "0.1.0",
+    "simple_entry": false,
+    "google_auth": false
 }

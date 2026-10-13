@@ -1,17 +1,15 @@
 # Google Sheets Integration Setup Guide
 This guide walks you through connecting Invoice Buddy to your Google Sheets account using OAuth 2.0.
 
-***NOTICE: This is for an integration which has yet to be completed. Work is still being done to fully integrate Google Sheets into Invoice Buddy.***
-
 ## Prerequisites
-- A personal Gmail account (school/work accounts may have Google Cloud disabled)
+- A Gmail account (personal recommended - school/work accounts may have Google Cloud disabled)
 - Internet access during initial setup
 - Approximately 10–15 minutes
 
 
 ### Step 1: Create a Google Cloud Project
 1. Go to Google Cloud Console
-2. Sign in with your personal Gmail account
+2. Sign in with your Gmail account
 3. Click the project dropdown at the top → New Project
 4. Name it (e.g., InvoiceBuddy)
 5. Click Create
@@ -72,6 +70,7 @@ After completing authentication, your token is saved automatically at:
 
 ~/.config/invoicebuddy/google_token.json
 
+On Windows, your path will be under AppData under Users.
 
 This token is refreshed automatically and does not require re-authentication.
 
@@ -107,7 +106,7 @@ This token is refreshed automatically and does not require re-authentication.
 
 **Cause:** You are using a school or work account that has Google Cloud disabled by the organization administrator.
 
-**Fix:** Switch to a **personal Gmail account** and try again.
+**Fix:** Switch to a **personal Gmail account** and try again, or contact your organization for help.
 
 ---
 
@@ -117,8 +116,10 @@ This token is refreshed automatically and does not require re-authentication.
 
 **Fix:** Delete your saved token and re-authenticate:
 
-bash rm ~/.config/invoicebuddy/google_token.json python src/connections/alphabet.py
+On Linux:
+`bash rm ~/.config/invoicebuddy/google_token.json
 
+Clicking the Disconnect button in the GUI also deletes your Google Token.
 
 ---
 
@@ -127,8 +128,12 @@ bash rm ~/.config/invoicebuddy/google_token.json python src/connections/alphabet
 If you need to reset your Google authentication (switching accounts, revoking access, etc.):
 
 1. Delete your local token file:
+On Linux:
    ```bash
    rm ~/.config/invoicebuddy/google_token.json
+   ```
+Alternatively, you can click "Disconnect" in the Integrations tab to delete your Google Token.
+
 (Optional) Revoke access from your Google account:
 2. Go to Google Account Permissions
 3. Find InvoiceBuddy → Click Remove Access

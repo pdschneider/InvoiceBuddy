@@ -1,7 +1,8 @@
 # src/qt_interface/qt_interface.py
 from PySide6.QtWidgets import (
     QApplication, QWidget, QVBoxLayout, QHBoxLayout, 
-    QSplitter)
+    QStackedLayout
+)
 from PySide6.QtCore import Qt, QEvent, QTimer, QObject
 from src.qt_interface.qt_components.qt_title_bar import TitleBar
 from src.qt_interface.qt_components.qt_top_bar import create_top_bar
@@ -16,7 +17,8 @@ from src.interface.setup.setup_wizard import create_wizard
 from src.qt_interface.qt_components.qt_changelog import create_changelog_panel, toggle_changelog_panel
 from src.qt_interface.qt_components.qt_about import create_about_panel, toggle_about_panel
 from src.qt_interface.qt_components.qt_bug_report import create_report_panel, toggle_report_panel
-from src.qt_interface.qt_components.qt_docs import create_docs_panel, toggle_docs_panel
+from src.qt_interface.qt_components.qt_docs import create_docs_panel
+from src.qt_interface.qt_components.qt_transaction_editor import TransactionEditor
 from src.utils.save_qt import save_qt_settings
 from src.utils.icons import load_qt_icons
 import logging
@@ -269,15 +271,24 @@ def create_qt_interface(globs):
     sidebar = create_sidebar(globs)
     workspace_layout.addWidget(sidebar)
 
-    splitter = QSplitter(Qt.Horizontal)
     mailbox = MailboxWidget(globs)
-    splitter.addWidget(mailbox)
+
+    # Left pane swaps between the mailbox and the transaction editor
+    left_pane = QWidget()
+    left_stack = QStackedLayout(left_pane)
+    left_stack.addWidget(mailbox)
+    editor = TransactionEditor(globs)
+    left_stack.addWidget(editor)
+    
+    # Give editor access to the stack
+    globs.transaction_editor = editor
+    editor.left_stack = left_stack
+    editor.mailbox = mailbox
     mailbox.setMinimumWidth(300)
     preview_pane = create_preview_pane(globs)
-    splitter.addWidget(preview_pane)
-    splitter.setSizes([400, 550])
-    splitter.setChildrenCollapsible(False)
-    workspace_layout.addWidget(splitter)
+
+    workspace_layout.addWidget(left_pane, stretch=4)
+    workspace_layout.addWidget(preview_pane, stretch=5)
 
     main_layout.addWidget(workspace_widget)
 
@@ -322,7 +333,6 @@ def create_qt_interface(globs):
     dim_overlay.mousePressEvent = close_all_panels
 
     # Store references
-    globs.splitter = splitter
     globs.mailbox = mailbox
     globs.preview_pane = preview_pane
     globs.sidebar = sidebar

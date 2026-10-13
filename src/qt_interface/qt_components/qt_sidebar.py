@@ -34,9 +34,9 @@ def create_sidebar(globs):
     layout.addLayout(top_layout)
 
     # === NAVIGATION LIST ===
-    nav_label = QLabel("Folders")
-    nav_label.setStyleSheet("font-weight: bold; font-size: 14px; padding-top: 10px; color: #aaa;")
-    layout.addWidget(nav_label)
+    # nav_label = QLabel("Folders")
+    # nav_label.setStyleSheet("font-weight: bold; font-size: 14px; padding-top: 10px; color: #aaa;")
+    # layout.addWidget(nav_label)
 
     # Use QListWidget for easy selection handling
     nav_list = QListWidget()
@@ -61,7 +61,7 @@ def create_sidebar(globs):
     """)
 
     # Define Folders
-    folders = ["Inbox", "Archive", "Budget", "Trash"]
+    folders = ["Inbox", "Transactions", "Budget", "Insights", "Trash"]
     for folder in folders:
         item = QListWidgetItem(folder)
         item.setData(Qt.UserRole, folder.lower()) # Store key
@@ -95,9 +95,11 @@ def on_folder_click(item, globs):
 
     if folder_key == 'inbox':
         globs.current_folder = globs.inbox
-    elif folder_key == 'archive':
+    elif folder_key == 'transactions':
         globs.current_folder = globs.archive
     elif folder_key == 'budget':
+        return  # Not implemented yet
+    elif folder_key == 'insights':
         return  # Not implemented yet
     elif folder_key == 'trash':
         return  # Not implemented yet
@@ -106,6 +108,11 @@ def on_folder_click(item, globs):
 
     # Deselect, then let the state machine update the preview
     globs.selected_file = None
+
+    # Collapse the transaction editor if open
+    editor = getattr(globs, 'transaction_editor', None)
+    if editor and editor.left_stack.currentWidget() is editor:
+        editor.left_stack.setCurrentWidget(globs.mailbox)
 
     # Refresh the mailbox
     if hasattr(globs, 'mailbox') and globs.mailbox:

@@ -3,22 +3,25 @@ from types import SimpleNamespace
 dark = SimpleNamespace(
     tabs = """
         QTabWidget::pane {
-            border: 1px solid #444;
-            border-radius: 5px;
-            background-color: #2b2b2b;
+            border: none;
+            border-top: 1px solid #3a3a40;
+            background-color: transparent;
         }
         QTabBar::tab {
-            background-color: #333;
-            color: #aaa;
-            padding: 10px 20px;
-            margin-right: 2px;
-            border-top-left-radius: 5px;
-            border-top-right-radius: 5px;
+            background-color: transparent;
+            color: #888;
+            padding: 8px 18px;
+            margin-right: 4px;
+            border-top-left-radius: 6px;
+            border-top-right-radius: 6px;
+            font-size: 13px;
+        }
+        QTabBar::tab:hover {
+            color: #dddddd;
         }
         QTabBar::tab:selected {
-            background-color: #2b2b2b;
             color: #2ecc71;
-            font-weight: bold;
+            border-bottom: 2px solid #2ecc71;
         }
     """,
     save_button = """
@@ -323,5 +326,52 @@ dark = SimpleNamespace(
             background-color: #3a3a3d;
             border-color: #777;
         }
+    """,
+    scrollbar = """
+        QScrollBar:vertical {
+            background-color: #2b2b2b;
+            width: 10px;
+            border-radius: 5px;
+            margin: 0;
+        }
+        QScrollBar::handle {
+            background-color: #505055;
+            border-radius: 5px;
+            min-height: 40px;
+        }
+        QScrollBar::handle:hover {
+            background-color: #606066;
+        }
+        QScrollBar::add-page, QScrollBar::sub-page {
+            background: none;
+        }
+        QScrollBar::add-line, QScrollBar::sub-line {
+            height: 0;
+            subcontrol-position: none;
+        }
+        QScrollBar::up-arrow, QScrollBar::down-arrow {
+            width: 0;
+            height: 0;
+            image: none;
+        }
+    """,
+    settings_checkbox = """
+        QCheckBox {
+            color: #d0d0d0; font-size: 13px; spacing: 10px;
+            padding: 6px 10px;
+            background-color: transparent; border-radius: 4px;
+        }
+        QCheckBox:hover { color: white; }
+        QCheckBox::indicator {
+            width: 18px; height: 18px;
+            border: 1px solid #555; border-radius: 4px;
+            background-color: #2b2b2b;
+        }
+        QCheckBox::indicator:hover { border: 1px solid #2ecc71; }
+        QCheckBox::indicator:checked {
+            background-color: #2ecc71; border: 1px solid #27ae60;
+            image: url(none);
+        }
+        QCheckBox::indicator:checked:disabled { background-color: #555; border: 1px solid #555; }
     """
 )

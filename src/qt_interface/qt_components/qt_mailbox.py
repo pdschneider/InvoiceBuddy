@@ -468,7 +468,7 @@ class MailboxWidget(QWidget):
         label.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
 
         # Double click starts editing
-        label.mouseDoubleClickEvent = lambda event: self._start_editing(filename, folder_path, label, row, row_layout)
+        label.mouseDoubleClickEvent = lambda event: self._open_transaction_editor(filename)
 
         row_layout.addWidget(label)
 
@@ -534,19 +534,17 @@ class MailboxWidget(QWidget):
             self.globs.update_preview_state()
 
     def _on_double_click(self, item):
-        """Handle double click (start editing)."""
+        """Handle double click (open transaction editor)."""
         filename = self.globs.files[self.list_widget.row(item)]
-        row_widget = self.list_widget.itemWidget(item)
+        self._open_transaction_editor(filename)
 
-        if row_widget and hasattr(row_widget, 'file_data'):
-            file_data = row_widget.file_data
-            self._start_editing(
-                file_data['filename'],
-                file_data['folder_path'],
-                file_data['label'],
-                file_data['row'],
-                file_data['row_layout']
-            )
+    def _open_transaction_editor(self, filename):
+        """Opens the transaction editor for the given file."""
+        editor = getattr(self.globs, 'transaction_editor', None)
+        if not editor:
+            logging.warning("Transaction editor not created yet.")
+            return
+        editor.open_for_file(filename)
 
     def _on_checkbox_toggled(self, filename, checked):
         """Tracks which files have their checkboxes checked and updates master."""

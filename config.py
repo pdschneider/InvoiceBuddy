@@ -44,8 +44,7 @@ class Globs:
         # PySide6 Widgets
         self.app = QApplication(sys.argv)
         self.window = QMainWindow()
-        self.mailbox = None
-        self.splitter = None
+        self.mailbox = NotImplemented
         self.preview_pane = None
         self.preview_placeholder = None
         self.pill_bar = None
@@ -64,6 +63,7 @@ class Globs:
         self.active_source_dialog = None
         self.file_menu = None
         self.rebuild_file_menu = None
+        self.transaction_editor = None
 
         # PySide6 Inbox
         self.files = []  # ALL filenames without extensions in inbox
@@ -223,6 +223,8 @@ class Globs:
         self.dynamic_window_size = settings.get("dynamic_window_size", True)
         self.legacy_mode = settings.get("legacy_mode", False)
         self.previous_version = settings.get("previous_version", "0.1.0")
+        self.simple_entry = settings.get("simple_entry", False)
+        self.google_auth = settings.get("google_auth", False)
 
         # Paths
         self.inbox = sources.get("inbox", "")

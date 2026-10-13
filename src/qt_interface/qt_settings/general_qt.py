@@ -26,25 +26,25 @@ def create_general_settings_tab(globs):
 
     # Check for Updates
     github_check_checkbox = QCheckBox("Check for Updates on Startup")
-    github_check_checkbox.setStyleSheet("color: white; font-size: 14px; margin-left: 10px;")
+    github_check_checkbox.setStyleSheet(dark.settings_checkbox)
     github_check_checkbox.setChecked(globs.github_check)
     layout.addWidget(github_check_checkbox)
 
     # Beta Updates
     beta_checkbox = QCheckBox("Include Beta Updates")
-    beta_checkbox.setStyleSheet("color: white; font-size: 14px; margin-left: 10px;")
+    beta_checkbox.setStyleSheet(dark.settings_checkbox)
     beta_checkbox.setChecked(globs.beta)
     layout.addWidget(beta_checkbox)
 
     # Save Window Placement
     window_checkbox = QCheckBox("Use Saved Window Placement")
-    window_checkbox.setStyleSheet("color: white; font-size: 14px; margin-left: 10px;")
+    window_checkbox.setStyleSheet(dark.settings_checkbox)
     window_checkbox.setChecked(globs.dynamic_window_size)
     layout.addWidget(window_checkbox)
 
     # Legacy Mode
     legacy_checkbox = QCheckBox("Legacy Mode")
-    legacy_checkbox.setStyleSheet("color: white; font-size: 14px; margin-left: 10px;")
+    legacy_checkbox.setStyleSheet(dark.settings_checkbox)
     legacy_checkbox.setChecked(globs.legacy_mode)
     layout.addWidget(legacy_checkbox)
 

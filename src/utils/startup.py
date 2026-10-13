@@ -231,6 +231,16 @@ def setup_settings():
             changed = True
             logging.info(
                 f"Added missing or nonconforming 'previous_version' key to settings.json")
+        if "simple_entry" not in data or not isinstance(data["simple_entry"], bool):
+            data["simple_entry"] = False
+            changed = True
+            logging.info(
+                f"Added missing or nonconforming 'simple_entry' key to settings.json")
+        if "google_auth" not in data or not isinstance(data["google_auth"], bool):
+            data["google_auth"] = False
+            changed = True
+            logging.info(
+                f"Added missing or nonconforming 'google_auth' key to settings.json")
 
         # Check to make sure paths are valid
         if not os.path.isfile(data["history_path"]) and data["history_path"]:

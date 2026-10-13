@@ -68,6 +68,8 @@ def save_qt_settings(globs):
     current_settings["legacy_mode"] = new_legacy_mode
     current_settings["logging_level"] = new_logging_level
     current_settings["previous_version"] = globs.current_version
+    current_settings["simple_entry"] = globs.simple_entry
+    current_settings["google_auth"] = globs.google_auth
 
     # Load current paths to merge with new values
     current_paths, current_buddies = load_paths()

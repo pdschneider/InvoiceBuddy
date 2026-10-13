@@ -2,6 +2,30 @@
 
 All notable changes to **Invoice Buddy** will be located in this file.
 
+## [0.3.3] - 2026-10-13
+
+This update adds a new transaction data entry page for each file, adds working Google Sheets auth, and establishes important back-end changes for future updates.
+
+### 🌟 New
+- New counterparties: Radwell International LLC
+- Added transaction info entry page
+- Simple entry toggle added for users with simple workflows - combines saving metadata, entering data to spreadsheet, and archiving into one single button
+- Added summary page with graphs to default spreadsheets
+- Google Sheets auth is fully functional
+
+### ⚙️ Changed
+- Filenames and spreadsheet data entry now pull from metadata, not the filename itself, allowing spaces in counterparties, descriptions and any other data
+- Improved UI for copyable metadata pills
+- Removed spitter between preview pane and inbox views
+- Minor UI improvements
+- Updated dependencies
+
+### 🛠️ Fixed
+- Dates and currencies now properly enter to the spreadsheet as their respective formats
+
+### 📚 Documentation
+- Added Google auth documentation to in-app help
+
 ## [0.3.2] - 2026-10-10
 
 This update focuses on improving the auto-name feature along with various bug fixes, plus a better first-user experience with an improved wizard and default spreadsheets. 14 new vendors were also added.

@@ -357,7 +357,8 @@ def _save_from_wizard(
         buddies=None,
         github_check=None,
         beta=None,
-        dynamic_window_size=None):
+        dynamic_window_size=None,
+        simple_entry=None):
     """Commit wizard-collected data to disk."""
     # Resolve paths: explicit value > existing > default
     new_inbox = inbox or globs.inbox or os.path.normpath(
@@ -412,6 +413,9 @@ def _save_from_wizard(
             current_settings["beta"] = beta
         if dynamic_window_size is not None:
             current_settings["dynamic_window_size"] = dynamic_window_size
+        # Apply Simple Entry only for recommended users
+        if simple_entry is not None:
+            current_settings["simple_entry"] = True
         current_settings["previous_version"] = globs.current_version
         save_settings(**current_settings)
         logging.info("Wizard settings saved.")
@@ -495,7 +499,8 @@ def create_wizard(globs):
             # Paths: fall back to existing/default (nothing to override)
             _save_from_wizard(
                 globs,
-                github_check=globs.github_check)
+                github_check=globs.github_check,
+                simple_entry=True)
         else:
             # Custom mode: harvest page data and save
             logging.info("Custom settings chosen")

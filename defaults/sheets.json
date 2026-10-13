@@ -6,7 +6,7 @@
       "workbook": "",
       "first_row": 3,
       "first_column": 1,
-      "column_order": ["Company", "Date", "Invoice #", ""]
+      "column_order": ["Counterparty", "Date", "Invoice #", ""]
     },
     {
       "name": "Expenses",
@@ -14,7 +14,7 @@
       "workbook": "",
       "first_row": 3,
       "first_column": 1,
-      "column_order": ["Company", "Date", "Invoice #", "Card Number"]
+      "column_order": ["Counterparty", "Date", "Invoice #", "Card Number"]
     }
   ]
 }

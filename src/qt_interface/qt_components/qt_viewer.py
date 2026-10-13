@@ -5,6 +5,7 @@ from PySide6.QtPdfWidgets import QPdfView
 from PySide6.QtCore import Qt, QBuffer, QByteArray
 import logging
 
+
 class NativePdfViewer(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)

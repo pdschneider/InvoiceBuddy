@@ -3,6 +3,8 @@ import logging
 import pdfplumber
 import os
 import platform
+import os
+from pypdf import PdfReader, PdfWriter
 
 os_name = platform.platform()
 
@@ -115,8 +117,6 @@ def write_pdf_metadata(file_metadata_dict: dict[str, dict], inbox_dir: str):
     file_metadata_dict: 
     {filename: {"Company": "Acme", "InvoiceDate": "2025-01-15", ...}}
     """
-    import os
-    from pypdf import PdfReader, PdfWriter
     updated = 0
     for filename, new_fields in file_metadata_dict.items():
         path = os.path.join(inbox_dir, filename)

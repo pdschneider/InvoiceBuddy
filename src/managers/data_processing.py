@@ -1,10 +1,12 @@
 # src/managers/data_processing.py
+import re
 import os
 import copy
 import logging
 import traceback
 import msoffcrypto
 from io import BytesIO
+from datetime import datetime
 from tkinter import simpledialog
 from openpyxl import load_workbook
 from src.managers.history_manager import load_history, add_update_history
@@ -14,6 +16,53 @@ from odf.opendocument import load
 from odf.table import Table, TableRow, TableCell
 from odf.teletype import extractText
 from odf.text import P
+from pypdf import PdfReader
+
+
+FIELD_KEY_MAP = {
+    "Counterparty": "/Counterparty",
+    "Date": "/Date",
+    "Amount": "/Amount",
+    "Category": "/Category",
+    "Subcategory": "/Subcategory",
+    "Description": "/Description",
+    "Invoice #": "/InvoiceNumber",
+    "Card Number": "/CardNumber",
+    "Terms (Net)": "/Net",
+    "Tax": "/Tax",
+}
+
+
+def get_transaction_data(globs, filepath, sheet_config):
+    """
+    Reads a PDF's metadata and returns values aligned to the sheet's
+    column_order. Missing fields become None placeholders so column
+    positions never shift. Returns (values, labels) where labels are
+    also None at missing positions.
+    """
+    column_order = sheet_config.get("column_order", [])
+
+    try:
+        meta = PdfReader(filepath).metadata or {}
+    except Exception as e:
+        logging.warning(f"Could not read metadata from {filepath}: {e}")
+        return [], []
+
+    values, labels = [], []
+    for col in column_order:
+        if not col:
+            values.append(None)
+            labels.append(None)
+            continue
+        key = FIELD_KEY_MAP.get(col)
+        if key and meta.get(key):
+            values.append(str(meta[key]))
+            labels.append(col)
+        else:
+            values.append(None)
+            labels.append(col)
+
+    return values, labels
 
 
 def parse_spreadsheet(globs, file_list=None):
@@ -198,7 +247,7 @@ def safe_remove_child(parent, child):
         child.parentNode = None
 
 
-def set_ods_cell(row, col_num, value):
+def set_ods_cell(row, col_num, value, numeric=False, date=False):
     """
     Writes value to the logical cell at 1-based col_num within this physical row,
     splitting repeated spans and padding with new cells so the write always lands.
@@ -233,11 +282,37 @@ def set_ods_cell(row, col_num, value):
         safe_remove_child(row, cell)
 
         def _clone(rep_count, text=None):
-            c = TableCell(numbercolumnsrepeated=str(rep_count)) if rep_count > 1 else TableCell()
+            # Numbers become float, dates become real dates, else string
+            num = None
+            iso = None
+            if text is not None and date:
+                m = re.match(r'^(\d{1,2})-(\d{1,2})-(\d{2,4})$', str(text).strip())
+                if m:
+                    mm, dd, yy = m.group(1).zfill(2), m.group(2).zfill(2), m.group(3)
+                    if len(yy) == 2:
+                        yy = "20" + yy
+                    iso = f"{yy}-{mm}-{dd}"
+
+            if text is not None and numeric:
+                try:
+                    num = float(str(text).replace(',', '').replace('$', ''))
+                except ValueError:
+                    num = None
+
+            if iso:
+                c = TableCell(datevalue=iso, valuetype='date')
+            elif num is not None:
+                c = TableCell(value=str(num), valuetype='float')
+            else:
+                c = TableCell(valuetype='string')
+
+            if rep_count > 1:
+                c.setAttribute('numbercolumnsrepeated', str(rep_count))
             if style:
                 c.setAttribute('stylename', style)
-            if text is not None:
-                c.setAttribute('valuetype', 'string')
+            if text is not None and not iso:
+                c.addElement(P(text=text))
+            if text is not None and iso:
                 c.addElement(P(text=text))
             return c
 
@@ -314,14 +389,19 @@ def parse_ods(globs, sheet_name, file_list=None):
             starting_row += 1
 
         for full_file_name in base_names:
-            # Advance to the next empty row (skip rows filled by earlier iterations)
+            # Advance to the next empty row
             while not all(
                 is_empty(starting_row, col)
                 for col in range(starting_column, starting_column + columns_to_check)):
                 starting_row += 1
 
-            base_name = os.path.splitext(full_file_name)[0]
-            portions = base_name.split()
+            full_path = os.path.join(globs.current_folder, full_file_name)
+            portions, labels = get_transaction_data(globs, full_path, sheet_config)
+
+            if not any(v is not None for v in portions):
+                logging.warning(
+                    f"No usable metadata for '{full_file_name}' - skipping (file not entered)")
+                continue
 
             row = get_or_create_ods_row(table, starting_row)
             if not row:
@@ -329,8 +409,21 @@ def parse_ods(globs, sheet_name, file_list=None):
                     f"No physical row at {starting_row} in '{sheet_name}' - skipping file '{full_file_name}'")
                 continue
 
+            if not portions:
+                logging.warning(
+                    f"No usable metadata for '{full_file_name}' - skipping (file not entered)")
+                continue
+
+            NUMERIC_FIELDS = {"Amount", "Tax"}
+            DATE_FIELDS = {"Date"}
+
             for offset, portion in enumerate(portions):
-                written = set_ods_cell(row, starting_column + offset, portion.strip())
+                if portion is None:
+                    continue  # leave that cell alone, but the column position is consumed
+                is_money = labels[offset] in {"Amount", "Tax"}
+                is_date = labels[offset] == "Date"
+                written = set_ods_cell(row, starting_column + offset, str(portion).strip(),
+                                       numeric=is_money, date=is_date)
                 if not written:
                     logging.warning(
                         f"No physical space at ({starting_row}, {starting_column + offset}) "
@@ -418,11 +511,43 @@ def parse_sheet_qt(globs, sheet_name, file_list=None):
                 for col in range(starting_column, starting_column + columns_to_check)):
                 starting_row += 1
 
-            base_name = os.path.splitext(full_file_name)[0]
-            portions = base_name.split()
+            NUMERIC_FIELDS = {"Amount", "Tax"}
+            DATE_FIELDS = {"Date"}
 
-            for j, portion in enumerate(portions, start=starting_column):
-                sheet.cell(row=starting_row, column=j, value=portion.strip())
+            # Read metadata and get ordered values + labels
+            full_path = os.path.join(globs.current_folder, full_file_name)
+            portions, labels = get_transaction_data(globs, full_path, sheet_config)
+
+            if not portions:
+                logging.warning(
+                    f"No usable metadata for '{full_file_name}' - skipping (file not entered)")
+                continue
+
+            for offset, portion in enumerate(portions):
+                if portion is None:
+                    continue
+                col_idx = starting_column + offset
+                label = labels[offset]
+
+                val = str(portion).strip()
+                if label in NUMERIC_FIELDS:
+                    try:
+                        cell_value = float(val.replace(',', '').replace('$', ''))
+                    except ValueError:
+                        cell_value = val
+                elif label in DATE_FIELDS:
+                    m = re.match(r'^(\d{1,2})-(\d{1,2})-(\d{2,4})$', val)
+                    if m:
+                        mm, dd, yy = int(m.group(1)), int(m.group(2)), int(m.group(3))
+                        if yy < 100:
+                            yy += 2000
+                        cell_value = datetime(yy, mm, dd)
+                    else:
+                        cell_value = val
+                else:
+                    cell_value = val
+
+                sheet.cell(row=starting_row, column=col_idx, value=cell_value)
 
             starting_row += 1
 

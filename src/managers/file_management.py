@@ -235,7 +235,7 @@ def open_selected_folders(globs):
     logging.info(f"Opened {len(folders)} unique destination folders.")
 
 
-def archive_files(globs, file_list=None):
+def archive_files(globs, file_list=None, confirm=True):
     """
     Archives files to their end destination.
 
@@ -266,16 +266,17 @@ def archive_files(globs, file_list=None):
         file_list = new_file_list
 
     # Ask for Confirmation
-    reply = QMessageBox.question(
-        globs.window,
-        "Confirm",
-        f"Archive selected files?",
-        QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
-        QMessageBox.StandardButton.No)
+    if confirm:
+        reply = QMessageBox.question(
+            globs.window,
+            "Confirm",
+            f"Archive selected files?",
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+            QMessageBox.StandardButton.No)
 
-    # Exit if yes is not checked
-    if reply == QMessageBox.StandardButton.No:
-        return False
+        # Exit if yes is not checked
+        if reply == QMessageBox.StandardButton.No:
+            return False
 
     logging.debug(f"Attempting to archive files: {file_list}")
 

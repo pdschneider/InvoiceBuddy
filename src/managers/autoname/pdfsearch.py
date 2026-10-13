@@ -84,12 +84,12 @@ def apply_auto_naming(globs, directory, file_list=None):
         return 0
 
     # Step 1: Search for companies (always, no skips)
-    company_results = company_search(
+    counterparty_results = company_search(
         directory=search_dir,
         file_list=file_list,
         normalized_texts=normalized_texts)
 
-    # Step 2: Apply company results, build initial new_parts, scrub if applied
+    # Step 2: Apply counterparty results, build initial new_parts, scrub if applied
     renamed = 0
     valid_companies = {normalize_text(c) for c in load_company_map().values()}
 
@@ -144,15 +144,15 @@ def apply_auto_naming(globs, directory, file_list=None):
 
         new_parts = parts[:]
 
-        # Apply company if found and different/missing
-        company_result = company_results.get(filename)
-        if company_result:
-            company, matched, keyword_tuple = company_result
-            norm_company = normalize_text(company)
-            if not parts or normalize_text(parts[0]) != norm_company:
-                if norm_company in valid_companies:  # Safety check
-                    new_parts = [company.capitalize()]
-                    logging.info(f"  Applied company: {company}")
+        # Apply counterparty if found and different/missing
+        counterparty_result = counterparty_results.get(filename)
+        if counterparty_result:
+            counterparty, matched, keyword_tuple = counterparty_result
+            norm_counterparty = normalize_text(counterparty)
+            if not parts or normalize_text(parts[0]) != norm_counterparty:
+                if norm_counterparty in valid_companies:  # Safety check
+                    new_parts = [counterparty.capitalize()]
+                    logging.info(f"  Applied counterparty: {counterparty}")
 
                     # Scrub all keywords from the text
                     for kw in keyword_tuple:
@@ -168,7 +168,7 @@ def apply_auto_naming(globs, directory, file_list=None):
                             if new_text != normalized_texts[filename]:
                                 normalized_texts[filename] = new_text
                                 logging.debug(
-                                    f"  Scrubbed matched company keyword: {normalized_kw}")
+                                    f"  Scrubbed matched counterparty keyword: {normalized_kw}")
                                 logging.debug(
                                     f"\nCurrent Normalized Text: {normalized_texts[filename]}\n")
                                 logging.debug(
@@ -180,7 +180,7 @@ def apply_auto_naming(globs, directory, file_list=None):
             file_list=file_list,
             normalized_texts=normalized_texts)
 
-        # Apply date if we have exactly company so far
+        # Apply date if we have exactly counterparty so far
         if len(new_parts) == 1:
             date_result = date_results.get(filename)
             if date_result:
@@ -254,13 +254,13 @@ def apply_auto_naming(globs, directory, file_list=None):
             sheets = globs.sheet_data.get("sheets", [])
             for s in sheets:
                 if s.get("name") == identity:
-                    order = s.get("column_order", ["Company", "Date", "Invoice #", ""])
+                    order = s.get("column_order", ["Counterparty", "Date", "Invoice #", ""])
                     break
 
         # Map field names to their extracted values (only if found)
         available = {}
-        if company_result:
-            available["Company"] = company_result[0].strip()
+        if counterparty_result:
+            available["Counterparty"] = counterparty_result[0].strip()
         if date_results.get(filename) and date_results[filename][0]:
             available["Date"] = date_results[filename][0]
         if invoice_results.get(filename) and invoice_results[filename][0]:

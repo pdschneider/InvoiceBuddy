@@ -1,145 +1,128 @@
 # src/connections/alphabet.py
 import os
-import sys
+import time
+import shutil
 import logging
-import gspread
-from google.oauth2.credentials import Credentials
-from google_auth_oauthlib.flow import InstalledAppFlow
-from google.auth.transport.requests import Request
+import webbrowser
+import wsgiref.simple_server
+import wsgiref.util
 
+try:
+    from google_auth_oauthlib.flow import InstalledAppFlow
+    import gspread
+except Exception as e:
+    logging.warning(f"Unable to import Google dependencies - Google Sheets integration unavailable.")
 
-# Scope: read/write to spreadsheets
+CURRENT_AUTH_URL = None  # Most recent auth link, for the reopen button
+
+# Scopes: read/write spreadsheets + drive (needed by gspread.openall)
 SCOPES = [
     'https://www.googleapis.com/auth/spreadsheets',
     'https://www.googleapis.com/auth/drive'
 ]
 
-
-def show_setup_instructions():
-    """Display persistent setup instructions in terminal."""
-    print("\n" + "=" * 60)
-    print("GOOGLE SHEETS SETUP REQUIRED")
-    print("=" * 60)
-    print("""
-To get started with Google Sheets, you need a 'client_secrets.json' file.
-
-STEPS:
-1. Go to: https://console.cloud.google.com/apis/credentials
-2. Create a new project (e.g., 'InvoiceBuddy')
-3. Enable 'Google Sheets API' (APIs & Services → Library)
-4. Create OAuth Client ID → Desktop app
-5. Download the JSON file
-
-SUPPORT:
-- Use a personal Gmail account (school/work accounts often blocked)
-- File should be named 'client_secrets.json' for simplicity
-""")
-    print("=" * 60 + "\n")
+# Establish basic local paths
+TOKEN_DIR = os.path.expanduser("~/.config/invoicebuddy/")
+TOKEN_PATH = os.path.join(TOKEN_DIR, "google_token.json")
+SECRETS_PATH = os.path.join(TOKEN_DIR, "client_secrets.json")
 
 
-def google_authenticate_cli(secrets_path=None):
-    """
-    CLI-based Google authentication with user prompts.
-    
-    Flow:
-    1. Check for existing token → auto-load if found
-    2. Prompt user if no token → select file or provide path
-    3. Run browser OAuth flow
-    4. Cache token for future runs
-    """
-    # Default paths
-    token_dir = os.path.expanduser("~/.config/invoicebuddy/")
-    os.makedirs(token_dir, exist_ok=True)
-    token_path = os.path.join(token_dir, "google_token.json")
-    
-    # Step 1: Check for existing token first
-    if os.path.exists(token_path):
-        try:
-            creds = Credentials.from_authorized_user_file(token_path, SCOPES)
-            
-            # Refresh if expired
-            if creds.expired and creds.refresh_token:
-                creds.refresh(Request())
-                with open(token_path, 'w') as f:
-                    f.write(creds.to_json())
-                logging.info("Refreshed expired Google token.")
-            
-            logging.info("✓ Loaded existing Google token.")
-            return gspread.authorize(creds)
-        
-        except Exception as e:
-            logging.warning(f"Token invalid/expired: {e}")
-    
-    # Step 2: No valid token — need setup
-    print("\nNo Google authentication found. Setting up...")
-    
-    # Ask user about credentials file
-    if not secrets_path:
-        answer = input("\nDo you already have a 'client_secrets.json' file? [y/n]: ").strip().lower()
-        
-        if answer in ['y', 'yes']:
-            # User has file — get path
-            secrets_path = input("\nEnter the full path to your client_secrets.json: ").strip()
-            secrets_path = os.path.expanduser(secrets_path)  # Expand ~ for home dir
-            
-            if not os.path.exists(secrets_path):
-                print(f"\n❌ File not found at: {secrets_path}")
-                print("Please verify the path is correct.\n")
-                return None
-        else:
-            # User needs to create file
-            show_setup_instructions()
-            secrets_path = input("\nEnter the path where you saved your client_secrets.json: ").strip()
-            secrets_path = os.path.expanduser(secrets_path)
-            
-            if not os.path.exists(secrets_path):
-                print(f"\n⚠️  File not found at: {secrets_path}")
-                print("Make sure you downloaded it from Google Cloud Console.")
-                print("Try running this command again after confirming the file exists.\n")
-                return None
-    
-    # Step 3: Run browser OAuth flow
-    print(f"\n📝 Using secrets file: {secrets_path}")
-    print("🌐 Browser will open for Google sign-in...\n")
-    
+class _CallbackCatcher:
+    """Tiny WSGI app that records Google's redirect after sign-in."""
+
+    def __init__(self):
+        self.last_request_uri = None
+
+    def __call__(self, environ, start_response):
+        self.last_request_uri = wsgiref.util.request_uri(environ)
+        start_response("200 OK", [("Content-Type", "text/plain")])
+        return [b"Authorization complete. You may close this window."]
+
+
+def has_saved_token():
+    """Check local token file only — no Google contact."""
+    return os.path.exists(TOKEN_PATH)
+
+
+def delete_token():
+    """Remove the cached Google token. Keeps client_secrets.json intact."""
     try:
-        flow = InstalledAppFlow.from_client_secrets_file(secrets_path, SCOPES)
-        creds = flow.run_local_server(port=0)
-        
-        # Save token for future use
-        with open(token_path, 'w') as f:
-            f.write(creds.to_json())
-        
-        print("\n✅ Google OAuth successful!")
-        print(f"   Token saved to: {token_path}")
-        print("   Future runs will authenticate automatically.\n")
-        return gspread.authorize(creds)
-    
+        if os.path.exists(TOKEN_PATH):
+            os.remove(TOKEN_PATH)
+        logging.info("Google token deleted.")
+        return True
     except Exception as e:
-        logging.error(f"OAuth flow failed: {e}")
-        print(f"\n❌ Authentication failed: {e}\n")
+        logging.error(f"Could not delete token: {e}")
+        return False
+
+
+def google_connect(secrets_path, cancel_event=None):
+    """
+    Run the browser OAuth flow using a client_secrets.json file.
+    Returns a gspread client on success, None on failure or cancellation.
+    Mirrors InstalledAppFlow.run_local_server(), but with cancel support
+    and a persistent auth URL for reopening the browser.
+    """
+    global CURRENT_AUTH_URL
+
+    try:
+        os.makedirs(TOKEN_DIR, exist_ok=True)
+
+        # Cache a copy of the secrets file so re-auth never needs it again
+        if os.path.abspath(secrets_path) != os.path.abspath(SECRETS_PATH):
+            shutil.copy2(secrets_path, SECRETS_PATH)
+
+        flow = InstalledAppFlow.from_client_secrets_file(SECRETS_PATH, SCOPES)
+
+        # ===== Our own callback server (same as run_local_server does) =====
+        wsgi_app = _CallbackCatcher()
+        local_server = wsgiref.simple_server.make_server(
+            "localhost", 0, wsgi_app)
+
+        flow.redirect_uri = f"http://localhost:{local_server.server_port}/"
+        auth_url, _ = flow.authorization_url(access_type='offline')
+        CURRENT_AUTH_URL = auth_url  # Saved for the reopen button
+
+        webbrowser.open(auth_url)
+        logging.info(f"Authorize at: {auth_url}")
+
+        # ===== Wait loop: checks cancel + 10-minute deadline each tick =====
+        local_server.timeout = 2  # handle_request() gives up every 2s
+        deadline = time.time() + 600
+
+        while not wsgi_app.last_request_uri:
+            if cancel_event and cancel_event.is_set():
+                local_server.server_close()
+                logging.info("OAuth cancelled by user.")
+                return None
+            if time.time() > deadline:
+                local_server.server_close()
+                logging.warning("OAuth timed out after 10 minutes.")
+                return None
+            local_server.handle_request()
+
+        local_server.server_close()
+
+        # Callback arrived — exchange the code for tokens
+        authorization_response = wsgi_app.last_request_uri.replace("http", "https")
+        flow.fetch_token(authorization_response=authorization_response)
+        creds = flow.credentials
+
+        with open(TOKEN_PATH, 'w') as f:
+            f.write(creds.to_json())
+
+        logging.info("Google OAuth successful, token cached.")
+        return gspread.authorize(creds)
+
+    except Exception as e:
+        logging.error(f"Google OAuth flow failed: {e}")
         return None
 
 
-# CLI test
-if __name__ == "__main__":
-    print("=" * 50)
-    print("Google Sheets Authentication Test")
-    print("=" * 50)
-    
-    gc = google_authenticate_cli()
-    
-    if gc:
-        # Quick test: list spreadsheets
-        print("\n📊 Testing connection...")
-        try:
-            spreadsheets = gc.openall()
-            print(f"✅ Connected! Found {len(spreadsheets)} spreadsheet(s):")
-            for s in spreadsheets[:5]:  # Show first 5
-                print(f"   - {s.title}")
-            if len(spreadsheets) > 5:
-                print(f"   ... and {len(spreadsheets) - 5} more")
-        except Exception as e:
-            print(f"⚠️  Connection OK but couldn't list spreadsheets: {e}")
-    else:
-        print("\n❌ Authentication failed or cancelled.")
+def list_spreadsheets(client, limit=3):
+    """Return up to `limit` spreadsheet titles as proof of connection."""
+    try:
+        return [s.title for s in client.openall()][:limit]
+    except Exception as e:
+        logging.warning(f"Could not list spreadsheets: {e}")
+        return []
