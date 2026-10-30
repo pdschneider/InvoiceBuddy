@@ -33,11 +33,6 @@ def create_sidebar(globs):
 
     layout.addLayout(top_layout)
 
-    # === NAVIGATION LIST ===
-    # nav_label = QLabel("Folders")
-    # nav_label.setStyleSheet("font-weight: bold; font-size: 14px; padding-top: 10px; color: #aaa;")
-    # layout.addWidget(nav_label)
-
     # Use QListWidget for easy selection handling
     nav_list = QListWidget()
     nav_list.setStyleSheet("""
@@ -61,7 +56,8 @@ def create_sidebar(globs):
     """)
 
     # Define Folders
-    folders = ["Inbox", "Transactions", "Budget", "Insights", "Trash"]
+    folders = ["Inbox", "Transactions", "Budget", "Insights", "Trash"]  # Eventual stack
+    folders = ["Inbox", "Budget"]
     for folder in folders:
         item = QListWidgetItem(folder)
         item.setData(Qt.UserRole, folder.lower()) # Store key
@@ -93,15 +89,22 @@ def on_folder_click(item, globs):
     """Handles clicking a folder in the sidebar navigation."""
     folder_key = item.data(Qt.UserRole)
 
-    if folder_key == 'inbox':
-        globs.current_folder = globs.inbox
-    elif folder_key == 'transactions':
-        globs.current_folder = globs.archive
-    elif folder_key == 'budget':
-        return  # Not implemented yet
+    # Pages that take over the whole workspace
+    if folder_key == 'budget':
+        globs.page_stack.setCurrentWidget(globs.budget_page)
+        return
     elif folder_key == 'insights':
         return  # Not implemented yet
     elif folder_key == 'trash':
+        return  # Not implemented yet
+
+    # File views always go back to page 0 (mailbox + preview)
+    if hasattr(globs, 'page_stack'):
+        globs.page_stack.setCurrentIndex(0)
+
+    if folder_key == 'inbox':
+        globs.current_folder = globs.inbox
+    elif folder_key == 'transactions':
         return  # Not implemented yet
     else:
         return

@@ -8,35 +8,7 @@ from PySide6.QtCore import Qt
 from pypdf import PdfReader
 import os
 from src.qt_interface.qt_components.qt_viewer import NativePdfViewer
-
-
-METADATA_KEYS = {
-    "/Counterparty": "Counterparty",
-    "/Date": "Date",
-    "/Amount": "Amount",
-    "/Category": "Category",
-    "/Subcategory": "Subcategory",
-    "/Description": "Description",
-    "/CardNumber": "Card Number",
-    "/InvoiceNumber": "Invoice Number",
-    "/Net": "Terms (Net)",
-    "/Tax": "Tax",
-}
-
-
-def read_file_metadata(filepath):
-    """Reads auto-name metadata keys from a PDF, skipping missing ones."""
-    fields = {}
-    try:
-        reader = PdfReader(filepath)
-        if reader.metadata:
-            for key, label in METADATA_KEYS.items():
-                value = reader.metadata.get(key)
-                if value:
-                    fields[label] = str(value)
-    except Exception:
-        pass
-    return fields
+from src.utils.load_settings import read_file_metadata
 
 
 def create_pill(label, value, display=None, is_copy_all=False):
@@ -214,15 +186,21 @@ def create_preview_pane(globs):
                 "Tax": "Tax",
             }
 
-            # Build ordered list of (display_label, value) tuples
+            # Build ordered list — column_order first, then any leftover fields
             ordered_fields = []
+            seen = set()
             for col in column_order:
                 if not col:  # Skip empty placeholders
                     continue
-                # Look up the field label from the mapping
                 field_label = label_mapping.get(col, col)
                 if field_label in fields:
                     ordered_fields.append((col, fields[field_label]))
+                    seen.add(field_label)
+
+            # Fields present in the PDF but not in column_order
+            for label, value in fields.items():
+                if label not in seen:
+                    ordered_fields.append((label, value))
 
             # Render ordered pills
             for label, value in ordered_fields:

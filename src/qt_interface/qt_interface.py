@@ -10,13 +10,23 @@ from src.qt_interface.qt_preview import create_preview_pane
 from src.qt_interface.qt_components.qt_sidebar import create_sidebar
 from src.qt_interface.qt_settings.qt_settings import create_settings_panel
 from src.qt_interface.qt_components.qt_mailbox import MailboxWidget
+from src.qt_interface.qt_components.qt_budget import BudgetPage
 from src.managers.file_management import (open_workbook, open_directory,
                                           open_logs, open_config)
 from src.utils.observers import setup_observer
 from src.interface.setup.setup_wizard import create_wizard
-from src.qt_interface.qt_components.qt_changelog import create_changelog_panel, toggle_changelog_panel
-from src.qt_interface.qt_components.qt_about import create_about_panel, toggle_about_panel
-from src.qt_interface.qt_components.qt_bug_report import create_report_panel, toggle_report_panel
+from src.qt_interface.qt_components.qt_changelog import (
+    create_changelog_panel,
+    toggle_changelog_panel
+)
+from src.qt_interface.qt_components.qt_about import (
+    create_about_panel,
+    toggle_about_panel
+)
+from src.qt_interface.qt_components.qt_bug_report import (
+    create_report_panel,
+    toggle_report_panel
+)
 from src.qt_interface.qt_components.qt_docs import create_docs_panel
 from src.qt_interface.qt_components.qt_transaction_editor import TransactionEditor
 from src.utils.save_qt import save_qt_settings
@@ -73,6 +83,9 @@ class WindowResizeEventFilter(QObject):
         return shapes.get(edge, Qt.ArrowCursor)
     
     def eventFilter(self, obj, event):
+        # Only act on events for our own main window
+        if not isinstance(obj, QWidget) or obj.window() is not self.window:
+            return False
         # Skip resize logic if a popup/menu is open
         if QApplication.activePopupWidget():
             return False
@@ -287,8 +300,27 @@ def create_qt_interface(globs):
     mailbox.setMinimumWidth(300)
     preview_pane = create_preview_pane(globs)
 
-    workspace_layout.addWidget(left_pane, stretch=4)
-    workspace_layout.addWidget(preview_pane, stretch=5)
+    # Stack that swaps entire page views (Inbox view vs Budget page)
+    page_holder = QWidget()
+    page_stack = QStackedLayout(page_holder)
+
+    # Page 0: Inbox view (mailbox/editor left, PDF preview right)
+    inbox_view = QWidget()
+    inbox_layout = QHBoxLayout(inbox_view)
+    inbox_layout.setContentsMargins(0, 0, 0, 0)
+    inbox_layout.setSpacing(5)
+    inbox_layout.addWidget(left_pane, stretch=4)
+    inbox_layout.addWidget(preview_pane, stretch=5)
+    page_stack.addWidget(inbox_view)
+
+    # Page 1: Budget page (left side only for now)
+    budget_page = BudgetPage(globs)
+    page_stack.addWidget(budget_page)
+
+    workspace_layout.addWidget(page_holder)
+
+    globs.page_stack = page_stack
+    globs.budget_page = budget_page
 
     main_layout.addWidget(workspace_widget)
 

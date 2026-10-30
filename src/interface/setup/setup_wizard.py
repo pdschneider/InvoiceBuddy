@@ -15,7 +15,16 @@ from src.qt_interface.qt_settings.qt_spreadsheet import (
     populate_sheets_list, on_add_sheet)
 from src.qt_interface.qt_styles import dark
 import logging
+import copy
 import os
+
+
+class ClassicWizard(QWizard):
+    """Re-forces ClassicStyle after Show, undoing Qt's
+    Windows-only auto-promotion to AeroStyle."""
+    def showEvent(self, event):
+        super().showEvent(event)
+        self.setWizardStyle(QWizard.ClassicStyle)
 
 
 class WelcomePage(QWizardPage):
@@ -438,7 +447,7 @@ def _backfill_default_workbooks(globs):
 def create_wizard(globs):
     """Opens the wizard window."""
     # Create Wizard Window
-    wizard = QWizard()
+    wizard = ClassicWizard()
     wizard.setWindowTitle("Invoice Buddy Setup")
     wizard.resize(650, 600)
 
@@ -478,8 +487,15 @@ def create_wizard(globs):
     # Set the skip target dynamically
     method_page.skip_to = thank_you_id
 
+    # Snapshot sheets so Cancel/Skip doesn't keep page edits
+    sheets_snapshot = copy.deepcopy(globs.sheet_data.get("sheets", []))
+
     # Execute Wizard
     result = wizard.exec()
+
+    # Undo any in-page edits if the wizard was cancelled or skipped
+    if result == QWizard.Rejected:
+        globs.sheet_data["sheets"] = copy.deepcopy(sheets_snapshot)
 
     # Restore the settings panel's layout and rebuild its rows
     globs.sheets_scroll_layout = sheets_page._previous_layout
@@ -495,6 +511,7 @@ def create_wizard(globs):
 
             # Update github_check based on privacy checkbox (True = disable updates)
             globs.github_check = not method_page.privacy_checkbox.isChecked()
+            globs.simple_entry = True
 
             # Paths: fall back to existing/default (nothing to override)
             _save_from_wizard(

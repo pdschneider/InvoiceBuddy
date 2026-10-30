@@ -1,4 +1,5 @@
 # src/utils/load_settings.py
+from pypdf import PdfReader
 import logging
 import platform
 import os
@@ -14,8 +15,8 @@ def load_data_path(direct=None, filename=None, default=False):
     """
     # ==================== DEFAULT FILES ====================
     default_files = [
-        "settings.json", "company_map.json", "folder_maps.json",
-        "paths.json", "spreadsheet.json",
+        "settings.json", "company_map.json", "folder_maps.json", "categories.json",
+        "paths.json", "spreadsheet.json", "default_spreadsheet.xlsx", "default_spreadsheet.ods",
         "assets/icon.png", "assets/add-1.png", "assets/add-2.png", "assets/add-3.png",
         "assets/archive.png", "assets/auto.png", "assets/card-1.png", "assets/card-2.png",
         "assets/cards-1.png", "assets/cards-2.png", "assets/delete-1.png", "assets/delete-2.png",
@@ -28,7 +29,7 @@ def load_data_path(direct=None, filename=None, default=False):
         "assets/settings-2.png", "assets/printer-1.png", "assets/printer-2.png", "assets/window-size.png",
         "assets/notification-1.png", "assets/notification-2.png", "assets/notification-3.png",
         "themes/cosmic_sky.json", "themes/pastel_green.json", "themes/trojan_red.json",
-        "themes/dark_cloud.json", "themes/soft_light.json", "sheets.json",
+        "themes/dark_cloud.json", "themes/soft_light.json", "sheets.json", "counterparties.json",
         "assets/github-light.svg", "assets/github.svg", "assets/codeberg.svg",
         "assets/github-light.png", "assets/github.png", "assets/codeberg.png"
     ]
@@ -69,7 +70,8 @@ def load_data_path(direct=None, filename=None, default=False):
                 persistent_dir = os.path.normpath(os.path.join(os.getenv("LOCALAPPDATA"), "InvoiceBuddy"))
             else:
                 persistent_dir = os.path.normpath(os.path.expanduser("~/.local/share/InvoiceBuddy"))
-            default_files = ["default_spreadsheet.xlsx", "default_spreadsheet.ods"]
+            default_files = ["default_spreadsheet.xlsx", "default_spreadsheet.ods",
+                             "counterparties.json", "categories.json"]
         else:  # cache or main
             if platform.system() == "Windows":
                 persistent_dir = os.path.normpath(
@@ -270,3 +272,61 @@ def load_sheets():
     except json.JSONDecodeError as e:
         logging.error(f"Error decoding sheets.json: {e}")
         return []
+
+
+# File metadata
+METADATA_KEYS = {
+    "/Counterparty": "Counterparty",
+    "/Date": "Date",
+    "/Amount": "Amount",
+    "/Category": "Category",
+    "/Subcategory": "Subcategory",
+    "/Description": "Description",
+    "/CardNumber": "Card Number",
+    "/InvoiceNumber": "Invoice Number",
+    "/Net": "Terms (Net)",
+    "/Tax": "Tax",
+}
+
+
+def read_file_metadata(filepath):
+    """Reads auto-name metadata keys from a PDF, skipping missing ones."""
+    fields = {}
+    try:
+        reader = PdfReader(filepath)
+        if reader.metadata:
+            for key, label in METADATA_KEYS.items():
+                value = reader.metadata.get(key)
+                if value:
+                    fields[label] = str(value)
+    except Exception:
+        pass
+    return fields
+
+
+def load_counterparties():
+    """Load counterparties from counterparties.json."""
+    try:
+        file_path = os.path.normpath(load_data_path("local", "counterparties.json"))
+        with open(file_path, 'r') as f:
+            return json.load(f)
+    except FileNotFoundError:
+        logging.error("Error: counterparties.json not found")
+        return {}
+    except json.JSONDecodeError as e:
+        logging.error(f"Error decoding counterparties.json: {e}")
+        return {}
+
+
+def load_categories():
+    """Load categories from categories.json."""
+    try:
+        file_path = os.path.normpath(load_data_path("local", "categories.json"))
+        with open(file_path, 'r') as f:
+            return json.load(f)
+    except FileNotFoundError:
+        logging.error("Error: categories.json not found")
+        return {}
+    except json.JSONDecodeError as e:
+        logging.error(f"Error decoding categories.json: {e}")
+        return {}

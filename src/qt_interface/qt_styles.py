@@ -98,7 +98,7 @@ dark = SimpleNamespace(
             image: none;
             border-left: 4px solid transparent;
             border-right: 4px solid transparent;
-            border-top: 5px solid white;
+            border-top: 5px solid transparent;
             margin-right: 10px;
         }
         QComboBox QAbstractItemView {

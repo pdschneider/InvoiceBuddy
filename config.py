@@ -15,7 +15,9 @@ from src.utils.load_settings import (load_settings,
                                  load_folder_map,
                                  load_paths,
                                  load_spreadsheet_specs,
-                                 load_sheets)
+                                 load_sheets,
+                                 load_counterparties,
+                                 load_categories)
 
 
 # Globs Class
@@ -24,6 +26,8 @@ class Globs:
     def __init__(self):
         """Initialize settings from load_settings"""
         self.refresh_globs()
+        self.refresh_counterparties()
+        self.refresh_categories()
         self.observers = {}
 
         # Current Version
@@ -38,7 +42,7 @@ class Globs:
         self.pyinstaller_bundle = getattr(sys, 'frozen', False)
         self.is_bundled = self.pyinstaller_bundle
 
-        # Folder mappings and paths from folder_maps.json
+        # Folder mappings and paths
         self.sources, self.buddies = load_paths()
 
         # PySide6 Widgets
@@ -54,7 +58,6 @@ class Globs:
         self.beta_checkbox = None
         self.window_checkbox = None
         self.printer_combo = None  # The combobox that stores the printer value
-        self.legacy_checkbox = None
         self.logging_level_box = None
         self.inbox_entry_box = None
         self.archive_entry_box = None
@@ -64,6 +67,8 @@ class Globs:
         self.file_menu = None
         self.rebuild_file_menu = None
         self.transaction_editor = None
+        self.page_stack = None
+        self.selected_file = None
 
         # PySide6 Inbox
         self.files = []  # ALL filenames without extensions in inbox
@@ -201,8 +206,18 @@ class Globs:
         self.inbox_count_var = None
         self.update_file_counts = None
 
+    def refresh_counterparties(self):
+        """Refreshes counterparties from counterparties json file."""
+        counterparties = load_counterparties()
+        self.counterparties = counterparties.get("counterparties", {})
+
+    def refresh_categories(self):
+        """Refreshes categories from categories json file."""
+        categories = load_categories()
+        self.categories = categories.get("categories", {})
+
     def refresh_globs(self):
-        """Refreshes settings from settings file"""
+        """Refreshes settings from settings file and a lot more"""
         settings = load_settings()
         sources, buddies = load_paths()
         spreadsheet_specs = load_spreadsheet_specs()

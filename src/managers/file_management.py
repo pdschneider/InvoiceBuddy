@@ -8,6 +8,7 @@ from send2trash import send2trash
 from src.managers.history_manager import load_history, add_update_history
 from src.utils.save_settings import save_metadata
 from src.utils.load_settings import load_data_path
+from src.utils.load_settings import read_file_metadata
 from src.utils.toast import show_toast
 from PySide6.QtWidgets import QFileDialog
 from PySide6.QtWidgets import QMessageBox
@@ -235,6 +236,15 @@ def open_selected_folders(globs):
     logging.info(f"Opened {len(folders)} unique destination folders.")
 
 
+SANITIZE_CHARS = '<>:"/\\|?*'
+
+def sanitize_folder_name(name):
+    """Strips whitespace and removes characters that are invalid in folder names."""
+    for ch in SANITIZE_CHARS:
+        name = name.replace(ch, "")
+    return name.strip()
+
+
 def archive_files(globs, file_list=None, confirm=True):
     """
     Archives files to their end destination.
@@ -281,18 +291,17 @@ def archive_files(globs, file_list=None, confirm=True):
     logging.debug(f"Attempting to archive files: {file_list}")
 
     for src_file in file_list:
-        # Find the first word of the filename for folder matching
         filename = os.path.basename(src_file)
-        first_word = os.path.splitext(filename)[0].split()[0].lower()
 
         # Get the identity from metadata via global dictionary variable
         file_type = globs.file_identity.get(src_file, "Invoice")
         logging.debug(f"File identity for {src_file}: {file_type}")
 
-        # Find matching subfolder
-        subfolder_name = next(
-            (folder for words, folder in globs.folder_map.items() if first_word in words),
-            globs.oneoffs_folder)
+        # Determine archive subfolder from PDF /Counterparty metadata
+        counterparty = read_file_metadata(src_file).get("Counterparty", "")
+        subfolder_name = sanitize_folder_name(counterparty) or globs.oneoffs_folder
+        if not counterparty:
+            logging.debug(f"No /Counterparty metadata on {src_file} - using fallback folder.")
         logging.debug(f"Matched subfolder: {subfolder_name}")
 
         # Generate path for archive destination folder

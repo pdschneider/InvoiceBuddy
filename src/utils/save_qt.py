@@ -20,7 +20,6 @@ def save_qt_settings(globs):
     new_beta = globs.beta_checkbox.isChecked()
     new_window_size = globs.window_checkbox.isChecked()
     new_printer = globs.printer_combo.currentText()
-    new_legacy_mode = globs.legacy_checkbox.isChecked()
     new_logging_level = globs.logging_level_box.currentText().upper()
 
     # Read Inbox Path
@@ -54,7 +53,6 @@ def save_qt_settings(globs):
     globs.beta = new_beta
     globs.dynamic_window_size = new_window_size
     globs.default_printer = new_printer
-    globs.legacy_mode = new_legacy_mode
     globs.logging_level = new_logging_level
     globs.inbox = new_inbox
     globs.archive = new_archive
@@ -65,7 +63,6 @@ def save_qt_settings(globs):
     current_settings["beta"] = new_beta
     current_settings["dynamic_window_size"] = new_window_size
     current_settings["default_printer"] = new_printer
-    current_settings["legacy_mode"] = new_legacy_mode
     current_settings["logging_level"] = new_logging_level
     current_settings["previous_version"] = globs.current_version
     current_settings["simple_entry"] = globs.simple_entry
@@ -139,15 +136,20 @@ def save_qt_settings(globs):
     # Save sheet definitions
     save_sheets(globs)
 
+    # Save counterparties
+    save_counterparties(globs)
+
+    # Save categories
+    save_categories(globs)
+
 
 def save_sheets(globs):
     """Save sheet definitions to sheets.json."""
-    
     try:
         file_path = load_data_path("config", "sheets.json")
         with open(file_path, 'w') as f:
             json.dump(globs.sheet_data, f, indent=2)
-        logging.info(f"Saved {len(globs.sheet_data.get('sheets', []))} sheet definitions.")
+        logging.debug(f"Saved {len(globs.sheet_data.get('sheets', []))} sheet definitions.")
     except Exception as e:
         logging.error(f"Failed to save sheets.json: {e}")
 
@@ -181,3 +183,23 @@ def save_metadata(globs):
             logging.warning(f"Could not save /Sheet to {filename}: {e}")
 
     logging.info(f"Saved /Sheet metadata to {saved_count} PDF files.")
+
+
+def save_counterparties(globs):
+    """Saves counterparties to counterparties.json file"""
+    try:
+        file_path = load_data_path("local", "counterparties.json")
+        with open(file_path, 'w') as f:
+            json.dump({"counterparties": globs.counterparties}, f, indent=2)
+    except Exception as e:
+        logging.error(f"Failed to save counterparties due to: {e}")
+
+
+def save_categories(globs):
+    """Saves categories to categories.json file"""
+    try:
+        file_path = load_data_path("local", "categories.json")
+        with open(file_path, 'w') as f:
+            json.dump({"categories": globs.categories}, f, indent=2)
+    except Exception as e:
+        logging.error(f"Failed to save categories due to: {e}")

@@ -2,6 +2,31 @@
 
 All notable changes to **Invoice Buddy** will be located in this file.
 
+## [0.3.4] - 2026-10-30
+
+This update finally removes the old legacy UI from the app and improves on new features introduced in the previous two updates.
+
+### 🌟 New
+- Filename writing can now be separated from column order
+- Date input now has calendar view
+- Counterparties now save for recurrant quicker entry
+
+### ⚙️ Changed
+- Metadata pills now populate even if not in column order
+- Archive function now operates based on Counterparty, not the first word of a filename, and generates new folders if counterparty is not present
+- Legacy mode has been fully removed from options
+- Exit option is now available in the file menu
+- Wizard recommended settings now toggles on simple entry mode
+- Auto-name counterparties expanded to include spaces & more identifiable names
+- Amount input sanitized to allow only real dollar amounts
+- Tax input sanitized to allow only real dollar amounts
+- Temporarilty removed unused menu items for clarity
+
+### 🛠️ Fixed
+- Window resize even no longer triggers when opening other windows from the title bar
+- Wizard correctly shows sheets in custom path
+- Sheet names no longer change with mouse scroll in spreadsheet settings
+
 ## [0.3.3] - 2026-10-13
 
 This update adds a new transaction data entry page for each file, adds working Google Sheets auth, and establishes important back-end changes for future updates.

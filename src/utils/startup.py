@@ -221,8 +221,8 @@ def setup_settings():
             changed = True
             logging.info(
                 f"Added missing or nonconforming 'dynamic_window_size' key to settings.json")
-        if "legacy_mode" not in data or not isinstance(data["legacy_mode"], bool):
-            data["legacy_mode"] = True
+        if "legacy_mode" not in data or not isinstance(data["legacy_mode"], bool) or data.get("legacy_mode", True) == True:
+            data["legacy_mode"] = False
             changed = True
             logging.info(
                 f"Added missing or nonconforming 'legacy_mode' key to settings.json")

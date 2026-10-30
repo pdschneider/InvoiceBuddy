@@ -1,7 +1,8 @@
 # src/qt_interface/qt_components/qt_title_bar.py
-from PySide6.QtWidgets import (QWidget, QHBoxLayout,
-                               QMenuBar, QToolButton,
-                               QMenu, QStyle)
+from PySide6.QtWidgets import (
+    QWidget, QHBoxLayout, QMenuBar, QToolButton,
+    QMenu, QStyle
+)
 from PySide6.QtCore import Qt, QPoint
 from PySide6.QtGui import  QAction
 from src.qt_interface.qt_styles import dark
@@ -113,7 +114,7 @@ class TitleBar(QWidget):
 
     def mousePressEvent(self, event):
         child = self.childAt(event.pos())
-        if isinstance(child, QToolButton):
+        if isinstance(child, (QToolButton, QMenuBar)):
             return
         if event.button() == Qt.LeftButton:
             self.dragging = True

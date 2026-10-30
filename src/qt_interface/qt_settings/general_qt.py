@@ -42,12 +42,6 @@ def create_general_settings_tab(globs):
     window_checkbox.setChecked(globs.dynamic_window_size)
     layout.addWidget(window_checkbox)
 
-    # Legacy Mode
-    legacy_checkbox = QCheckBox("Legacy Mode")
-    legacy_checkbox.setStyleSheet(dark.settings_checkbox)
-    legacy_checkbox.setChecked(globs.legacy_mode)
-    layout.addWidget(legacy_checkbox)
-
     # --- PRINTER SELECTION START ---
 
     # Create a frame to hold the label and combo box for alignment
@@ -102,6 +96,5 @@ def create_general_settings_tab(globs):
     globs.github_check_checkbox = github_check_checkbox
     globs.beta_checkbox = beta_checkbox
     globs.window_checkbox = window_checkbox
-    globs.legacy_checkbox = legacy_checkbox
 
     return tab_widget

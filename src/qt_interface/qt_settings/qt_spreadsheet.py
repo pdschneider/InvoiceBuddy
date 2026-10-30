@@ -2,7 +2,8 @@
 from PySide6.QtWidgets import (QWidget, QVBoxLayout, QLabel,
                                QHBoxLayout, QPushButton, QLineEdit,
                                QColorDialog, QMessageBox, QScrollArea,
-                               QSpinBox, QComboBox, QFrame)
+                               QSpinBox, QComboBox, QFrame, QCheckBox,
+                               QSizePolicy)
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QColor
 from odf.opendocument import load
@@ -15,7 +16,7 @@ from src.qt_interface.qt_styles import dark
 
 
 COLUMN_OPTIONS = ["Counterparty", "Date", "Amount", "Category",
-                  "Subcategory", "Description", "Invoice #", "Card Number", ""]
+                  "Subcategory", "Description", "Invoice Number", "Card Number", ""]
 MAX_COLUMNS = 10
 
 
@@ -117,14 +118,14 @@ def populate_sheets_list(globs):
         sheet_defs.append({
             "name": "Sheet", "color": "#2ecc71", "workbook": "",
             "first_row": 3, "first_column": 1,
-            "column_order": ["Counterparty", "Date", "Invoice #", ""]
+            "column_order": ["Counterparty", "Date", "Invoice Number", ""]
         })
         globs.sheet_data["sheets"] = sheet_defs
 
     for idx, sheet in enumerate(sheet_defs):
         sheet.setdefault("first_row", 3)
         sheet.setdefault("first_column", 1)
-        sheet.setdefault("column_order", ["Counterparty", "Date", "Invoice #", ""])
+        sheet.setdefault("column_order", ["Counterparty", "Date", "Invoice Number", ""])
         sheet.setdefault("workbook", "")
         row = create_sheet_row(globs, idx, sheet)
         layout.addWidget(row)
@@ -383,7 +384,6 @@ def create_sheet_row(globs, idx, sheet):
         """)
 
         def on_browse_collapsed():
-            from src.managers.file_management import browse_file
             temp_var = type('obj', (object,), {'setText': lambda s, v: setattr(temp_var, '_val', v)})()
             browse_file(globs, temp_var, _type="workbook")
             if hasattr(temp_var, '_val'):
@@ -392,7 +392,7 @@ def create_sheet_row(globs, idx, sheet):
                 globs.sheet_data["sheets"][idx].setdefault("color", "#2ecc71")
                 globs.sheet_data["sheets"][idx].setdefault("first_row", 3)
                 globs.sheet_data["sheets"][idx].setdefault("first_column", 1)
-                globs.sheet_data["sheets"][idx].setdefault("column_order", ["Counterparty", "Date", "Invoice #", ""])
+                globs.sheet_data["sheets"][idx].setdefault("column_order", ["Counterparty", "Date", "Invoice Number", ""])
                 populate_sheets_list(globs)
 
         add_btn.clicked.connect(lambda checked: on_browse_collapsed())
@@ -442,6 +442,7 @@ def create_sheet_row(globs, idx, sheet):
 
     # Name combo (populated from workbook tabs)
     name_combo = QComboBox()
+    name_combo.wheelEvent = lambda event: event.ignore()
     wb_path_for_names = sheet.get("workbook", "")
     if wb_path_for_names and not wb_path_for_names.startswith("http"):
         tab_names = get_workbook_sheet_names(wb_path_for_names)
@@ -550,23 +551,50 @@ def create_sheet_row(globs, idx, sheet):
     line2.addStretch()
     row_layout.addLayout(line2)
 
-    # ===== LINE 3: Column Order =====
+    # ===== Filename separation toggle =====
+    filename_check = QCheckBox("Separate filename order from column order")
+    filename_check.setChecked(sheet.get("separate_filename", False))
+    filename_check.setStyleSheet("color: #aaa; font-size: 12px;")
+    filename_check.toggled.connect(
+        lambda checked, i=idx: on_filename_mode_changed(globs, i, checked))
+    row_layout.addWidget(filename_check)
+
+    # ===== COLUMN ORDER + FILENAME ORDER (side by side) =====
+    orders_row = QHBoxLayout()
+    orders_row.setSpacing(12)
+
+    # ----- Left side: Column Order -----
     line3 = QVBoxLayout()
     line3.setSpacing(4)
+
+    order_label = QLabel("Column Order")
+    order_label.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
+    order_label.setStyleSheet(
+        "color: white; font-size: 13px; font-weight: bold;"
+        "border-bottom: 1px solid #444; padding-bottom: 2px;"
+    )
+    line3.addWidget(order_label)
+    line3 = QVBoxLayout()
+    line3.setSpacing(4)
+
+    header_row = QHBoxLayout()
+    header_row.setSpacing(8)
 
     order_label = QLabel("Column Order")
     order_label.setStyleSheet(
         "color: white; font-size: 13px; font-weight: bold;"
         "border-bottom: 1px solid #444; padding-bottom: 2px;"
     )
-    line3.addWidget(order_label)
+    header_row.addWidget(order_label)
+
+    line3.addLayout(header_row)
 
     # Tiny class to disable mouse scroll for comboboxes
     class NoScrollComboBox(QComboBox):
         def wheelEvent(self, event):
             event.ignore()
 
-    column_order = sheet.setdefault("column_order", ["Counterparty", "Date", "Invoice #", ""])
+    column_order = sheet.setdefault("column_order", ["Counterparty", "Date", "Invoice Number", ""])
 
     if len(column_order) > MAX_COLUMNS:
         del column_order[MAX_COLUMNS:]
@@ -639,7 +667,88 @@ def create_sheet_row(globs, idx, sheet):
     add_btn.clicked.connect(lambda checked, i=idx: on_add_column(globs, i))
     line3.addWidget(add_btn)
 
-    row_layout.addLayout(line3)
+    # Horizontal row wrapping Column Order + Filename Order side by side
+    orders_row = QHBoxLayout()
+    orders_row.setSpacing(12)  # gap between the two lists
+    orders_row.addLayout(line3)
+
+    if sheet.get("separate_filename"):
+        fn_line = QVBoxLayout()
+        fn_line.setSpacing(4)
+        fn_line.setContentsMargins(0, 0, 0, 0)
+
+        fn_label = QLabel("Filename Order")
+        fn_label.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
+        fn_label.setStyleSheet(
+            "color: white; font-size: 13px; font-weight: bold;"
+            "border-bottom: 1px solid #444; padding-bottom: 2px;"
+        )
+        fn_line.addWidget(fn_label)
+
+        filename_order = sheet.setdefault("filename_order", list(column_order))
+        if len(filename_order) > MAX_COLUMNS:
+            del filename_order[MAX_COLUMNS:]
+
+        for pos in range(len(filename_order)):
+            fn_row = QHBoxLayout()
+            fn_row.setSpacing(8)
+
+            # Use numbers instead of spreadsheet letters
+            fn_num_label = QLabel(str(pos + 1))
+            fn_num_label.setFixedWidth(36)
+            fn_num_label.setAlignment(Qt.AlignCenter)
+            fn_num_label.setStyleSheet(
+                "color: #3498db; font-size: 14px; font-weight: bold;"
+                "background-color: #3a3a3a; border-radius: 4px; padding: 4px;"
+            )
+            fn_row.addWidget(fn_num_label)
+
+            combo = NoScrollComboBox()
+            combo.addItems(COLUMN_OPTIONS)
+            combo.setCurrentText(filename_order[pos])
+            combo.setStyleSheet(_combo_style())
+            combo.currentTextChanged.connect(
+                lambda text, i=idx, p=pos: on_filename_order_changed(globs, i, p, text))
+            fn_row.addWidget(combo)
+
+            if len(filename_order) > 1:
+                minus_btn = QPushButton("−")
+                minus_btn.setFixedSize(28, 28)
+                minus_btn.setToolTip("Remove this filename field")
+                minus_btn.setStyleSheet("""
+                    QPushButton {
+                        background-color: #3a3a3a; color: #e74c3c; border: none;
+                        border-radius: 4px; font-size: 16px; font-weight: bold;
+                    }
+                    QPushButton:hover { background-color: #454545; border: 1px solid #e74c3c; }
+                """)
+                minus_btn.clicked.connect(
+                    lambda checked, i=idx, p=pos: on_remove_filename_column(globs, i, p))
+                fn_row.addWidget(minus_btn)
+
+            fn_row.addStretch()
+            fn_line.addLayout(fn_row)
+
+        fn_add_btn = QPushButton("+")
+        fn_add_btn.setFixedSize(36, 28)
+        fn_add_btn.setCursor(Qt.PointingHandCursor)
+        fn_add_btn.setToolTip("Add filename field")
+        fn_add_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #3a3a3a; color: #3498db; border: none;
+                border-radius: 4px; font-size: 16px; font-weight: bold;
+            }
+            QPushButton:hover { background-color: #454545; border: 1px solid #3498db; }
+        """)
+        fn_add_btn.clicked.connect(lambda checked, i=idx: on_add_filename_column(globs, i))
+        fn_line.addWidget(fn_add_btn)
+
+        fn_container = QWidget()
+        fn_container.setLayout(fn_line)
+        fn_container.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Fixed)
+        orders_row.addWidget(fn_container, 0, Qt.AlignTop)
+
+    row_layout.addLayout(orders_row)
 
     return row_widget
 
@@ -669,6 +778,17 @@ def on_column_order_changed(globs, index, position, value):
         col_order[position] = value
 
 
+def on_filename_mode_changed(globs, index, separate):
+    """Toggle whether filenames use their own order instead of column_order."""
+    sheet_defs = globs.sheet_data.get("sheets", [])
+    if 0 <= index < len(sheet_defs):
+        sheet_defs[index]["separate_filename"] = separate
+        if separate and not sheet_defs[index].get("filename_order"):
+            sheet_defs[index]["filename_order"] = list(
+                sheet_defs[index].get("column_order", []))
+        populate_sheets_list(globs)
+
+
 def on_add_column(globs, index):
     """Append a new empty column to a sheet's order."""
     sheet_defs = globs.sheet_data.get("sheets", [])
@@ -685,6 +805,35 @@ def on_remove_column(globs, index, pos):
         col_order = sheet_defs[index].setdefault("column_order", [])
         if len(col_order) > 1 and 0 <= pos < len(col_order):
             col_order.pop(pos)
+            populate_sheets_list(globs)
+
+
+def on_filename_order_changed(globs, index, position, value):
+    """Update filename_order when a combo box changes."""
+    sheet_defs = globs.sheet_data.get("sheets", [])
+    if 0 <= index < len(sheet_defs):
+        fn_order = sheet_defs[index].setdefault("filename_order", [])
+        while len(fn_order) < position + 1:
+            fn_order.append("")
+        fn_order[position] = value
+
+
+def on_add_filename_column(globs, index):
+    """Append a new empty column to a sheet's filename order."""
+    sheet_defs = globs.sheet_data.get("sheets", [])
+    if 0 <= index < len(sheet_defs):
+        fn_order = sheet_defs[index].setdefault("filename_order", [])
+        fn_order.append("")
+        populate_sheets_list(globs)
+
+
+def on_remove_filename_column(globs, index, pos):
+    """Remove a column from filename order, keeping at least one."""
+    sheet_defs = globs.sheet_data.get("sheets", [])
+    if 0 <= index < len(sheet_defs):
+        fn_order = sheet_defs[index].setdefault("filename_order", [])
+        if len(fn_order) > 1 and 0 <= pos < len(fn_order):
+            fn_order.pop(pos)
             populate_sheets_list(globs)
 
 
@@ -783,7 +932,7 @@ def on_add_sheet(globs):
         "workbook": last_workbook,
         "first_row": 3,
         "first_column": 1,
-        "column_order": ["Counterparty", "Date", "Invoice #", ""]
+        "column_order": ["Counterparty", "Date", "Invoice Number", ""]
     })
 
     populate_sheets_list(globs)

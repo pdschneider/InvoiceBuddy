@@ -85,7 +85,10 @@ def create_docs_panel(globs):
 
         viewer.setOpenLinks(False)
         viewer.setOpenExternalLinks(True)
-        viewer.setStyleSheet(dark.scrollbar)
+        viewer.setStyleSheet(dark.scrollbar + """
+    QScrollBar::handle { color: #dddddd !important; }
+    qtextdocument { color: #dddddd; background-color: transparent; }
+""")
 
         md_path = os.path.join(DOCS_DIR, fname)
         with open(md_path, "r", encoding="utf-8") as f:
@@ -109,7 +112,10 @@ def create_docs_panel(globs):
         viewer = QTextBrowser()
         viewer.setOpenLinks(False)
         viewer.setOpenExternalLinks(True)
-        viewer.setStyleSheet(dark.scrollbar)
+        viewer.setStyleSheet(dark.scrollbar + """
+    QScrollBar::handle { color: #dddddd !important; }
+    qtextdocument { color: #dddddd; background-color: transparent; }
+""")
         with open(md_path, "r", encoding="utf-8") as f:
             viewer.setMarkdown(f.read())
         viewer.document().setBaseUrl(PROJECT_DOCS + "/")

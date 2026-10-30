@@ -247,15 +247,15 @@ def apply_auto_naming(globs, directory, file_list=None):
             normalized_texts=normalized_texts)
 
         # Get user-defined field order based on the file's Identity
-        if globs.legacy_mode:
-            order = get_field_order(globs, identity, filename)
-        else:
-            order = ["", "", "", ""]
-            sheets = globs.sheet_data.get("sheets", [])
-            for s in sheets:
-                if s.get("name") == identity:
-                    order = s.get("column_order", ["Counterparty", "Date", "Invoice #", ""])
-                    break
+        meta_order = ["", "", "", ""]
+        order = ["", "", "", ""]
+        sheets = globs.sheet_data.get("sheets", [])
+        for s in sheets:
+            if s.get("name") == identity:
+                order = s.get("column_order", ["Counterparty", "Date", "Invoice Number", ""])
+                if s.get("separate_filename") and s.get("filename_order"):
+                    order = s.get("filename_order", [])
+                break
 
         # Map field names to their extracted values (only if found)
         available = {}
@@ -264,9 +264,29 @@ def apply_auto_naming(globs, directory, file_list=None):
         if date_results.get(filename) and date_results[filename][0]:
             available["Date"] = date_results[filename][0]
         if invoice_results.get(filename) and invoice_results[filename][0]:
-            available["Invoice #"] = invoice_results[filename][0]
+            available["Invoice Number"] = invoice_results[filename][0]
         if card_results.get(filename) and card_results[filename][0]:
             available["Card Number"] = card_results[filename][0]
+
+        # Fill in any fields already present in PDF metadata (e.g. set in the editor)
+        try:
+            reader = PdfReader(full_path)
+            existing = reader.metadata or {}
+            pdf_key_map = {
+                "/Counterparty": "Counterparty",
+                "/Date": "Date",
+                "/Amount": "Amount",
+                "/Category": "Category",
+                "/Subcategory": "Subcategory",
+                "/Description": "Description",
+                "/InvoiceNumber": "Invoice Number",
+                "/CardNumber": "Card Number",
+            }
+            for pdf_key, field in pdf_key_map.items():
+                if field not in available and existing.get(pdf_key):
+                    available[field] = str(existing[pdf_key])
+        except Exception as e:
+            logging.warning(f"Could not merge existing metadata for {filename}: {e}")
 
         # Build new_parts using the user-chosen order
         # Skip any field that is empty ("") or not found
@@ -291,16 +311,11 @@ def apply_auto_naming(globs, directory, file_list=None):
             new_path = os.path.join(search_dir, new_name)
             counter += 1
 
-        # Build metadata using the same ordered values
+        # Build metadata from ALL available fields, regardless of order
         meta = {}
-        for field in order:
-            if field and field in available:
-                # Normalize key (e.g. "Invoice #" becomes "/InvoiceNumber")
-                key = f"/{field.replace(' #', 'Number').replace(' ', '')}"
-                meta[key] = available[field]
-
-        if "Card Number" in available:
-            meta["/CardNumber"] = available["Card Number"]
+        for field, value in available.items():
+            key = f"/{field.replace(' #', 'Number').replace(' ', '')}"
+            meta[key] = value
 
         if meta:
             metadata_to_write[filename] = meta
