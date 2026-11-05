@@ -1,23 +1,17 @@
-# config.py
+# config
 import platform
 import getpass
 import os
 import sys
 import hashlib
-import json
-import logging
 import threading
 import customtkinter as ctk
 from version import __version__
 from PySide6.QtWidgets import QApplication, QMainWindow
-from src.utils.load_settings import (load_settings,
-                                 load_data_path,
-                                 load_folder_map,
-                                 load_paths,
-                                 load_spreadsheet_specs,
-                                 load_sheets,
-                                 load_counterparties,
-                                 load_categories)
+from src.utils.load_settings import (
+    load_settings, load_data_path, load_paths,
+    load_sheets, load_counterparties, load_categories
+)
 
 
 # Globs Class
@@ -63,12 +57,14 @@ class Globs:
         self.archive_entry_box = None
         self.spreadsheet_toggle = None
         self.dim_overlay = None
+        self.autoname_curtain = None
         self.active_source_dialog = None
         self.file_menu = None
         self.rebuild_file_menu = None
         self.transaction_editor = None
         self.page_stack = None
         self.selected_file = None
+        self.place_curtain = None
 
         # PySide6 Inbox
         self.files = []  # ALL filenames without extensions in inbox
@@ -130,17 +126,7 @@ class Globs:
         self.codeberg_icon = None
         self.mail_icon = None
 
-        self.icons_list = ["assets/invoice-1.png",
-                           "assets/invoice-2.png",
-                           "assets/invoice-3.png",
-                           "assets/card-1.png",
-                           "assets/card-2.png",
-                           "assets/cards-1.png",
-                           "assets/cards-2.png",
-                           "assets/money-1.png",
-                           "assets/money-2.png",
-                           "assets/money-bag.png"]
-
+        # Treeview Icons
         self.invoice_icon = None
         self.card_icon = None
         self.po_icon = None
@@ -149,58 +135,12 @@ class Globs:
         self.edit_flag = None
         self.network_drive = False
 
-        # Trees
-        self.inbox_tree = None
-        self.history_tree = None
-
-        # Temporary UI Variables
-        self.workbook_var = ""
-        self.history_var = ""
-        self.default_printer_var = ""
-        self.github_check_var = None
-        self.beta_var = None
-        self.dynamic_window_size_var = None
-        self.legacy_mode_var = None
-
         # Inbox Temporary Vars
         self.inbox_dir_var = ""
         self.buddy_pairs = []
         self.max_buddies = 3
         self.buddy_frames = []
         self.buddy_entries = []
-
-        self.logging_level_var = None
-        self.theme_var = None
-        self.archive_path_var = None
-
-        self.sheet_invoices_var = None
-        self.sheet_CreditCards_var = None
-        self.sheet_PurchaseOrders_var = None
-        self.table_InvoiceTable_var = None
-        self.table_CreditCards_var = None
-        self.table_PurchaseOrders_var = None
-        self.invoice_starting_row_var = None
-        self.card_starting_row_var = None
-        self.po_starting_row_var = None
-        self.invoice_starting_column_var = None
-        self.card_starting_column_var = None
-        self.po_starting_column_var = None
-
-        # Temporary Components Vars
-        self.invoice_com_a_var = None
-        self.invoice_com_b_var = None
-        self.invoice_com_c_var = None
-        self.invoice_com_d_var = None
-
-        self.card_com_a_var = None
-        self.card_com_b_var = None
-        self.card_com_c_var = None
-        self.card_com_d_var = None
-
-        self.po_com_a_var = None
-        self.po_com_b_var = None
-        self.po_com_c_var = None
-        self.po_com_d_var = None
 
         # Counts for Watchdog
         self.inbox_count_var = None
@@ -220,8 +160,6 @@ class Globs:
         """Refreshes settings from settings file and a lot more"""
         settings = load_settings()
         sources, buddies = load_paths()
-        spreadsheet_specs = load_spreadsheet_specs()
-        self.folder_map, self.oneoffs_folder = load_folder_map()
         self.sheet_data = load_sheets()
 
         # Settings
@@ -246,53 +184,8 @@ class Globs:
         self.workbook = sources.get("workbook", "")
         self.archive = sources.get("archive", "")
 
-        # Spreadsheet
-        self.sheet_invoices = spreadsheet_specs.get("sheet_invoices", "Invoices")
-        self.sheet_CreditCards = spreadsheet_specs.get("sheet_CreditCards", "Credit Cards")
-        self.sheet_PurchaseOrders = spreadsheet_specs.get("sheet_PurchaseOrders", "Purchase Orders")
-        self.table_InvoiceTable = spreadsheet_specs.get("table_InvoiceTable", "InvoiceTable")
-        self.table_PurchaseOrders = spreadsheet_specs.get("table_PurchaseOrders", "POTable")
-        self.table_CreditCards = spreadsheet_specs.get("table_CreditCards", "CreditCards")
-        self.invoice_starting_row = spreadsheet_specs.get("invoice_starting_row", 3)
-        self.card_starting_row = spreadsheet_specs.get("card_starting_row", 3)
-        self.po_starting_row = spreadsheet_specs.get("po_starting_row", 0)
-        self.invoice_starting_column = spreadsheet_specs.get("invoice_starting_column", 1)
-        self.card_starting_column = spreadsheet_specs.get("card_starting_column", 1)
-        self.po_starting_column = spreadsheet_specs.get("po_starting_column", 1)
-        self.invoice_icon_path = spreadsheet_specs.get("invoice_icon", "assets/invoice-1.png")
-        self.card_icon_path = spreadsheet_specs.get("card_icon", "assets/card-1.png")
-        self.po_icon_path = spreadsheet_specs.get("po_icon", "assets/invoice-2.png")
-        self.invoice_component_a = spreadsheet_specs.get("invoice_component_a", "Company")
-        self.invoice_component_b = spreadsheet_specs.get("invoice_component_b", "Date")
-        self.invoice_component_c = spreadsheet_specs.get("invoice_component_c", "Invoice #")
-        self.invoice_component_d = spreadsheet_specs.get("invoice_component_d", "")
-        self.card_component_a = spreadsheet_specs.get("card_component_a", "Company")
-        self.card_component_b = spreadsheet_specs.get("card_component_b", "Date")
-        self.card_component_c = spreadsheet_specs.get("card_component_c", "invoice #")
-        self.card_component_d = spreadsheet_specs.get("card_component_d", "")
-        self.po_component_a = spreadsheet_specs.get("po_component_a", "Company")
-        self.po_component_b = spreadsheet_specs.get("po_component_b", "Date")
-        self.po_component_c = spreadsheet_specs.get("po_component_c", "Invoice #")
-        self.po_component_d = spreadsheet_specs.get("po_component_d", "")
-
         # Variables not stored directly in a file
         self.current_folder = self.inbox
-
-
-def apply_theme(name: str) -> None:
-    """Loads the user's chosen theme and applies it to ctk widgets."""
-    try:
-        globs.theme_path = os.path.normpath(
-            os.path.join(
-                load_data_path(direct="config"), f"themes/{globs.active_theme}.json"))
-        try:
-            with open(globs.theme_path, 'r') as f:
-                globs.theme_dict = json.load(f)
-        except:
-            logging.warning(f"Unable to load theme into dictionary.")
-        ctk.set_default_color_theme(globs.theme_path)
-    except Exception as e:
-        logging.warning(f"Could not retrieve CTk active theme due to: {e}")
 
 
 def get_executable_path():

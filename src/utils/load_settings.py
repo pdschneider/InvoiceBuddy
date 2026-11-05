@@ -15,8 +15,8 @@ def load_data_path(direct=None, filename=None, default=False):
     """
     # ==================== DEFAULT FILES ====================
     default_files = [
-        "settings.json", "company_map.json", "folder_maps.json", "categories.json",
-        "paths.json", "spreadsheet.json", "default_spreadsheet.xlsx", "default_spreadsheet.ods",
+        "settings.json", "company_map.json", "categories.json",
+        "paths.json", "default_spreadsheet.xlsx", "default_spreadsheet.ods",
         "assets/icon.png", "assets/add-1.png", "assets/add-2.png", "assets/add-3.png",
         "assets/archive.png", "assets/auto.png", "assets/card-1.png", "assets/card-2.png",
         "assets/cards-1.png", "assets/cards-2.png", "assets/delete-1.png", "assets/delete-2.png",
@@ -28,8 +28,7 @@ def load_data_path(direct=None, filename=None, default=False):
         "assets/money-bag.png", "assets/theme.png", "assets/preferences.png", "assets/note.png",
         "assets/settings-2.png", "assets/printer-1.png", "assets/printer-2.png", "assets/window-size.png",
         "assets/notification-1.png", "assets/notification-2.png", "assets/notification-3.png",
-        "themes/cosmic_sky.json", "themes/pastel_green.json", "themes/trojan_red.json",
-        "themes/dark_cloud.json", "themes/soft_light.json", "sheets.json", "counterparties.json",
+        "sheets.json", "counterparties.json",
         "assets/github-light.svg", "assets/github.svg", "assets/codeberg.svg",
         "assets/github-light.png", "assets/github.png", "assets/codeberg.png"
     ]
@@ -87,8 +86,6 @@ def load_data_path(direct=None, filename=None, default=False):
             os.makedirs(persistent_dir, exist_ok=True)
             if any(f.startswith("assets/") for f in default_files):
                 os.makedirs(os.path.join(persistent_dir, "assets"), exist_ok=True)
-            if any(f.startswith("themes/") for f in default_files):
-                os.makedirs(os.path.join(persistent_dir, "themes"), exist_ok=True)
             if not os.access(persistent_dir, os.W_OK):
                 raise PermissionError(f"No write permission for {persistent_dir}")
         except Exception as e:
@@ -105,8 +102,6 @@ def load_data_path(direct=None, filename=None, default=False):
             os.makedirs(data_dir, exist_ok=True)
             if any(f.startswith("assets/") for f in default_files):
                 os.makedirs(os.path.join(data_dir, "assets"), exist_ok=True)
-            if any(f.startswith("themes/") for f in default_files):
-                os.makedirs(os.path.join(data_dir, "themes"), exist_ok=True)
             if not os.access(data_dir, os.W_OK):
                 raise PermissionError(f"No write permission for {data_dir}")
         except Exception as e:
@@ -132,21 +127,6 @@ def load_data_path(direct=None, filename=None, default=False):
         return os.path.normpath(os.path.join(data_dir, filename)) if filename else data_dir
 
 
-def load_spreadsheet_specs():
-    """Get the spreadsheet data such as table and sheet names."""
-    try:
-        file_path = os.path.normpath(
-            load_data_path("config", "spreadsheet.json"))
-        with open(file_path, 'r') as f:
-            return json.load(f)
-    except FileNotFoundError:
-        logging.error("Error: spreadsheet.json not found in data folder")
-        return {}
-    except json.JSONDecodeError as e:
-        logging.error(f"Error decoding spreadsheet.json: {e}")
-        return {}
-
-
 def load_company_map():
     """Load company_map from company_map.json."""
     try:
@@ -161,70 +141,6 @@ def load_company_map():
     except json.JSONDecodeError as e:
         logging.error(f"Error decoding company_map.json: {e}")
         return {}
-
-
-def load_users_path():
-    """Get the path for users.json."""
-    return os.path.normpath(load_data_path("local", "users.json"))
-
-
-def load_history_path():
-    """Fetches the history CSV file."""
-    settings = load_settings()
-    if not settings.get("history_path", load_data_path("local", "history.csv")):
-        return os.path.normpath(load_data_path("local", "history.csv"))
-    else:
-        return settings.get(
-            "history_path", load_data_path("local", "history.csv"))
-
-
-def load_folder_map():
-    """
-    Load folder_map from folder_maps.json and
-    return (folder_map, oneoffs_folder).
-    """
-    try:
-        # Load subfolders from folder_maps
-        file_path = os.path.normpath(
-            load_data_path("config", "folder_maps.json"))
-        with open(file_path, 'r') as f:
-            subfolder_data = json.load(f)
-
-        # Load archive from paths.json
-        file_path = os.path.normpath(load_data_path("config", "paths.json"))
-        with open(file_path, 'r') as f:
-            archive_path_data = json.load(f)
-
-        try:
-            archive_path = archive_path_data["sources"]["archive"]
-        except:
-            logging.warning(
-                "Archive path not loaded properly in load_folder_map, sanitizing...")
-            archive_path = ""
-
-        folder_map = {}
-        # All vendors now live under the single archive folder
-        for key_str, subfolder in subfolder_data['maps'].items():
-            tuple_key = tuple(key_str.split(','))
-            full_path = os.path.join(archive_path, subfolder)
-            folder_map[tuple_key] = os.path.normpath(full_path)
-
-        # One-offs → Miscellaneous subfolder inside the archive
-        miscellaneous_path = os.path.join(archive_path, "Miscellaneous")
-        oneoffs_folder = os.path.normpath(miscellaneous_path)
-
-        return folder_map, oneoffs_folder
-
-    except FileNotFoundError:
-        logging.error(f"folder_maps.json not found at: {file_path}")
-        raise FileNotFoundError(f"folder_maps.json not found at: {file_path}")
-    except json.JSONDecodeError as e:
-        logging.error(f"Error decoding folder_maps.json: {e}")
-        raise json.JSONDecodeError(
-            f"Invalid folder_maps.json: {e}", e.doc, e.pos)
-    except KeyError as e:
-        logging.error(f"Missing required key in folder_maps.json: {e}")
-        raise KeyError(f"Missing key in folder_maps.json: {e}")
 
 
 def load_paths():

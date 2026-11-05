@@ -44,6 +44,8 @@ This document lists every currently supported company with its **full official/l
 - Central Welding Supply
 - McMaster-Carr
 - National Safety Inc
+- Forensics Detectors
+- ABC Supply Co. inc.
 
 ## Facility Maintenance & Services
 
@@ -79,6 +81,7 @@ This document lists every currently supported company with its **full official/l
 - Safety Sign
 - National Safety Inc
 - Radwell International LLC
+- North Coast Electric
 
 ## Government, Utilities & Public Agencies
 

@@ -6,54 +6,50 @@ from src.utils.load_settings import load_company_map
 from src.managers.autoname.search_helpers import (extract_normalized_text,
                                               normalize_text,
                                               write_pdf_metadata,
-                                              get_field_order,
                                               date_patterns)
 from src.managers.autoname.company_search import company_search
 from src.managers.autoname.date_search import date_search
 from src.managers.autoname.inv_num_search import invoice_number_search
 from src.managers.autoname.card_num_search import card_number_search
-from src.utils.save_settings import save_metadata
-from src.utils.save_qt import save_metadata as save_qt_metadata
+from src.utils.save import save_metadata, ensure_uuid
 from PySide6.QtWidgets import QMessageBox
-from tkinter import messagebox
 from pypdf import PdfReader
 from datetime import datetime
 
 
-def apply_auto_naming(globs, directory, file_list=None):
+def apply_auto_naming(globs, directory, file_list=None, force=False):
     """
     Master auto-namer: extracts text once per file,
     calls company/date/invoice searches sequentially,
     scrubs matches from normalized text between calls,
     and renames based on progressive logic.
+
+    When force=True, PDF metadata is overwritten and the
+    filename is regenerated.
+
+    When force=False, only blank PDF metadata is written and
+    the filename is not changed.
     """
 
     # Save metadata first
-    if globs.legacy_mode:
-        save_metadata(globs)
-    else:
-        save_qt_metadata(globs)
+    save_metadata(globs)
 
     # Return if no files are sent
-    if not file_list:
-        if not globs.legacy_mode:
-            QMessageBox.information(
-                globs.window,
-                "Nothing Selected",
-                "Please select one or more files to auto-name.",
-                QMessageBox.StandardButton.Ok,
-                QMessageBox.StandardButton.Ok
-            )
-        else:
-            messagebox.showinfo("Nothing Selected", "Please select one or more files to auto-name.")
-        return 0
+    if not file_list and force:
+        QMessageBox.information(
+            globs.window,
+            "Nothing Selected",
+            "Please select one or more files to auto-name.",
+            QMessageBox.StandardButton.Ok,
+            QMessageBox.StandardButton.Ok
+        )
+        return 0, {}
 
     # Make File List Work for PySide6
     new_file_list = []
-    if not globs.legacy_mode:
-        for file in file_list:
-            new_file_list.append(os.path.normpath(os.path.join(globs.inbox, file)))
-        file_list = new_file_list
+    for file in file_list:
+        new_file_list.append(os.path.normpath(os.path.join(globs.inbox, file)))
+    file_list = new_file_list
 
     logging.debug(f"Attempting to auto-name files: {file_list}")
 
@@ -66,7 +62,7 @@ def apply_auto_naming(globs, directory, file_list=None):
     search_dir = os.path.normpath(directory)
     if not os.path.isdir(search_dir):
         logging.error(f"Invalid directory: {search_dir}")
-        return 0
+        return 0, {}
 
     # Extract normalized texts once for all files (batch optimization)
     normalized_texts = {}
@@ -74,14 +70,23 @@ def apply_auto_naming(globs, directory, file_list=None):
         if not os.path.isfile(full_path):
             continue
         filename = os.path.basename(full_path)
+        
+        # Check AutoNamed flag BEFORE extracting text (if not forcing)
+        if not force:
+            try:
+                reader = PdfReader(full_path)
+                if (reader.metadata or {}).get("/AutoNamed"):
+                    logging.info(f"Skipping {filename}: already auto-named (pre-scan)")
+                    continue
+            except Exception:
+                pass
+        
         normalized = extract_normalized_text(full_path)
         normalized_texts[filename] = normalized
-
         logging.debug(f"Normalized text length: {len(normalized)}\n")
-        logging.debug(f"\nCurrent Normalized Text: {normalized}\n")
 
     if not normalized_texts:
-        return 0
+        return 0, {}
 
     # Step 1: Search for companies (always, no skips)
     counterparty_results = company_search(
@@ -98,43 +103,21 @@ def apply_auto_naming(globs, directory, file_list=None):
         if filename not in normalized_texts:
             continue
 
-        # Check the identity
-        identity = "Invoice"  # default fallback
-
+        # Determine identity and check AutoNamed flag
+        identity = ""
+        existing = {}
         try:
             reader = PdfReader(full_path)
-            if reader.metadata:
-                if globs.legacy_mode:
-                    # Legacy: check /Identity first
-                    if "/Identity" in reader.metadata:
-                        val = str(reader.metadata["/Identity"])
-                        if val in ["Invoice", "Card", "Purchase"]:
-                            identity = val
-                        logging.info(f"Identity read from metadata for {filename}: {identity}")
-                    else:
-                        # Fallback to /Sheet, try to map it
-                        if "/Sheet" in reader.metadata:
-                            sheet_val = str(reader.metadata["/Sheet"])
-                            # Map known sheet names to identity types
-                            mapping = {
-                                "Invoices": "Invoice",
-                                "Credit Cards": "Card",
-                                "Income": "Invoice",
-                                "Expenses": "Card"
-                            }
-                            if sheet_val in mapping:
-                                identity = mapping[sheet_val]
-                            else:
-                                identity = "Invoice"  # Unknown sheet, default to Invoice
-                            logging.info(f"Sheet fallback for {filename}: {sheet_val} → {identity}")
-                        else:
-                            logging.debug(f"No metadata found for {filename}, using default 'Invoice'")
-                else:
-                    if "/Sheet" in reader.metadata:
-                        identity = reader.metadata["/Sheet"]
-                        logging.info(f"Sheet read from metadata for {filename}: {identity}")
+            existing = reader.metadata or {}
+            if existing.get("/Sheet"):
+                identity = str(existing["/Sheet"])
+                logging.info(f"Sheet identity for {filename}: {identity}")
         except Exception as e:
-            logging.warning(f"Could not read metadata from {filename}: {e}, using default")
+            logging.warning(f"Could not read metadata from {filename}: {e}")
+
+        if not identity:
+            identity = globs.sheet_data.get("sheets", [{}])[0].get("name", "")
+            logging.info(f"No /Sheet metadata for {filename}, defaulting to first sheet: {identity}")
 
         # Pick apart base name from filename
         base_name = os.path.splitext(filename)[0]
@@ -288,6 +271,20 @@ def apply_auto_naming(globs, directory, file_list=None):
         except Exception as e:
             logging.warning(f"Could not merge existing metadata for {filename}: {e}")
 
+        # Pull stored counterparty data (Category/Subcategory/Description)
+        counterparty_name = available.get("Counterparty")
+        if counterparty_name:
+            record = globs.counterparties.get(counterparty_name, {})
+            record_map = {
+                "Category": "Category",
+                "Subcategory": "Subcategory",
+                "Description": "Description",
+            }
+            for field, record_key in record_map.items():
+                if field not in available and record.get(record_key):
+                    available[field] = record[record_key]
+                    logging.info(f"  Auto-filled {field} from counterparty record")
+
         # Build new_parts using the user-chosen order
         # Skip any field that is empty ("") or not found
         new_parts = []
@@ -295,10 +292,10 @@ def apply_auto_naming(globs, directory, file_list=None):
             if field and field in available:
                 new_parts.append(available[field])
 
-        # If nothing new or same as original - skip rename/metadata
+        # Rename only if the built name differs from the current one
         if not new_parts or " ".join(new_parts) == " ".join(parts):
-            logging.info(f"No changes needed for {filename}")
-            continue
+            logging.info(f"No rename needed for {filename} (writing metadata)")
+            # fall through to metadata write
 
         new_base = " ".join(new_parts)
         new_name = new_base + ".pdf"
@@ -311,11 +308,19 @@ def apply_auto_naming(globs, directory, file_list=None):
             new_path = os.path.join(search_dir, new_name)
             counter += 1
 
-        # Build metadata from ALL available fields, regardless of order
+        # Build metadata from all available fields (force overwrites all, drop-in fills blanks only)
         meta = {}
         for field, value in available.items():
             key = f"/{field.replace(' #', 'Number').replace(' ', '')}"
+            if not force and existing.get(key):
+                continue  # field already populated
             meta[key] = value
+
+        # Write AutoNamed flag to metadata
+        meta["/AutoNamed"] = "True"
+        if existing.get("/UUID"):
+            meta["/UUID"] = str(existing["/UUID"])
+        ensure_uuid(meta)
 
         if meta:
             metadata_to_write[filename] = meta
@@ -327,27 +332,29 @@ def apply_auto_naming(globs, directory, file_list=None):
                 {filename: metadata_to_write[filename]}, search_dir)
             del metadata_to_write[filename]
 
-        # Finally rename
-        try:
-            os.rename(full_path, new_path)
-            logging.info(f"Auto-named: {filename} becomes {new_name}")
-            renamed += 1
-        except Exception as e:
-            logging.error(f"Rename failed for {filename}: {e}")
+        # File rename (force only)
+        if force:
+            try:
+                os.rename(full_path, new_path)
+                logging.info(f"Auto-named: {filename} becomes {new_name}")
+                renamed += 1
+            except Exception as e:
+                logging.error(f"Rename failed for {filename}: {e}")
 
         logging.debug(f"{filename} | order={order} | available={list(available.keys())}")
 
-    logging.info(f"Total renamed: {renamed}")
+    if renamed:
+        logging.info(f"Total renamed: {renamed}")
 
     return renamed, applied_dates
 
 
-def pdf_button(globs, companies=None, directory=None, file_list=None):
+def pdf_button(globs, companies=None, directory=None, file_list=None, force=False, show_dialogs=True):
     """One-click auto-naming — all logic in apply_auto_naming."""
 
     # Apply auto-naming and return number of changed files and dates
     search_dir = os.path.normpath(directory or globs.sources['inbox'])
-    changes, applied_dates = apply_auto_naming(globs, search_dir, file_list)
+    changes, applied_dates = apply_auto_naming(globs, search_dir, file_list, force=force)
     logging.debug(f"Applied Dates: {applied_dates}")
 
     # Determine today's date and create empty list for any future dates
@@ -366,8 +373,12 @@ def pdf_button(globs, companies=None, directory=None, file_list=None):
         except ValueError:
             logging.warning(f"Could not parse date '{date_str}' for {filename}")
 
+    # Return early if dialogs are not shown
+    if not show_dialogs:
+        return changes, applied_dates
+
     # Display a messagebox
-    if changes == 0:
+    if changes == 0 and force:
         QMessageBox.information(
             globs.window,
             "Nothing to Do",
@@ -375,7 +386,7 @@ def pdf_button(globs, companies=None, directory=None, file_list=None):
             QMessageBox.StandardButton.Ok,
             QMessageBox.StandardButton.Ok
         )
-    elif future_dates and old_dates:
+    elif future_dates and old_dates and force:
         QMessageBox.information(
             globs.window,
             "Complete!",
@@ -383,7 +394,7 @@ def pdf_button(globs, companies=None, directory=None, file_list=None):
             QMessageBox.StandardButton.Ok,
             QMessageBox.StandardButton.Ok
         )
-    elif future_dates:
+    elif future_dates and force:
         QMessageBox.information(
             globs.window,
             "Complete!",
@@ -391,7 +402,7 @@ def pdf_button(globs, companies=None, directory=None, file_list=None):
             QMessageBox.StandardButton.Ok,
             QMessageBox.StandardButton.Ok
         )
-    elif old_dates:
+    elif old_dates and force:
         QMessageBox.information(
             globs.window,
             "Complete!",
@@ -400,10 +411,13 @@ def pdf_button(globs, companies=None, directory=None, file_list=None):
             QMessageBox.StandardButton.Ok
         )
     else:
-        QMessageBox.information(
-            globs.window,
-            "Complete!",
-            f"Auto-Name Complete! Updated {changes} file(s).",
-            QMessageBox.StandardButton.Ok,
-            QMessageBox.StandardButton.Ok
-        )
+        if force:
+            QMessageBox.information(
+                globs.window,
+                "Complete!",
+                f"Auto-Name Complete! Updated {changes} file(s).",
+                QMessageBox.StandardButton.Ok,
+                QMessageBox.StandardButton.Ok
+            )
+
+    return changes, applied_dates

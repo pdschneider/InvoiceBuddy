@@ -31,7 +31,7 @@ class FolderEventHandler(FileSystemEventHandler):
         self.scheduled_update = None
 
         # Qt mode: Set up thread-safe signaling
-        if PYSIDE6_AVAILABLE and hasattr(globs, 'legacy_mode') and not globs.legacy_mode:
+        if PYSIDE6_AVAILABLE:
             self._signaler = _WatchdogSignaler()
             self._signaler.file_changed.connect(self._on_file_changed_qt)
             # Persistent timer that lives in the main thread
@@ -42,10 +42,8 @@ class FolderEventHandler(FileSystemEventHandler):
     def on_any_event(self, event):
         """Ignores directories and irrelevant event types."""
         # Only proceed upon specific events
-        if event.is_directory or event.event_type not in ['created',
-                                                          'deleted',
-                                                          'modified',
-                                                          'moved']:
+        if event.is_directory or event.event_type not in [
+            'created', 'deleted', 'modified', 'moved']:
             return
 
         # Only proceed if an event involves a pdf file
@@ -59,7 +57,7 @@ class FolderEventHandler(FileSystemEventHandler):
 
         current_time = time.time()
 
-        if PYSIDE6_AVAILABLE and hasattr(self.globs, 'legacy_mode') and not self.globs.legacy_mode:
+        if PYSIDE6_AVAILABLE:
             self._signaler.file_changed.emit()
         else:
             # Tkinter Mode: Cancel and reschedule

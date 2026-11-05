@@ -1,10 +1,11 @@
-# src/managers/autoname/company_search.py
+# src.managers.autoname.company_search
 import logging
 import os
 import re
 from src.utils.load_settings import load_company_map
-from src.managers.autoname.search_helpers import (extract_normalized_text,
-                                              normalize_text)
+from src.managers.autoname.search_helpers import (
+    extract_normalized_text, normalize_text
+)
 
 
 def company_search(companies=None, directory=None, file_list=None, normalized_texts=None):

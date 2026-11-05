@@ -2,6 +2,43 @@
 
 All notable changes to **Invoice Buddy** will be located in this file.
 
+## [0.3.5] - 2026-11-04
+
+This update adds a brand new budgeting page for creating categories! It also purges all of the dead code belonging to the old GUI for a simpler codebase and faster app, among other various improvements and big fixes. 
+
+### 🌟 New
+- Budgeting page for adding categories
+- New counterparties: Forensics Detectors, ABC Supply Co. inc., North Coast Electric
+- Cleaned hundreds of lines of dead code from the codebase
+- Categories are now choosable from a pre-made list rather than typed by hand
+- Category & description now auto-populate from most recent counterparty data
+
+### ⚙️ Changed
+- Auto-name is now set up with destructive and non-destructive modes for later implementation
+- Auto-name now queues up files for later implementation
+- Auto-name now dims the window while processing instead of freezing the app
+- A unique ID is now attached to every file for later implementation
+- Inbox now appends items instead of rebuilding the entire list, keeping work intact across folder changes
+- Advanced toggle no longer takes focus in transaction editor
+- Adding files now uses the OS's native file explorer
+- Improved default sheet column order
+- Various UI improvements
+- Updated dependencies
+
+### 🛠️ Fixed
+- Auto-name now writes metadata even if the filename is correct
+- Counterparty drop down list no longer takes app restart to show new values
+- Erased values in the transaction editor no longer show up after saving
+- Les Schwab now correctly auto-names with a space
+- Pills now show '&' symbols
+- Various bug fixes
+
+### 📚 Documentation
+- Modified Google auth documentation for clarity
+
+### 🔒 Security
+- Patched multiple vulnerabilities by updating dependencies
+
 ## [0.3.4] - 2026-10-30
 
 This update finally removes the old legacy UI from the app and improves on new features introduced in the previous two updates.
@@ -23,7 +60,7 @@ This update finally removes the old legacy UI from the app and improves on new f
 - Temporarilty removed unused menu items for clarity
 
 ### 🛠️ Fixed
-- Window resize even no longer triggers when opening other windows from the title bar
+- Window resize event no longer triggers when opening other windows from the title bar
 - Wizard correctly shows sheets in custom path
 - Sheet names no longer change with mouse scroll in spreadsheet settings
 

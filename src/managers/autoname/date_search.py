@@ -4,8 +4,9 @@ import re
 import os
 from datetime import datetime
 from src.utils.load_settings import load_company_map
-from src.managers.autoname.search_helpers import (extract_normalized_text,
-                                              date_patterns)
+from src.managers.autoname.search_helpers import (
+    extract_normalized_text, date_patterns
+)
 
 
 def date_search(companies=None, directory=None, file_list=None, normalized_texts=None):

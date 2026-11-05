@@ -136,38 +136,3 @@ def write_pdf_metadata(file_metadata_dict: dict[str, dict], inbox_dir: str):
             logging.warning(f"Metadata write failed {filename}: {e}")
     logging.info(f"Updated metadata on {updated} files")
     return updated
-
-
-def get_field_order(globs, identity="Invoice", filename=None):
-    """Returns list of field names in user-chosen order for this identity."""
-    if identity == "Invoice":
-        return [
-            globs.invoice_com_a_var.get().strip(),
-            globs.invoice_com_b_var.get().strip(),
-            globs.invoice_com_c_var.get().strip(),
-            globs.invoice_com_d_var.get().strip(),
-        ]
-    elif identity == "Card":
-        return [
-            globs.card_com_a_var.get().strip(),
-            globs.card_com_b_var.get().strip(),
-            globs.card_com_c_var.get().strip(),
-            globs.card_com_d_var.get().strip(),
-        ]
-    elif identity == "Purchase":
-        return [
-            globs.po_com_a_var.get().strip(),
-            globs.po_com_b_var.get().strip(),
-            globs.po_com_c_var.get().strip(),
-            globs.po_com_d_var.get().strip(),
-        ]
-    else:
-        # Fallback — use invoice order or log warning
-        logging.warning(
-            f"Unknown identity '{identity}' for {filename}, falling back to Invoice order")
-        return [
-            globs.invoice_com_a_var.get().strip(),
-            globs.invoice_com_b_var.get().strip(),
-            globs.invoice_com_c_var.get().strip(),
-            globs.invoice_com_d_var.get().strip(),
-        ]

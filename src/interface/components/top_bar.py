@@ -1,78 +1,56 @@
-# src/nterface/Components/top_bar.py
-import customtkinter as ctk
-from CTkToolTip import CTkToolTip
-
+# src.interface.components.top_bar
+from PySide6.QtWidgets import (
+    QHBoxLayout, QLabel, QPushButton, QWidget
+)
+from PySide6.QtCore import Qt
+from PySide6.QtGui import QCursor
+from src.interface.components.sidebar import toggle_sidebar
+from src.interface.settings.settings import toggle_settings_panel
+from src.interface.components.docs import toggle_docs_panel
+from src.interface.styles import dark
 
 def create_top_bar(globs):
-    """
-    Creates the top bar for navigation.
+    """Creates the top navigation bar for Invoice Buddy."""
+    top_bar_widget = QWidget()
+    top_bar_widget.setFixedHeight(50)
+    top_bar_widget.setStyleSheet("background-color: #333339;")
 
-        Parameters:
-                globs: Global variables
+    top_bar_layout = QHBoxLayout(top_bar_widget)
+    top_bar_layout.setContentsMargins(10, 5, 10, 5)
+    top_bar_layout.setSpacing(10)
 
-        Returns:
-                top_bar: The top_bar frame and its child widgets
-    """
-    def toggle_inbox():
-        pages = [globs.settings_page, globs.onboarding_page, globs.changelog]
-        for page in pages:
-            page.pack_forget()
-        globs.main_page.pack(fill="both", expand=True, padx=10, pady=0)
-        globs.title.configure(text="Inbox")
+    # Left Side
+    hamburger_button = QPushButton("☰")
+    hamburger_button.setFixedSize(40, 40)
+    hamburger_button.setCursor(QCursor(Qt.PointingHandCursor))
+    hamburger_button.setStyleSheet(dark.hamburger_button)
+    hamburger_button.clicked.connect(lambda: toggle_sidebar(globs, globs.sidebar))
+    top_bar_layout.addWidget(hamburger_button)
 
-    def toggle_settings():
-        """Shows and hides the settings window when the button is clicked."""
-        pages = [globs.onboarding_page, globs.main_page, globs.changelog]
-        for page in pages:
-            page.pack_forget()
-        globs.settings_page.pack(fill="both", expand=True, padx=10, pady=0)
-        globs.title.configure(text="Settings")
+    # App Title
+    title_label = QLabel("Invoice Buddy")
+    title_label.setStyleSheet("font-size: 16px; font-weight: bold; color: white;")
+    top_bar_layout.addWidget(title_label)
 
-    # Main top bar
-    top_bar = ctk.CTkFrame(globs.root, height=55, corner_radius=0)
-    globs.top_bar = top_bar
-    top_bar.pack(side="top", fill="x")
-    top_bar.pack_propagate(False)
+    top_bar_layout.addSpacing(20)
 
-    # Inbox button (left)
-    globs.inbox_button = ctk.CTkButton(
-        top_bar,
-        image=globs.inbox_icon,
-        text=None,
-        width=45,
-        height=45)
-    globs.inbox_button.pack(side="left", padx=10, pady=5)
-    globs.inbox_button.configure(command=toggle_inbox)
-    CTkToolTip(globs.inbox_button,
-               message="Inbox",
-               delay=0.6,
-               follow=True,
-               padx=10,
-               pady=5)
+    # Center
+    top_bar_layout.addStretch()
 
-    # Title / App name (center)
-    title = ctk.CTkLabel(
-        top_bar,
-        text="",
-        font=ctk.CTkFont(size=20, weight="bold"))
-    globs.title = title
-    globs.title.pack(side="left", expand=True)
+    # Settings
+    settings_button = QPushButton("⚙")
+    settings_button.setFixedSize(40, 40)
+    settings_button.setCursor(QCursor(Qt.PointingHandCursor))
+    settings_button.setStyleSheet(dark.settings_button)
+    settings_button.clicked.connect(lambda: toggle_settings_panel(globs))
+    top_bar_layout.addWidget(settings_button)
 
-    # Settings gear (right)
-    globs.settings_button = ctk.CTkButton(
-        top_bar,
-        image=globs.settings_icon,
-        text=None,
-        width=45,
-        height=45)
-    globs.settings_button.pack(side="right", padx=10, pady=0)
-    globs.settings_button.configure(command=toggle_settings)
-    CTkToolTip(
-        globs.settings_button,
-        message="Settings",
-        delay=0.6,
-        follow=True,
-        padx=10,
-        pady=5)
+    # Help
+    help_button = QPushButton("?")
+    help_button.setFixedSize(40, 40)
+    help_button.setCursor(QCursor(Qt.PointingHandCursor))
+    help_button.setStyleSheet(dark.settings_button)
+    help_button.clicked.connect(lambda: toggle_docs_panel(globs))
+    top_bar_layout.addWidget(help_button)
 
-    return top_bar
+    return top_bar_widget

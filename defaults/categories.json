@@ -1,1 +1,51 @@
-{}
+{
+  "categories": {
+    "Income": {
+      "subcategories": [
+        "Paycheck 1",
+        "Paycheck 2"
+      ]
+    },
+    "Giving": {
+      "subcategories": [
+        "Charity"
+      ]
+    },
+    "Food": {
+      "subcategories": [
+        "Groceries",
+        "Restaurants"
+      ]
+    },
+    "Transportation": {
+      "subcategories": [
+        "Gas",
+        "Car Wash",
+        "Car Maintenance"
+      ]
+    },
+    "Housing": {
+      "subcategories": [
+        "Rent/Mortgage",
+        "Water",
+        "Electricity",
+        "Trash",
+        "Home Maintenance"
+      ]
+    },
+    "Personal": {
+      "subcategories": [
+        "Miscellaneous",
+        "Haircuts",
+        "Subscriptions",
+        "Clothing"
+      ]
+    },
+    "Lifestyle": {
+      "subcategories": [
+        "Fun Money"
+      ]
+    },
+    "Health": {}
+  }
+}

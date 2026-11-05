@@ -4,6 +4,8 @@ import platform
 import logging
 import os
 from PySide6.QtWidgets import QMessageBox
+
+# These imports only work on Windows - ignore linter on Linux
 if platform.platform().startswith("Windows"):
     import win32print
     import win32api
@@ -24,9 +26,8 @@ def print_selected_files(globals, filenames=None):
 
     # Create list of full paths
     new_file_list = []
-    if not globals.legacy_mode:
-        for file in filenames:
-            new_file_list.append(os.path.normpath(os.path.join(globals.current_folder, file)))
+    for file in filenames:
+        new_file_list.append(os.path.normpath(os.path.join(globals.current_folder, file)))
     filenames = new_file_list
 
     logging.debug(f"Attempting to print files: {filenames}")

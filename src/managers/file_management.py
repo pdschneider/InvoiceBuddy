@@ -1,12 +1,10 @@
-# src/managers/file_management.py
+# src.managers.file_management
 import logging
 import os
 import shutil
 import subprocess
-from tkinter import filedialog
 from send2trash import send2trash
-from src.managers.history_manager import load_history, add_update_history
-from src.utils.save_settings import save_metadata
+from src.utils.save import save_metadata
 from src.utils.load_settings import load_data_path
 from src.utils.load_settings import read_file_metadata
 from src.utils.toast import show_toast
@@ -46,17 +44,11 @@ def browse_file(globs, var, _type=None):
         file_types = [("All files", "*.*"), ("CSV files", "*.csv")]
     else:
         file_types = [("All files", "*.*"), ("CSV files", "*.csv"), ("Excel files", "*.xlsx")]
-    if globs.legacy_mode:
-        file_path = filedialog.askopenfilename(
-            filetypes=file_types)
-        if file_path:
-            var.set(file_path)
-            logging.info(f"Selected file: {file_path}")
-    else:
-        file_path, _ = QFileDialog.getOpenFileName(None, "Select File", "", "Spreadsheet Files (*.xlsx *.xlsm *.xlst *.xltm, *.ods)")
-        if file_path:
-            var.setText(file_path)
-            logging.info(f"Selected file: {file_path}")
+
+    file_path, _ = QFileDialog.getOpenFileName(None, "Select File", "", "Spreadsheet Files (*.xlsx *.xlsm *.xlst *.xltm, *.ods)")
+    if file_path:
+        var.setText(file_path)
+        logging.info(f"Selected file: {file_path}")
 
 
 def browse_directory(globs, var):
@@ -66,18 +58,12 @@ def browse_directory(globs, var):
         var:        Variable to change
                     ex: globs.inbox_dir_var
     """
-    if globs.legacy_mode:
-        dir_path = filedialog.askdirectory()
-    else:
-        dir_path = QFileDialog.getExistingDirectory(None, "Select Folder", "")
+
+    dir_path = QFileDialog.getExistingDirectory(None, "Select Folder", "")
 
     if dir_path:
-
-        # Handle Tkinter variable (legacy mode)
-        if hasattr(var, 'set'):
-            var.set(dir_path)
         # Handle QLineEdit widget (Qt mode)
-        elif hasattr(var, 'setText'):
+        if hasattr(var, 'setText'):
             var.setText(dir_path)
 
         logging.info(f"Selected directory: {dir_path}")
@@ -125,35 +111,25 @@ def add_files(globs):
         globs:        Global variables
 
         files_tuple:    Tuple of selected files
-                        ex: ('/home/phillip/ZZZ-Unnamed- Ice Melt V24533.pdf',
-                        '/home/phillip/ZZZ-Unnamed- LED Lamp Refund.pdf')
+                        ex: ('/home/username/ZZZ-Unnamed- Ice Melt V24533.pdf',
+                        '/home/username/ZZZ-Unnamed- LED Lamp Refund.pdf')
         files_list:     List of selected files
-                        ex: ['/home/phillip/ZZZ-Unnamed- Ice Melt V24533.pdf',
-                        '/home/phillip/ZZZ-Unnamed- LED Lamp Refund.pdf']
+                        ex: ['/home/username/ZZZ-Unnamed- Ice Melt V24533.pdf',
+                        '/home/username/ZZZ-Unnamed- LED Lamp Refund.pdf']
     """
 
     # Uses path from var if saved path isn't valid
-    if globs.legacy_mode:
-        if not os.path.isdir(globs.inbox) and os.path.isdir(globs.inbox_dir_var.get().strip()):
-            globs.inbox = globs.inbox_dir_var.get().strip()
-            logging.debug(f"Inbox not a valid path. Using path from paths settings.")
-    else:
-        if not os.path.isdir(globs.inbox):
-            logging.error(f"Unable to reach inbox folder.")
-            return
+    if not os.path.isdir(globs.inbox):
+        logging.error(f"Unable to reach inbox folder.")
+        return
 
     if os.path.isdir(globs.inbox):
         # Open file selection box
-        if globs.legacy_mode:
-            files_tuple = filedialog.askopenfilenames(
-                title="Select Files", filetypes=[("PDF files", "*.pdf")], multiple=True)
-        else:
-            files_tuple, filter = QFileDialog.getOpenFileNames(
-                None,
-                "Add Files",
-                "",
-                "PDF Files (*.pdf)",
-                options=QFileDialog.Option.DontUseNativeDialog)
+        files_tuple, filter = QFileDialog.getOpenFileNames(
+            None,
+            "Add Files",
+            "",
+            "PDF Files (*.pdf)")
         try:
             if files_tuple:
                 files_list = []
@@ -268,12 +244,10 @@ def archive_files(globs, file_list=None, confirm=True):
         return
 
     # Create list of full paths
-    if not globs.legacy_mode:
-        new_file_list = []
-        if not globs.legacy_mode:
-            for file in file_list:
-                new_file_list.append(os.path.normpath(os.path.join(globs.inbox, file)))
-        file_list = new_file_list
+    new_file_list = []
+    for file in file_list:
+        new_file_list.append(os.path.normpath(os.path.join(globs.inbox, file)))
+    file_list = new_file_list
 
     # Ask for Confirmation
     if confirm:
@@ -320,23 +294,13 @@ def archive_files(globs, file_list=None, confirm=True):
             logging.warning(f"File {filename} already in destination folder. Skipping...")
             continue
 
-        # Move files to their archived location
         try:
             shutil.move(src_file, dst_file)
             moved_files += 1
-            add_update_history(
-                filename=filename,
-                src_folder=globs.inbox,
-                dst_folder=dst_folder,
-                file_type=file_type,
-                moved=globs.user)
         except Exception as e:
             errors.append(f"Failed to move {filename} due to: {e}")
             logging.debug(f"Failed to move {filename} due to: {e}")
             continue
-
-        # Reload Treeview
-        load_history(globs.history_tree)
 
     if errors:
         show_toast(globs, f"Error moving some files", _type="error")
@@ -358,9 +322,8 @@ def send_to_trash(globs, file_list=None):
 
     # Create list of full paths
     new_file_list = []
-    if not globs.legacy_mode:
-        for file in file_list:
-            new_file_list.append(os.path.normpath(os.path.join(globs.inbox, file)))
+    for file in file_list:
+        new_file_list.append(os.path.normpath(os.path.join(globs.inbox, file)))
     file_list = new_file_list
 
     logging.debug(f"Attempting to print files: {file_list}")
@@ -415,8 +378,7 @@ def send_to_trash(globs, file_list=None):
                 logging.error(f"Failed to delete {file_path}: {e}")
 
     # Refresh UI
-    if globs.legacy_mode:
-        globs.update_file_counts()
+    globs.update_file_counts()
 
     # Feedback
     if trashed_count == len(file_list):

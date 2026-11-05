@@ -3,13 +3,10 @@ import logging
 import sys
 import os
 import json
-import csv
 import hashlib
 import platform
 from logging.handlers import TimedRotatingFileHandler
 from src.utils.load_settings import load_data_path, load_settings
-from src.utils.vars import create_vars
-from src.utils.icons import load_icons
 from src.connections.updater import version_check
 
 
@@ -21,17 +18,10 @@ def setup(globs):
     if globs.github_check:
         version_check(globs)
     setup_company_map()
-    setup_folder_maps()
     setup_settings()
     setup_paths()
-    make_legacy_compatible()
     setup_spreadsheet()
-    setup_history()
-    setup_themes()
     company_map_check()
-    folder_maps_check()
-    create_vars(globs)
-    load_icons(globs)
     get_executable_path(globs)
 
 
@@ -100,49 +90,6 @@ def setup_company_map():
         company_map = load_data_path("config", "company_map.json")
     except Exception as e:
         logging.error(f"Unable to load company map due to {e}")
-
-
-def setup_folder_maps():
-    try:
-        folder_map = load_data_path("config", "folder_maps.json")
-        with open(folder_map, 'r', encoding='utf-8') as f:
-            data = json.load(f)
-
-        # Check for type error
-        for key, subfolder in data["maps"].items():
-            test = os.path.join(".", subfolder)
-
-        changed = False
-
-        # Check to make sure dicts are present
-        if "maps" not in data:
-            data["maps"] = {}
-            changed = True
-            logging.info("Added missing 'maps' key to folder_maps.json")
-
-        # Write to file
-        if changed:
-            with open(folder_map, 'w', encoding='utf-8') as f:
-                json.dump(data, f, indent=4)
-            changed = False
-
-        # Write to file
-        if changed:
-            with open(folder_map, 'w', encoding='utf-8') as f:
-                json.dump(data, f, indent=4)
-
-    except json.JSONDecodeError as e:
-        logging.error(
-            f"Invalid json synatax: {e} | Replacing corrupted folder_maps file with default.")
-        os.remove(folder_map)
-        load_data_path("config", "folder_maps.json")
-    except TypeError as e:
-        logging.error(
-            f"Invalid json structure: {e} | Replacing corrupted folder_maps file with default.")
-        os.remove(folder_map)
-        load_data_path("config", "folder_maps.json")
-    except Exception as e:
-        logging.error(f"Unable to load folder map due to {e}")
 
 
 def setup_settings():
@@ -540,103 +487,6 @@ def setup_spreadsheet():
         logging.error(f"Unable to load spreadsheet data due to {e}")
 
 
-def setup_history():
-    """
-    Initializes the history file with headers in the app's designated folder.
-    """
-    headers = ["File Name",
-               "Source Folder",
-               "Destination Folder",
-               "Type",
-               "Archived",
-               "Entered"]
-    history_file = load_data_path("local", "history.csv")
-
-    # Create the file if it does not exist
-    if not os.path.exists(history_file):
-        with open(history_file, 'w', encoding='utf-8', newline="") as f:
-            writer = csv.writer(f)
-            writer.writerow(headers)
-        logging.info(f"Created new history file with headers: {history_file}")
-        return
-
-    # Read the first line:
-    with open(history_file, 'r', encoding='utf-8') as f:
-        first_line = f.readline().rstrip('\n')
-
-    # Expected first line
-    expected = ','.join(headers)
-
-    if first_line == expected:
-        logging.debug("History file headers are correct.")
-        return
-
-    # If headers are wrong, fix them
-    logging.warning(f"Wrong headers found. Fixing... (found: {first_line!r})")
-
-    # Read everything except the first line
-    with open(history_file, 'r', encoding='utf-8') as f:
-        lines = f.readlines()[1:]
-
-    # Write the correct header and re-add the rest of the file
-    with open(history_file, 'w', encoding='utf=8', newline="") as h:
-        h.write(expected + "\n")
-        h.writelines(lines)
-    logging.info(f"Headers fixed successfully")
-
-
-def setup_themes():
-    """Replaces theme files if they are different from the current version."""
-    try:
-        themes = ["themes/cosmic_sky.json",
-                  "themes/pastel_green.json",
-                  "themes/trojan_red.json",
-                  "themes/dark_cloud.json",
-                  "themes/soft_light.json"]
-
-        for theme in themes:
-            try:
-                # Read the contents of the default path and hash it
-                default_theme_path = load_data_path(
-                    "config", theme, default=True)
-                with open(default_theme_path, 'r', encoding='utf-8') as f:
-                    default_theme_file = f.read()
-                hashed_default_theme_file = hashlib.md5(
-                    default_theme_file.encode()).hexdigest()
-                if not hashed_default_theme_file:
-                    logging.warning(f"No hash for default {theme} found.")
-
-                # Read the contents of the current user's path and hash it
-                user_theme_path = load_data_path("config", theme)
-                with open(user_theme_path, 'r', encoding='utf-8') as f:
-                    user_theme_file = f.read()
-                hashed_user_theme_file = hashlib.md5(
-                    user_theme_file.encode()).hexdigest()
-                if not hashed_user_theme_file:
-                    logging.warning(f"No has for user's {theme} found.")
-
-            except Exception as e:
-                logging.warning(f"Unable to hash {theme} due to: {e}")
-                return
-
-            # Compare hashes, remove and replace old file if different
-            if hashed_default_theme_file != hashed_user_theme_file:
-                try:
-                    if os.path.isfile(load_data_path("config", theme)):
-                        logging.debug(f"Removing old {theme}...")
-                        os.remove(load_data_path("config", theme))
-                    logging.info(f"Updating {theme}...")
-                    load_data_path("config", theme, default=True)
-
-                except Exception as e:
-                    logging.warning(f"Unable to update {theme} to: {e}")
-                    return
-
-    except Exception as e:
-        logging.error(f"Could not hash theme files due to: {e}")
-        return
-
-
 def company_map_check():
     """
     Checks if company map is different from
@@ -673,100 +523,6 @@ def company_map_check():
 
         except Exception as e:
             logging.warning(f"Unable to update company map due to: {e}")
-
-
-def folder_maps_check():
-    """
-    Checks if folder map is different from
-    user's folder map, prompts for change.
-    """
-    try:
-        # Read the contents of the default folder_maps path and hash it
-        default_folder_path = load_data_path(
-            "config", "folder_maps.json", default=True)
-        with open(default_folder_path, 'r') as f:
-            default_folder_file = f.read()
-        hashed_default_folder_map = hashlib.md5(
-            default_folder_file.encode()).hexdigest()
-
-        # Read the contents of the current user's folder_maps path and hash it
-        user_folder_path = load_data_path("config", "folder_maps.json")
-        with open(user_folder_path, 'r') as f:
-            user_folder_file = f.read()
-        hashed_user_folder_map = hashlib.md5(
-            user_folder_file.encode()).hexdigest()
-
-    except Exception as e:
-        logging.warning(f"Unable to hash folder_maps.json files due to: {e}")
-        return
-
-    if hashed_default_folder_map != hashed_user_folder_map:
-        try:
-            if os.path.isfile(load_data_path("config", "folder_maps.json")):
-                logging.debug(f"Removing old folder map...")
-                os.remove(load_data_path("config", "folder_maps.json"))
-            logging.info(f"Updating folder map...")
-            load_data_path("config", "folder_maps.json", default=True)
-
-        except Exception as e:
-            logging.warning(f"Unable to update folder map due to: {e}")
-
-
-def make_legacy_compatible():
-    """
-    Reads legacy entries in files and converts
-    them to the modern format usable in recent versions.
-    """
-    try:
-        # Load folder_maps.json
-        folder_maps_path = load_data_path("config", "folder_maps.json")
-        with open(folder_maps_path, 'r', encoding='utf-8') as f:
-            folder_data = json.load(f)
-
-        # Load paths.json
-        paths = load_data_path("config", "paths.json")
-        with open(paths, 'r', encoding='utf-8') as f:
-            paths_data = json.load(f)
-
-        # Get archive path from both files
-        archive_path = folder_data.get("bases", {}).get("archive", "")
-        new_archive_path = paths_data.get("sources", {}).get("archive", "")
-
-        # Skip if archive path is empty or falsy in either file
-        if not archive_path or new_archive_path:
-            return
-
-        # Load paths.json
-        paths_file = load_data_path("config", "paths.json")
-        with open(paths_file, 'r', encoding='utf-8') as f:
-            paths_data = json.load(f)
-
-        changed = False
-
-        # Ensure "sources" exists
-        if "sources" not in paths_data:
-            paths_data["sources"] = {}
-            changed = True
-            logging.info("Added missing 'sources' key to paths.json")
-
-        # Add/update archive key only if it's not already there or different
-        current_archive = paths_data["sources"].get("archive", "")
-        if current_archive != archive_path:
-            paths_data["sources"]["archive"] = archive_path
-            changed = True
-            logging.info(
-                f"Added/updated archive path in paths.json: {archive_path}")
-
-        # Save if changes were made
-        if changed:
-            with open(paths_file, 'w', encoding='utf-8') as f:
-                json.dump(paths_data, f, indent=4)
-
-    except json.JSONDecodeError as e:
-        logging.error(
-            f"JSON decode error in folder_maps.json or paths.json: {e}")
-    except Exception as e:
-        logging.error(f"Failed to set up archive path: {e}")
 
 
 def get_executable_path(globs):

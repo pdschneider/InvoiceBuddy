@@ -10,7 +10,7 @@ This guide walks you through connecting Invoice Buddy to your Google Sheets acco
 ### Step 1: Create a Google Cloud Project
 1. Go to Google Cloud Console
 2. Sign in with your Gmail account
-3. Click the project dropdown at the top → New Project
+3. Click the project dropdown at the top and New Project
 4. Name it (e.g., InvoiceBuddy)
 5. Click Create
 
@@ -18,19 +18,19 @@ This guide walks you through connecting Invoice Buddy to your Google Sheets acco
 Google requires you to enable each API your app will use. You need two APIs enabled:
 
 1. Enable Google Sheets API
-2. Navigate to APIs & Services → Library
+2. Navigate to APIs & Services, then Library
 3. Search for Google Sheets API
-4. Click on it → Click Enable
+4. Click on it and Click Enable
 Or visit directly: Enable Google Sheets API
 5. Enable Google Drive API
 6. In the same Library page, search for Google Drive API
-7. Click on it → Click Enable
+7. Click on it and Click Enable
 8. Or visit directly: Enable Google Drive API
 
 
 ### Step 3: Configure OAuth Consent Screen
-1. Go to APIs & Services → OAuth consent screen
-2. Select External → Click Create
+1. Go to APIs & Services and OAuth consent screen
+2. Select External and Click Create
 3. Fill in required fields:
 4. App name: InvoiceBuddy
 5. User support email: Your email
@@ -38,27 +38,27 @@ Or visit directly: Enable Google Sheets API
 7. Click Save and Continue through each page
 8. On the Scopes page, click Add or Remove Scopes
 9. Search for and add these two scopes:
-https://www.googleapis.com/auth/spreadsheets — See, edit, create, and delete your spreadsheets
-https://www.googleapis.com/auth/drive — See, edit, create, and delete all your Google Drive files
+https://www.googleapis.com/auth/spreadsheets - See, edit, create, and delete your spreadsheets
+https://www.googleapis.com/auth/drive - See, edit, create, and delete all your Google Drive files
 10. Click Save and Continue through the remaining pages
 
 ### Step 4: Create OAuth Client Credentials
-1. Go to APIs & Services → Credentials
-2. Click + Create Credentials → OAuth client ID
+1. Go to APIs & Services and Credentials
+2. Click + Create Credentials and OAuth client ID
 3. Application type: Desktop app
 4. Name: InvoiceBuddy Desktop
 5. Click Create
-6. Click Download JSON — this downloads your client_secrets.json file
-7. Save this file somewhere safe — you'll need it for the first-time auth flow
+6. Click Download JSON - this downloads your client_secrets.json file
+7. Save this file somewhere safe - you'll need it for the first-time auth flow
 
 
 ### Step 5: First-Time Authentication
 1. Launch Invoice Buddy
-2. Go to Settings → Google Sheets Integration
+2. Go to Settings and Google Sheets Integration
 3. When prompted, enter the path to your downloaded `client_secrets.json` file
 4. Your default browser will open a Google sign-in page
 5. Sign in with the same Gmail account you used for Google Cloud
-6. Click **Continue** on the warning prompt (your app is unverified — this is normal for self-hosted apps)
+6. Click **Continue** on the warning prompt (your app is unverified - this is normal for self-hosted apps)
 7. Grant permission for Sheets and Drive access
 8. You should see a success message in Invoice Buddy
 
@@ -98,7 +98,7 @@ This token is refreshed automatically and does not require re-authentication.
 
 **Cause:** Your `client_secrets.json` file is missing, corrupt, or contains placeholder values.
 
-**Fix:** Re-download the JSON file from Google Cloud Console → Credentials.
+**Fix:** Re-download the JSON file from Google Cloud Console and Credentials.
 
 ---
 
@@ -136,7 +136,7 @@ Alternatively, you can click "Disconnect" in the Integrations tab to delete your
 
 (Optional) Revoke access from your Google account:
 2. Go to Google Account Permissions
-3. Find InvoiceBuddy → Click Remove Access
+3. Find InvoiceBuddy and Click Remove Access
 4. Re-run the authentication flow
 
 ### Data & Privacy
@@ -148,3 +148,5 @@ You can revoke access at any time from your Google Account
 
 ### Need Help?
 If you encounter issues not covered in this troubleshooting guide, please file an issue on GitHub or consult the Google OAuth 2.0 documentation.
+
+*Up to date as of v0.3.5-beta*
