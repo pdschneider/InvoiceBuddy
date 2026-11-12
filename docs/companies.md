@@ -161,6 +161,7 @@ This document lists every currently supported company with its **full official/l
 - Sport Clips, Inc.
 - Petco Animal Supplies, Inc.
 - Chops Lynnwood
+- New Balance
 
 ## Miscellaneous / Technology & Services
 
@@ -220,6 +221,7 @@ This document lists every currently supported company with its **full official/l
 - Everett Community College Bookstore
 - Daily Journal of Commerce
 - GoFundMe Inc.
+- RAYUS Radiology
 
 ---
 

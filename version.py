@@ -1,5 +1,5 @@
 # version.py
-__version__ = "0.3.5"
+__version__ = "0.3.6"
 
 __author__ = "Phillip Schneider"
 __title__ = "Invoice Buddy"

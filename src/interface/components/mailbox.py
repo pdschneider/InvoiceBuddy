@@ -295,6 +295,8 @@ class MailboxWidget(QWidget):
         self.globs.checked_files = set()
         self.reveals_paused = False
         self._pending_new = []
+        self.drop_in_queue = []     # filenames waiting for non-invasive auto-name
+        self.drop_in_active = False  # True while the silent worker is running
 
         # Layout
         layout = QVBoxLayout(self)
@@ -450,10 +452,11 @@ class MailboxWidget(QWidget):
         if hasattr(self.globs, 'update_preview_state'):
             self.globs.update_preview_state()
 
-    def update_files(self, folder_path):
+    def update_files(self, folder_path, skip=None):
         """Lightweight refresh: prepend new files, remove gone ones, keep the rest."""
         if not os.path.isdir(folder_path):
             return
+        skip = set(skip or ())
 
         pdf_files = sorted(f for f in os.listdir(folder_path)
                         if f.lower().endswith(".pdf"))
@@ -472,7 +475,10 @@ class MailboxWidget(QWidget):
                     break
 
         # Prepend rows for new files (inserted above existing ones)
-        for filename in current_set - known_set:
+        for filename in sorted(current_set - known_set):
+            if filename in skip:
+                continue
+
             item = QListWidgetItem()
             item.setSizeHint(QSize(0, 50))
             self.list_widget.insertItem(0, item)
@@ -527,8 +533,11 @@ class MailboxWidget(QWidget):
 
         # PILL
         full_path = os.path.join(folder_path, filename)
-        sheet_name = load_sheet_identity(full_path, self.globs)
-        self.globs.file_identity[filename] = sheet_name
+        if filename in self.globs.file_identity:
+            sheet_name = self.globs.file_identity[filename]
+        else:
+            sheet_name = load_sheet_identity(full_path, self.globs)
+            self.globs.file_identity[filename] = sheet_name
 
         # Find matching color
         sheet_color = "#888"
@@ -835,3 +844,42 @@ class MailboxWidget(QWidget):
         self.globs.checked_files.clear()
         self.master_checkbox.setChecked(False)
         self.action_buttons.hide()
+
+    def queue_drop_in(self, filenames):
+        """Add filenames to the silent drop-in queue and start the worker if idle."""
+        for f in filenames:
+            if f not in self.drop_in_queue:
+                self.drop_in_queue.append(f)
+        if not self.drop_in_active:
+            self._run_drop_in()
+
+    def _run_drop_in(self):
+        """Kick off a silent force=False worker for everything queued. On any
+        failure the queue is drained anyway — files still land in the inbox."""
+        if not self.drop_in_queue:
+            return
+
+        # Snapshot and clear the queue; new arrivals just re-enqueue
+        batch = self.drop_in_queue
+        self._drop_in_batch = batch
+        self.drop_in_queue = []
+        self.drop_in_active = True
+
+        try:
+            self._drop_in_thread = AutoNameWorker(
+                self.globs, self.globs.current_folder, batch, force=False)
+            self._drop_in_thread.finished_run.connect(self._drop_in_done)
+            self._drop_in_thread.start()
+        except Exception as e:
+            logging.error(f"Drop-in auto-name failed to start: {e}")
+            # Graceful fallback: surface the files untouched
+            self._drop_in_done(0)
+
+    def _drop_in_done(self, changes):
+        """Worker finished (or failed): flush queued files into the mailbox."""
+        self.drop_in_active = False
+        self.update_files(self.globs.current_folder)
+
+        # Drain anything that arrived while we were busy
+        if self.drop_in_queue:
+            self._run_drop_in()

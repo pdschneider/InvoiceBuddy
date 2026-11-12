@@ -7,12 +7,12 @@ customtkinter==6.0.0
 darkdetect==0.8.0
 defusedxml==0.7.1
 et_xmlfile==2.0.0
-google-auth==2.62.1
+google-auth==2.62.2
 google-auth-oauthlib==1.5.0
 gspread==6.2.1
 idna==3.20
 iniconfig==2.3.1
-msoffcrypto-tool==6.0.0
+msoffcrypto-tool==6.1.0
 Nuitka==4.2.1
 oauthlib==4.0.1
 odfpy==1.4.1
@@ -32,8 +32,8 @@ pyasn1_modules==0.4.2
 pycparser==3.12
 Pygments==2.21.0
 pyparsing==3.3.3
-pypdf==6.21.4
-pypdfium2==5.14.0
+pypdf==7.0.1
+pypdfium2==5.15.2
 PySide6==6.12.0
 PySide6_Addons==6.12.0
 PySide6_Essentials==6.12.0
@@ -47,5 +47,5 @@ Send2Trash==2.1.0
 setuptools==84.2.1
 shiboken6==6.12.0
 urllib3==2.8.0
-watchdog==7.0.0
+watchdog==7.1.0
 zstandard==0.25.0

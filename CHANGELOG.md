@@ -2,6 +2,28 @@
 
 All notable changes to **Invoice Buddy** will be located in this file.
 
+## [0.3.6] - 2026-11-12
+
+This update adds automatic auto-naming functionality and a new Accounts page! It also features various bug fixes and UI improvements.
+
+### 🌟 New
+- Files not yet auto-named now do so automatically when dropped into the inbox folder and on app launch
+- Users can not add accounts in the all new Accounts page
+- A refresh button now exists for the inbox to re-establish observers and re-build the maibox view
+- New counterparties: RAYUS Radiology, New Balance
+- Sheet identity can now be selected in the transaction editor
+
+### ⚙️ Changed
+- Category button now shows primary category as well as subcategory in transaction editor
+- Category / subcategory pills now show as one "Category - Subcategory" button for copying
+- TMobile changed to T-Mobile for auto-name
+- Updated dependencies
+- Various UI improvements
+
+### 🛠️ Fixed
+- Sheet names now persist between switching pages
+- Sheet now saves on app close
+
 ## [0.3.5] - 2026-11-04
 
 This update adds a brand new budgeting page for creating categories! It also purges all of the dead code belonging to the old GUI for a simpler codebase and faster app, among other various improvements and big fixes. 

@@ -11,6 +11,7 @@ from src.interface.components.sidebar import create_sidebar
 from src.interface.settings.settings import create_settings_panel
 from src.interface.components.mailbox import MailboxWidget
 from src.interface.components.budget import BudgetPage
+from src.interface.components.accounts import AccountsPage
 from src.managers.file_management import (
     open_workbook, open_directory, open_logs, open_config
 )
@@ -30,9 +31,11 @@ from src.interface.components.bug_report import (
 )
 from src.interface.components.docs import create_docs_panel
 from src.interface.components.transaction_editor import TransactionEditor
-from src.utils.save import save_qt_settings
+from src.utils.save import save_qt_settings, save_metadata
 from src.utils.icons import load_qt_icons
+from pypdf import PdfReader
 import logging
+import time
 import os
 
 
@@ -243,6 +246,47 @@ def create_qt_interface(globs):
     populate_file_menu(globs)
     globs.rebuild_file_menu = populate_file_menu
 
+    # Full observer reconnect + mailbox rebuild (for network-drive drops)
+    MIN_SPIN_MS = 600
+    _spin_started = {"t": 0.0}
+
+    def reconnect_observers():
+        logging.info("Manual refresh requested.")
+        globs.set_refresh_spinning(True)
+        _spin_started["t"] = time.monotonic()
+        # Return to the event loop first so the spinner can actually animate
+        QTimer.singleShot(30, _do_reconnect)
+
+    def _do_reconnect():
+        try:
+            # Tear down any surviving observers first
+            for observer in globs.observers.values():
+                try:
+                    if observer and observer.is_alive():
+                        observer.stop()
+                        observer.join(timeout=5.0)
+                except Exception as e:
+                    logging.error(f"Failed stopping observer during reconnect: {e}")
+
+            # Re-arm fresh — setup_observer replaces the dead handler/thread
+            if hasattr(globs, 'current_folder') and globs.current_folder:
+                observer = setup_observer(
+                    globs, globs.current_folder, key='current_folder',
+                    callback=update_mailbox_view)
+                if observer:
+                    globs.observers['current_folder'] = observer
+                mailbox.refresh_files(globs.current_folder)
+                logging.info("Observers reconnected and mailbox refreshed.")
+        finally:
+            elapsed_ms = (time.monotonic() - _spin_started["t"]) * 1000
+            remaining = int(MIN_SPIN_MS - elapsed_ms)
+            if remaining > 0:
+                QTimer.singleShot(remaining, lambda: globs.set_refresh_spinning(False))
+            else:
+                globs.set_refresh_spinning(False)
+
+    globs.reconnect_observers = reconnect_observers
+
     # Populate Data Title Menu
     data_menu = title_bar.menu_bar.addMenu("Data")
     data_menu.addAction("Export / Import (Coming Soon)")
@@ -317,10 +361,24 @@ def create_qt_interface(globs):
     budget_page = BudgetPage(globs)
     page_stack.addWidget(budget_page)
 
+    # Page 2: Accounts page
+    accounts_page = AccountsPage(globs)
+    page_stack.addWidget(accounts_page)
+
     workspace_layout.addWidget(page_holder)
 
     globs.page_stack = page_stack
     globs.budget_page = budget_page
+    globs.accounts_page = accounts_page
+
+    # Show the ↻ button only while the Inbox page is displayed
+    def _sync_refresh_btn(index):
+        btn = getattr(globs, 'refresh_inbox_btn', None)
+        if btn:
+            btn.setVisible(index == 0)
+
+    page_stack.currentChanged.connect(_sync_refresh_btn)
+    _sync_refresh_btn(page_stack.currentIndex())
 
     main_layout.addWidget(workspace_widget)
 
@@ -384,12 +442,35 @@ def create_qt_interface(globs):
     globs.sidebar = sidebar
     globs.dim_overlay = dim_overlay
 
-    # Set up Watchdog Observers
-    def update_mailbox_view():
-        if hasattr(globs, 'current_folder') and globs.current_folder:
-            mailbox.update_files(globs.current_folder)
-        else:
+    def update_mailbox_view(events=None):
+        """Routes debounced filesystem events to the mailbox."""
+        if not (hasattr(globs, 'current_folder') and globs.current_folder):
             logging.warning("Cannot refresh mailbox: globs.current_folder is not set.")
+            return
+
+        mailbox = globs.mailbox_widget
+        created = []
+        deleted = []
+        modified = []
+
+        for ev_type, filename in (events or []):
+            if not filename.lower().endswith('.pdf'):
+                continue
+            if ev_type == 'created':
+                created.append(filename)
+            elif ev_type == 'deleted':
+                deleted.append(filename)
+            else:
+                modified.append(filename)
+
+        # Deleted files vanish instantly, full sync removes gone rows
+        if deleted or modified:
+            mailbox.update_files(globs.current_folder)
+
+        # New files enter the drop-in queue; they surface only when the
+        # silent worker finishes (or fails) and drains the queue.
+        if created:
+            mailbox.queue_drop_in(created)
 
     globs.observers = {}
     if hasattr(globs, 'current_folder') and globs.current_folder:
@@ -425,6 +506,22 @@ def create_qt_interface(globs):
     globs.window.show()
     if hasattr(globs, 'current_folder'):
         mailbox.refresh_files(globs.current_folder)
+
+    # Startup sweep: silent metadata-fill for anything not yet /AutoNamed
+    def sweep_untagged():
+        import glob as glob_mod
+        folder = globs.current_folder
+        untagged = []
+        for full_path in glob_mod.glob(os.path.join(folder, '*.pdf')):
+            try:
+                if not (PdfReader(full_path).metadata or {}).get('/AutoNamed'):
+                    untagged.append(os.path.basename(full_path))
+            except Exception:
+                untagged.append(os.path.basename(full_path))  # retry next load
+        if untagged:
+            globs.mailbox_widget.queue_drop_in(untagged)
+
+    QTimer.singleShot(100, sweep_untagged)  # after first paint, off the boot path
 
     # Update position on resize
     original_resize = globs.window.resizeEvent
@@ -489,6 +586,7 @@ def create_qt_interface(globs):
             logging.error(f"Unable to shut down observers due to: {e}")
         try:
             save_qt_settings(globs)
+            save_metadata(globs)
         except Exception as e:
             logging.error(f"Error occurred when saving settings: {e}")
         original_close(event)

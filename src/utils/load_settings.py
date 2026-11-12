@@ -15,7 +15,7 @@ def load_data_path(direct=None, filename=None, default=False):
     """
     # ==================== DEFAULT FILES ====================
     default_files = [
-        "settings.json", "company_map.json", "categories.json",
+        "settings.json", "company_map.json", "categories.json", "ledger.json",
         "paths.json", "default_spreadsheet.xlsx", "default_spreadsheet.ods",
         "assets/icon.png", "assets/add-1.png", "assets/add-2.png", "assets/add-3.png",
         "assets/archive.png", "assets/auto.png", "assets/card-1.png", "assets/card-2.png",
@@ -70,7 +70,8 @@ def load_data_path(direct=None, filename=None, default=False):
             else:
                 persistent_dir = os.path.normpath(os.path.expanduser("~/.local/share/InvoiceBuddy"))
             default_files = ["default_spreadsheet.xlsx", "default_spreadsheet.ods",
-                             "counterparties.json", "categories.json"]
+                             "counterparties.json", "categories.json",
+                             "ledger.json"]
         else:  # cache or main
             if platform.system() == "Windows":
                 persistent_dir = os.path.normpath(
@@ -245,4 +246,18 @@ def load_categories():
         return {}
     except json.JSONDecodeError as e:
         logging.error(f"Error decoding categories.json: {e}")
+        return {}
+
+
+def load_ledger():
+    """Load accounts and transactions from ledger.json."""
+    try:
+        file_path = os.path.normpath(load_data_path("local", "ledger.json"))
+        with open(file_path, 'r') as f:
+            return json.load(f)
+    except FileNotFoundError:
+        logging.error("Error: ledger.json not found")
+        return {}
+    except json.JSONDecodeError as e:
+        logging.error(f"Error decoding ledger.json: {e}")
         return {}

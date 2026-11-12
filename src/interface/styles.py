@@ -124,26 +124,23 @@ dark = SimpleNamespace(
         }
     """,
     line_edit = """
-        background-color: #3a3a3a;
-        color: white;
-        padding: 10px;
-        border-radius: 4px;
+        QLineEdit {
+            background-color: #2b2b2b; color: white;
+            border: 1px solid #505055; border-radius: 10px;
+            padding: 6px 12px; font-size: 14px;
+        }
+        QLineEdit:focus {
+            border: 1px solid #2ecc71;
+            background-color: #303030;
+        }
     """,
     minus_button = """
         QPushButton {
-            background-color: #3a3a3a;
-            color: white;
-            padding: 10px;
-            border-radius: 15px;
-            font-weight: bold;
+            background-color: #2b2b2b; color: #aaaaaa;
+            border: 1px solid #505055; border-radius: 10px;
+            padding: 6px 0px; font-size: 14px;
         }
-        QPushButton:hover {
-            background-color: #4a4a4a;
-            font-weight: bold;
-        }
-        QToolTip {
-            background-color: #2b2b2b; color: white; border: 1px solid #555;
-        }
+        QPushButton:hover { color: #ff6b6b; border-color: #ff6b6b; }
     """,
     hamburger_button = """
         QPushButton {
@@ -374,5 +371,135 @@ dark = SimpleNamespace(
             image: url(none);
         }
         QCheckBox::indicator:checked:disabled { background-color: #555; border: 1px solid #555; }
+    """,
+    transaction_input = """
+        QLineEdit {
+            background-color: #2b2b2b; color: white;
+            border: 1px solid #505055; border-radius: 10px;
+            padding: 0px 12px; font-size: 14px;
+        }
+        QLineEdit:focus {
+            border: 1px solid #2ecc71;
+            background-color: #303030;
+        }
+    """,
+    field_label = """
+        QLabel {
+            color: #c8c8c8; font-size: 13px;
+            font-weight: 700; border: none;
+            background: transparent;
+        }
+    """,
+    transaction_save_button = """
+        QPushButton {
+            background-color: #2ecc71; color: white;
+            border: 2px solid transparent; border-radius: 14px;
+            padding: 6px 20px; font-size: 13px; font-weight: 700;
+        }
+    """,
+    date_editor = """
+        QDateEdit {
+            background-color: #2b2b2b; color: white;
+            border: 1px solid #505055; border-radius: 10px;
+            padding: 0px 12px; font-size: 14px;
+            selection-background-color: #2ecc71;
+        }
+        QDateEdit:hover { border-color: #6a6a70; }
+        QDateEdit:focus { border: 1px solid #2ecc71; background-color: #303030; }
+        QDateEdit::drop-down {
+            subcontrol-origin: padding;
+            subcontrol-position: center right;
+            width: 26px;
+            border: none;
+            background: transparent;
+        }
+        QDateEdit::down-arrow {
+            image: none;
+            width: 0px; height: 0px;
+        }
+        QDateEdit QLineEdit {
+            background-color: transparent;
+            border: none; color: white; font-size: 14px;
+        }
+
+        QDateEdit QLineEdit {
+            background-color: transparent;
+            border: none; color: white; font-size: 14px;
+        }
+    """,
+    metadata_pill = """
+        QPushButton {
+            background-color: #3a3a42;
+            color: #eeeeee;
+            border: 1px solid #45454c;
+            border-radius: 16px;
+            padding: 5px 16px;
+            font-size: 12px;
+        }
+        QPushButton:hover {
+            background-color: #35353d;
+            color: #2ecc71;
+            border: 1px solid #2ecc71;
+        }
+        QPushButton:pressed {
+            background-color: #28282d;
+        }
+        QToolTip {
+            background-color: #2b2b2b;
+            color: #dddddd;
+            border: 1px solid #505055;
+            border-radius: 4px;
+            padding: 4px 8px;
+            font-size: 12px;
+        }
+    """,
+    line_edit_attached = """
+        QLineEdit {
+            background-color: #2b2b2b; color: white;
+            border: 1px solid #505055;
+            border-top-left-radius: 10px; border-bottom-left-radius: 10px;
+            border-top-right-radius: 0px; border-bottom-right-radius: 0px;
+            padding: 6px 12px; font-size: 14px;
+            min-height: 20px; max-height: 20px;
+        }
+        QLineEdit:focus {
+            border: 1px solid #2ecc71;
+            background-color: #303030;
+        }
+    """,
+    browse_button_attached = """
+        QPushButton {
+            background-color: #2b2b2b; color: #aaaaaa;
+            border: 1px solid #505055;
+            border-top-left-radius: 0px; border-bottom-left-radius: 0px;
+            border-top-right-radius: 10px; border-bottom-right-radius: 10px;
+            padding: 6px 16px; font-size: 14px;
+            min-height: 20px; max-height: 20px;
+        }
+        QPushButton:hover { color: #dddddd; border-color: #6a6a70; }
+    """,
+    message_box = """
+        QMessageBox {
+            background-color: #2b2b2b; color: #dddddd;
+            font-size: 13px;
+        }
+        QMessageBox QLabel { color: #dddddd; }
+        QMessageBox QPushButton {
+            background-color: #3a3a3a; color: white;
+            border: 1px solid #505055; border-radius: 6px;
+            padding: 6px 20px; font-size: 13px;
+        }
+        QMessageBox QPushButton:hover { background-color: #4a4a4a; }
+    """,
+    add_buddy_button = """
+        QPushButton {
+            background-color: transparent; color: #aaaaaa;
+            border: 1px dashed #505055; border-radius: 10px;
+            padding: 8px 16px; font-size: 13px; font-weight: 600;
+        }
+        QPushButton:hover {
+            color: #2ecc71; border-color: #2ecc71;
+        }
+        QPushButton:pressed { color: #27ae60; }
     """
 )

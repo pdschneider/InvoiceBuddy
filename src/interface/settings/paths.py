@@ -1,9 +1,9 @@
 # src.interface.settings.paths
 from PySide6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLabel,
-    QPushButton, QLineEdit
+    QPushButton, QLineEdit, QMessageBox
 )
-from PySide6.QtCore import Qt
+from PySide6.QtCore import Qt, QEvent, QObject
 from src.utils.load_settings import load_data_path
 from src.managers.file_management import browse_directory
 from src.interface.styles import dark
@@ -36,8 +36,10 @@ def create_paths_settings_tab(globs):
     # Inbox Entry Box
     inbox_entry_layout = QHBoxLayout()
 
-    inbox_label = QLabel()
-    inbox_label.setText("Inbox: ")
+    inbox_label = QLabel("Inbox")
+    inbox_label.setFixedWidth(110)
+    inbox_label.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
+    inbox_label.setStyleSheet("color: #c8c8c8; font-size: 13px; font-weight: 700; border: none;")
     inbox_entry_layout.addWidget(inbox_label)
 
     globs.inbox_entry_box = QLineEdit()
@@ -45,23 +47,27 @@ def create_paths_settings_tab(globs):
         globs.inbox_entry_box.setPlaceholderText(globs.inbox)
     else:
         globs.inbox_entry_box.setPlaceholderText(default_inbox)
-    globs.inbox_entry_box.setStyleSheet(dark.line_edit)
+    globs.inbox_entry_box.setStyleSheet(dark.line_edit_attached)
+    attach_focus_label(inbox_label, globs.inbox_entry_box)
     inbox_entry_layout.addWidget(globs.inbox_entry_box)
 
     inbox_browse = QPushButton()
     inbox_browse.setText("Browse")
-    inbox_browse.setStyleSheet(dark.browse_button)
+    inbox_browse.setStyleSheet(dark.browse_button_attached)
     inbox_browse.clicked.connect(lambda: browse_directory(globs, globs.inbox_entry_box))
     inbox_entry_layout.addWidget(inbox_browse)
     inbox_browse.setFixedWidth(150)
 
     layout.addLayout(inbox_entry_layout)
+    inbox_entry_layout.setSpacing(0)
 
     # Archive Entry Box
     archive_entry_layout = QHBoxLayout()
 
-    archive_label = QLabel()
-    archive_label.setText("Archive: ")
+    archive_label = QLabel("Archive")
+    archive_label.setFixedWidth(110)
+    inbox_label.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
+    archive_label.setStyleSheet("color: #c8c8c8; font-size: 13px; font-weight: 700; border: none;")
     archive_entry_layout.addWidget(archive_label)
 
     globs.archive_entry_box = QLineEdit()
@@ -69,24 +75,26 @@ def create_paths_settings_tab(globs):
         globs.archive_entry_box.setPlaceholderText(globs.archive)
     else:
         globs.archive_entry_box.setPlaceholderText(default_archive)
-    globs.archive_entry_box.setStyleSheet(dark.line_edit)
+    globs.archive_entry_box.setStyleSheet(dark.line_edit_attached)
+    attach_focus_label(archive_label, globs.archive_entry_box)
     archive_entry_layout.addWidget(globs.archive_entry_box)
 
     archive_browse = QPushButton()
     archive_browse.setText("Browse")
-    archive_browse.setStyleSheet(dark.browse_button)
+    archive_browse.setStyleSheet(dark.browse_button_attached)
     archive_browse.clicked.connect(lambda: browse_directory(globs, globs.archive_entry_box))
     archive_entry_layout.addWidget(archive_browse)
     archive_browse.setFixedWidth(150)
 
     layout.addLayout(archive_entry_layout)
+    archive_entry_layout.setSpacing(0)
 
     # Buddies Title
     buddies_title = QLabel("Buddies")
     buddies_title.setStyleSheet("font-size: 18px; font-weight: bold; color: white; margin-bottom: 10px;")
     layout.addWidget(buddies_title)
 
-    # Buddies container — rows get inserted here
+    # Buddies container: rows get inserted here
     globs.buddy_container = QWidget()
     globs.buddy_container_layout = QVBoxLayout(globs.buddy_container)
     globs.buddy_container_layout.setContentsMargins(0, 0, 0, 0)
@@ -103,7 +111,7 @@ def create_paths_settings_tab(globs):
     # Add Buddy Button
     globs.buddy_add_btn = QPushButton("+ Add Buddy")
     globs.buddy_add_btn.setFixedWidth(120)
-    globs.buddy_add_btn.setStyleSheet("background-color: #3a3a3a; color: white; border-radius: 4px; padding: 6px;")
+    globs.buddy_add_btn.setStyleSheet(dark.add_buddy_button)
     globs.buddy_add_btn.setCursor(Qt.PointingHandCursor)
     layout.addWidget(globs.buddy_add_btn)
 
@@ -125,18 +133,23 @@ def create_paths_settings_tab(globs):
         name_input.setStyleSheet(dark.line_edit)
         row_layout.addWidget(name_input)
 
-        # Path field
+        # Path field + Browse button as one seamless unit
         path_input = QLineEdit()
         path_input.setPlaceholderText("Folder path...")
-        path_input.setStyleSheet(dark.line_edit)
-        row_layout.addWidget(path_input)
+        path_input.setStyleSheet(dark.line_edit_attached)
 
-        # Browse button
         browse_btn = QPushButton("Browse")
-        browse_btn.setFixedWidth(100)
-        browse_btn.setStyleSheet(dark.browse_button)
+        browse_btn.setStyleSheet(dark.browse_button_attached)
         browse_btn.clicked.connect(lambda: browse_directory(globs, path_input))
-        row_layout.addWidget(browse_btn)
+
+        path_unit = QWidget()
+        path_unit.setStyleSheet("background-color: transparent;")
+        path_layout = QHBoxLayout(path_unit)
+        path_layout.setContentsMargins(0, 0, 0, 0)
+        path_layout.setSpacing(0)
+        path_layout.addWidget(path_input)
+        path_layout.addWidget(browse_btn)
+        row_layout.addWidget(path_unit)
 
         # Remove button
         remove_btn = QPushButton("-")
@@ -161,6 +174,16 @@ def create_paths_settings_tab(globs):
 
     def remove_buddy(row):
         """Remove a buddy row and clean up."""
+
+        # Gate keep deletion behind a message box
+        confirm = QMessageBox.question(
+            row, "Remove Buddy",
+            "Remove this buddy row?",
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+            QMessageBox.StandardButton.No)
+        if confirm != QMessageBox.StandardButton.Yes:
+            return
+
         for entry in globs.buddy_entries[:]:
             if entry["frame"] == row:
                 row.deleteLater()
@@ -179,10 +202,29 @@ def create_paths_settings_tab(globs):
         for name, path in candidates:
             add_buddy()
             latest = globs.buddy_entries[-1]
-            latest["name_input"].setText(name)
-            latest["path_input"].setText(path)
+            latest["name_input"].setText("")
+            latest["name_input"].setPlaceholderText(name)
+            latest["path_input"].setText("")
+            latest["path_input"].setPlaceholderText(path)
 
     # Add some spacer at the bottom so it doesn't hug the edge
     layout.addStretch()
 
     return tab_widget
+
+
+def attach_focus_label(label, edit):
+    """Turn the label green while its line edit has focus or content."""
+    def refresh(*_):
+        active = edit.hasFocus() or bool(edit.text().strip())
+        color = "#2ecc71" if active else "#c8c8c8"
+        label.setStyleSheet(
+            f"color: {color}; font-size: 13px; font-weight: 700; border: none;")
+    class _Filter(QObject):
+        def eventFilter(self, obj, event):
+            if event.type() in (QEvent.Type.FocusIn, QEvent.Type.FocusOut):
+                refresh()
+            return False
+    filt = _Filter(label)
+    edit.installEventFilter(filt)
+    edit.textChanged.connect(refresh)

@@ -10,7 +10,8 @@ from version import __version__
 from PySide6.QtWidgets import QApplication, QMainWindow
 from src.utils.load_settings import (
     load_settings, load_data_path, load_paths,
-    load_sheets, load_counterparties, load_categories
+    load_sheets, load_counterparties, load_categories,
+    load_ledger
 )
 
 
@@ -22,6 +23,7 @@ class Globs:
         self.refresh_globs()
         self.refresh_counterparties()
         self.refresh_categories()
+        self.refresh_ledger()
         self.observers = {}
 
         # Current Version
@@ -39,7 +41,7 @@ class Globs:
         # Folder mappings and paths
         self.sources, self.buddies = load_paths()
 
-        # PySide6 Widgets
+        # PySide6 Widgets & Functions
         self.app = QApplication(sys.argv)
         self.window = QMainWindow()
         self.mailbox = NotImplemented
@@ -65,6 +67,9 @@ class Globs:
         self.page_stack = None
         self.selected_file = None
         self.place_curtain = None
+        self.reconnect_observers = None
+        self.budget_page = None
+        self.accouunts_page = None
 
         # PySide6 Inbox
         self.files = []  # ALL filenames without extensions in inbox
@@ -155,6 +160,11 @@ class Globs:
         """Refreshes categories from categories json file."""
         categories = load_categories()
         self.categories = categories.get("categories", {})
+
+    def refresh_ledger(self):
+        """Refreshes the ledger from ledger json file."""
+        ledger = load_ledger()
+        self.ledger = ledger.get("accounts", {})
 
     def refresh_globs(self):
         """Refreshes settings from settings file and a lot more"""

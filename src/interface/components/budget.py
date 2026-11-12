@@ -7,6 +7,7 @@ from PySide6.QtWidgets import (
 from PySide6.QtCore import Qt, QTimer
 from shiboken6 import Shiboken
 from src.utils.save import save_categories
+from src.interface.styles import dark
 
 
 class BudgetPage(QWidget):
@@ -23,18 +24,18 @@ class BudgetPage(QWidget):
         scroll = QScrollArea()
         scroll.setWidgetResizable(True)
         scroll.setFrameShape(QFrame.NoFrame)
-        scroll.setStyleSheet("border: none;")
+        scroll.setStyleSheet("QScrollArea { border: none; } " + dark.scrollbar)
 
         # Everything that used to go in `layout` goes in here
         content = QWidget()
         layout = QVBoxLayout(content)
-        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setContentsMargins(0, 0, 0, 150)
         content.setStyleSheet("background-color: transparent;")
         layout.setSpacing(12)
 
         # Header Row
         header_layout = QHBoxLayout()
-        header_layout.setContentsMargins(0, 0, 0, 0)  # Remove extra spacing
+        header_layout.setContentsMargins(0, 0, 0, 0)
         header_layout.setSpacing(10)  # Gap between widgets
 
         title = QLabel("Budget")

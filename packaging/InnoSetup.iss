@@ -4,7 +4,7 @@
 
 #define MyAppName "Invoice Buddy"
 #define MyAppPublisher "Phillip Schneider"
-#define MyAppVersion "0.3.5"
+#define MyAppVersion "0.3.6"
 #define MyAppURL "https://github.com/pdschneider/InvoiceBuddy"
 #define MyAppExeName "InvoiceBuddy.exe"
 

@@ -3,11 +3,15 @@ from PySide6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout,
     QLabel, QPushButton, QFrame, QScrollArea,
     QLineEdit, QSizePolicy, QCheckBox, QDateEdit,
-    QCompleter, QStackedLayout, QMessageBox
+    QCompleter, QStackedLayout, QMessageBox,
+    QGraphicsDropShadowEffect, QStyleOptionSpinBox,
+    QStyle, QCalendarWidget
 )
 from PySide6.QtCore import (
-    Qt, QPoint, QDate, QTimer, QStringListModel
+    Qt, QPoint, QDate, QTimer, QStringListModel,
+    QPropertyAnimation, QEasingCurve, QPointF
 )
+from PySide6.QtGui import (QColor, QMouseEvent)
 from pypdf import PdfReader, PdfWriter
 import os
 import logging
@@ -49,15 +53,7 @@ class TransactionEditor(QWidget):
         # Save button
         save_btn = QPushButton("Save")
         save_btn.setCursor(Qt.PointingHandCursor)
-        save_btn.setStyleSheet("""
-            QPushButton {
-                background-color: #2ecc71; color: white;
-                border: none; border-radius: 14px;
-                padding: 4px 16px; font-size: 12px; font-weight: bold;
-            }
-            QPushButton:hover { background-color: #27ae60; }
-            QPushButton:pressed { background-color: #219a52; }
-        """)
+        save_btn.setStyleSheet(dark.transaction_save_button)
         save_btn.clicked.connect(self.save_transaction)
         header.addWidget(save_btn)
 
@@ -103,6 +99,7 @@ class TransactionEditor(QWidget):
         scroll.setStyleSheet(f"QScrollArea {{ border: none; }} {dark.scrollbar}")
 
         form_container = QWidget()
+        form_container.setMaximumWidth(560)
         form_layout = QVBoxLayout(form_container)
         form_layout.setContentsMargins(0, 5, 0, 0)
         form_layout.setSpacing(20)
@@ -111,14 +108,7 @@ class TransactionEditor(QWidget):
         self.field_labels = {}
         self.inputs = {}
 
-        input_style = """
-            QLineEdit {
-                background-color: #2b2b2b; color: white;
-                border: 1px solid #505055; border-radius: 8px;
-                padding: 0px 12px; font-size: 14px;
-            }
-            QLineEdit:focus { border: 1px solid #2ecc71; background-color: #303030; }
-        """
+        input_style = dark.transaction_input
 
         def add_field(key, label, parent_layout):
             wrapper = QHBoxLayout()
@@ -143,7 +133,7 @@ class TransactionEditor(QWidget):
 
             field_label = QLabel(label)
             field_label.setFixedWidth(120)
-            field_label.setStyleSheet("color: #bbbbbb; font-size: 13px; font-weight: 600; border: none;")
+            field_label.setStyleSheet(dark.field_label)
 
             if key == "/Date":
                 edit = QDateEdit()
@@ -154,23 +144,15 @@ class TransactionEditor(QWidget):
                 edit.setSpecialValueText(" ")
                 edit.setButtonSymbols(QDateEdit.NoButtons)
                 edit.setFixedSize(140, 36)
-                edit.setStyleSheet("""
-                    QDateEdit {
-                        background-color: #2b2b2b; color: white;
-                        border: 1px solid #505055; border-radius: 8px;
-                        padding: 0px 12px; font-size: 14px;
-                        selection-background-color: #2ecc71;
-                    }
-                    QDateEdit::down-button {
-                        background: transparent;
-                        border: none;
-                        border-top-right-radius: 8px;
-                        border-bottom-right-radius: 8px;
-                        width: 24px;
-                    }
-                    QDateEdit:hover { border-color: #6a6a70; }
-                    QDateEdit:focus { border: 1px solid #2ecc71; background-color: #303030; }
-                """)
+                edit.setStyleSheet(dark.date_editor)
+
+                cal_icon = QLabel("📅", edit)
+                cal_icon.setGeometry(edit.width() - 32, 6, 24, 24)
+                cal_icon.setStyleSheet(
+                    "background: transparent; border: none; font-size: 13px;")
+                cal_icon.setCursor(Qt.PointingHandCursor)
+                cal_icon.mousePressEvent = lambda e, ed=edit: ed.mousePressEvent(e)
+
             else:
                 edit = QLineEdit()
                 edit.setStyleSheet(input_style)
@@ -189,8 +171,13 @@ class TransactionEditor(QWidget):
             edit.installEventFilter(self)
             edit.setFixedHeight(36)
             if key != "/Date":
-                edit.setMaximumWidth(280)
-                edit.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Fixed)
+                edit.setMaximumWidth(420)
+                if key == "/Description":
+                    edit.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+                elif key in ("/CardNumber", "/InvoiceNumber", "/Net"):
+                    edit.setFixedWidth(140)
+                else:
+                    edit.setMaximumWidth(420)
 
             self.inputs[key] = edit
             if key != "/Category":
@@ -291,12 +278,40 @@ class TransactionEditor(QWidget):
             if key != "/Subcategory":
                 parent_layout.addLayout(wrapper)
 
+        # Sheet selector (colored pill, mirrors mailbox)
+        sheet_header = QHBoxLayout()
+        sheet_header.setSpacing(10)
+        sheet_header.setContentsMargins(0, 0, 0, 0)
+
+        sheet_label = QLabel("Sheet")
+        sheet_label.setFixedWidth(120)
+        sheet_label.setStyleSheet("color: #bbbbbb; font-size: 13px; font-weight: 600; border: none;")
+        sheet_header.addWidget(sheet_label)
+
+        self.sheet_button = QPushButton("Sheet")
+        self.sheet_button.setCursor(Qt.PointingHandCursor)
+        self.sheet_button.setFixedHeight(24)
+        self.sheet_button.setMaximumWidth(160)
+        self.sheet_button.setStyleSheet("""
+            QPushButton {
+                background-color: #888888; color: white;
+                border-radius: 12px; padding: 0 12px;
+                font-size: 11px; font-weight: bold; text-align: center;
+            }
+            QPushButton:hover { border: 1px solid #aaaaaa; }
+        """)
+        self.sheet_button.clicked.connect(self._open_sheet_picker)
+        sheet_header.addWidget(self.sheet_button)
+        sheet_header.addStretch()
+
+        form_layout.addLayout(sheet_header)
+
         # Basic fields
         for key, label in self.basic_fields:
             add_field(key, label, form_layout)
 
         # Advanced toggle
-        self.advanced_toggle = QPushButton("Advanced ▾")
+        self.advanced_toggle = QPushButton("More Options  ▾")
         self.advanced_toggle.setCursor(Qt.PointingHandCursor)
         self.advanced_toggle.setFocusPolicy(Qt.NoFocus)
         self.advanced_toggle.setStyleSheet("""
@@ -325,6 +340,11 @@ class TransactionEditor(QWidget):
         scroll.setWidget(form_container)
         layout.addWidget(scroll, stretch=1)
 
+        # Attach glow effect to buttons
+        # self._attach_glow(self.category_button, "#2ecc71")
+        # self._attach_glow(self.counterparty_button, "#2ecc71")
+        self._attach_glow(save_btn, "#2ecc71")
+
     def open_for_file(self, filename):
         """Load a file into the editor and swap the left pane to it."""
         self.counterparty_completer.setModel(QStringListModel(list(self.globs.counterparties)))
@@ -339,10 +359,41 @@ class TransactionEditor(QWidget):
             self.counterparty_stack.setCurrentIndex(0)
             self.counterparty_button.setText("")
 
+        self._refresh_sheet_button()
         self._refresh_category_button()
 
         self.left_stack.setCurrentWidget(self)
         logging.debug(f"Transaction editor opened for {filename}")
+
+    def _pulse_glow(self, color, entering):
+        c = self.sheet_glow.color().name()
+        if entering and c != color:
+            self.sheet_glow.setColor(QColor(color))
+        anim = self.sheet_glow_anim
+        anim.stop()
+        anim.setStartValue(anim.currentValue() or 0)
+        anim.setEndValue(10 if entering else 0)  # Determines how big the glow is
+        anim.start()
+
+    def _attach_glow(self, button, color):
+        """Give a button an animated glow in the given color."""
+        glow = QGraphicsDropShadowEffect(button)
+        glow.setBlurRadius(0)
+        glow.setOffset(0, 0)
+        glow.setColor(QColor(color))
+        button.setGraphicsEffect(glow)
+
+        anim = QPropertyAnimation(glow, b"blurRadius", button)
+        anim.setDuration(180)
+        anim.setEasingCurve(QEasingCurve.OutCubic)
+        button.enterEvent = lambda e=None: self._pulse(anim, 10)
+        button.leaveEvent = lambda e=None: self._pulse(anim, 0)
+
+    def _pulse(self, anim, target):
+        anim.stop()
+        anim.setStartValue(anim.currentValue() or 0)
+        anim.setEndValue(target)
+        anim.start()
 
     def load_metadata(self):
         """Read metadata from PDF and populate fields."""
@@ -369,6 +420,59 @@ class TransactionEditor(QWidget):
                     self._format_amount_final(edit)
         except Exception as e:
             logging.warning(f"Could not load metadata from {self.current_filename}: {e}")
+
+    def _refresh_sheet_button(self):
+        """Color and label the sheet pill from globs.file_identity."""
+        sheet_name = self.globs.file_identity.get(
+            self.current_filename, "Sheet")
+
+        sheet_color = "#888"
+        for s in self.globs.sheet_data.get("sheets", []):
+            if s.get("name") == sheet_name:
+                sheet_color = s.get("color", "#888")
+                break
+
+        glow = self.sheet_button.graphicsEffect()
+        if not glow:
+            glow = QGraphicsDropShadowEffect(self.sheet_button)
+            glow.setBlurRadius(0)
+            glow.setOffset(0, 0)
+            self.sheet_button.setGraphicsEffect(glow)
+            anim = QPropertyAnimation(glow, b"blurRadius", self.sheet_button)
+            anim.setDuration(180)
+            anim.setEasingCurve(QEasingCurve.OutCubic)
+            self.sheet_glow = glow
+            self.sheet_glow_anim = anim
+            glow_in = lambda e=None: self._pulse_glow(sheet_color, True)
+            glow_out = lambda e=None: self._pulse_glow("#000000", False)
+            self.sheet_button.enterEvent = glow_in
+            self.sheet_button.leaveEvent = glow_out
+        self.sheet_glow.setColor(QColor(sheet_color))
+
+        self.sheet_button.setText(sheet_name)
+        self.sheet_button.setStyleSheet(f"""
+            QPushButton {{
+                background-color: #26262a; color: {sheet_color};
+                border: 1px solid #505055; border-radius: 10px;
+                padding: 4px 16px; font-size: 13px; font-weight: 600;
+            }}
+            QPushButton:hover {{
+                border: 1px solid {sheet_color};
+                background-color: #2b2b30;
+            }}
+        """)
+
+    def _open_sheet_picker(self):
+        self.sheet_picker = _SheetPickerPopup(
+            self.globs, self._on_sheet_picked)
+        pos = self.sheet_button.mapToGlobal(
+            QPoint(0, self.sheet_button.height()))
+        self.sheet_picker.move(pos)
+        self.sheet_picker.show()
+
+    def _on_sheet_picked(self, sheet_name):
+        self.globs.file_identity[self.current_filename] = sheet_name
+        self._refresh_sheet_button()
 
     def close_editor(self):
         """Return to the mailbox view."""
@@ -397,7 +501,7 @@ class TransactionEditor(QWidget):
         logging.debug(f"REFRESH: cat='{cat}', sub='{sub}', categories={list(self.globs.categories)}")
         
         if cat and sub and valid:
-            self.category_button.setText(sub)
+            self.category_button.setText(f"{cat.replace('&', '&&')} > {sub.replace('&', '&&')}")
             self.category_button.setStyleSheet("""
                 QPushButton {
                     background-color: #2d4a3e; color: #dddddd;
@@ -433,7 +537,7 @@ class TransactionEditor(QWidget):
 
     def _delete_counterparty(self):
         """Ask, then remove the shown counterparty from the saved list."""
-        name = self.counterparty_button.text()
+        name = self.counterparty_button.text().replace("&&", "&")
         if not name:
             return
         confirm = QMessageBox.question(
@@ -457,7 +561,7 @@ class TransactionEditor(QWidget):
         """Convert the counterparty edit into a button showing its text."""
         name = edit.text().strip()
         logging.debug(f"SOLIDIFY called with name: '{name}'")
-        self.counterparty_button.setText(name)
+        self.counterparty_button.setText(name.replace("&", "&&"))
         self.counterparty_stack.setCurrentIndex(1)
 
         # Autofill remembered category/description (only if fields are empty)
@@ -478,7 +582,7 @@ class TransactionEditor(QWidget):
     def _toggle_advanced(self):
         # Toggle visibility
         self.advanced_frame.setVisible(not self.advanced_frame.isVisible())
-        self.advanced_toggle.setText("Advanced ▾" if self.advanced_frame.isVisible() else "Advanced ▸")
+        self.advanced_toggle.setText("More Options  ▾" if self.advanced_frame.isVisible() else "More Options  ▸")
 
     def eventFilter(self, obj, event):
         if event.type() == event.Type.KeyPress and obj is self.inputs.get("/Counterparty"):
@@ -591,6 +695,10 @@ class TransactionEditor(QWidget):
                 val = val.replace(",", "")
             if val:
                 new_meta[key] = val
+
+        sheet_name = self.globs.file_identity.get(self.current_filename)
+        if sheet_name:
+            new_meta["/Sheet"] = sheet_name
 
         # Auto-add new counterparty
         counterparty = new_meta.get("/Counterparty", "").strip()
@@ -707,6 +815,12 @@ class TransactionEditor(QWidget):
                 archive_files(self.globs, [self.current_filename], confirm=False)
 
             logging.info(f"Saved transaction for {self.current_filename}")
+
+            # Update mailbox view's pills
+            if self.current_filename not in self.mailbox.globs.files:
+                self.mailbox.update_files(self.globs.current_folder)
+            else:
+                self.mailbox._refresh_pills()
             self.close_editor()
 
         except Exception as e:
@@ -758,6 +872,78 @@ class _OptionsPopup(QWidget):
         main_layout.addWidget(container)
 
 
+class _SheetPickerPopup(QWidget):
+    """Floating menu listing available sheets with colored dots."""
+
+    def __init__(self, globs, on_pick, parent=None):
+        super().__init__(parent)
+        self.on_pick = on_pick
+        self.globs = globs
+        self.setWindowFlags(Qt.Popup | Qt.FramelessWindowHint)
+        self.setAttribute(Qt.WA_TranslucentBackground)
+        self.setFixedWidth(220)
+
+        container = QFrame()
+        container.setStyleSheet("""
+            QFrame {
+                background-color: #2d2d30;
+                border: 1px solid #444;
+                border-radius: 8px;
+            }
+        """)
+
+        main_layout = QVBoxLayout(self)
+        main_layout.setContentsMargins(0, 0, 0, 0)
+
+        layout = QVBoxLayout(container)
+        layout.setContentsMargins(12, 12, 12, 12)
+        layout.setSpacing(4)
+
+        title = QLabel("Assign to Sheet")
+        title.setStyleSheet(
+            "color: white; font-size: 13px; font-weight: bold;"
+            "margin-bottom: 4px; border: none;")
+        layout.addWidget(title)
+
+        for sheet in self.globs.sheet_data.get("sheets", []):
+            name = sheet.get("name", "Sheet")
+            color = sheet.get("color", "#888")
+
+            row = QFrame()
+            row.setFixedHeight(34)
+            row.setCursor(Qt.PointingHandCursor)
+            row.setStyleSheet("""
+                QFrame { background-color: transparent; border-radius: 4px; }
+                QFrame:hover { background-color: #3a3a40; }
+            """)
+
+            row_layout = QHBoxLayout(row)
+            row_layout.setContentsMargins(8, 4, 8, 4)
+            row_layout.setSpacing(10)
+
+            dot = QLabel()
+            dot.setFixedSize(12, 12)
+            dot.setStyleSheet(f"background-color: {color}; border-radius: 6px;")
+            row_layout.addWidget(dot)
+
+            label = QLabel(name)
+            label.setStyleSheet(
+                "color: white; font-size: 13px;"
+                "background-color: transparent; border: none;")
+            row_layout.addWidget(label)
+            row_layout.addStretch()
+
+            row.mousePressEvent = lambda event, n=name: self._pick(n)
+            layout.addWidget(row)
+
+        layout.addStretch()
+        main_layout.addWidget(container)
+
+    def _pick(self, name):
+        self.on_pick(name)
+        self.close()
+
+
 class _CategoryPickerPopup(QWidget):
     """Floating menu listing subcategories grouped under their categories."""
 
@@ -784,8 +970,14 @@ class _CategoryPickerPopup(QWidget):
         inner.setContentsMargins(8, 8, 8, 8)
         inner.setSpacing(0)
 
+        rows = QWidget()
+        rows.setStyleSheet("background-color: transparent;")
+        inner_rows = QVBoxLayout(rows)
+        inner_rows.setContentsMargins(0, 0, 0, 0)
+        inner_rows.setSpacing(0)
+
         for category, data in globs.categories.items():
-            header = QPushButton(category)
+            header = QPushButton(category.replace("&", "&&"))
             header.setEnabled(False)  # not selectable, just a label
             header.setStyleSheet("""
                 QPushButton {
@@ -794,10 +986,10 @@ class _CategoryPickerPopup(QWidget):
                     text-align: left; padding: 6px 4px 2px 4px;
                 }
             """)
-            inner.addWidget(header)
+            inner_rows.addWidget(header)
 
             for sub in data.get("subcategories", []):
-                btn = QPushButton("    " + sub)
+                btn = QPushButton("    " + sub.replace('&', '&&'))
                 btn.setCursor(Qt.PointingHandCursor)
                 btn.setStyleSheet("""
                     QPushButton {
@@ -809,9 +1001,16 @@ class _CategoryPickerPopup(QWidget):
                 """)
                 btn.clicked.connect(
                     lambda _=False, c=category, s=sub: self._pick(c, s))
-                inner.addWidget(btn)
+                inner_rows.addWidget(btn)
 
-        inner.addStretch()
+        scroll = QScrollArea()
+        scroll.setWidgetResizable(True)
+        scroll.setFrameShape(QFrame.NoFrame)
+        scroll.setMaximumHeight(400)
+        scroll.setStyleSheet("""QScrollArea, QScrollArea > QWidget > QWidget { border: none; background-color: transparent; }""" + dark.scrollbar)
+        scroll.setWidget(rows)
+        inner.addWidget(scroll)
+
         main_layout.addWidget(container)
 
     def _pick(self, category, subcategory):

@@ -77,8 +77,11 @@ def save_qt_settings(globs):
     new_buddies = {}
     buddy_counter = 0
     for entry in globs.buddy_entries:
-        name = entry["name_input"].text().strip()[:9]
-        path = entry["path_input"].text().strip()
+        name_raw = entry["name_input"].text().strip() or \
+            entry["name_input"].placeholderText()
+        name = name_raw[:9]
+        path = entry["path_input"].text().strip() or \
+            str(entry["path_input"].placeholderText())
 
         if name.lower() == "inbox":
             buddy_counter += 1
@@ -203,6 +206,16 @@ def save_categories(globs):
             json.dump({"categories": globs.categories}, f, indent=2)
     except Exception as e:
         logging.error(f"Failed to save categories due to: {e}")
+
+
+def save_ledger(globs):
+    """Saves ledger to ledger.json file"""
+    try:
+        file_path = load_data_path("local", "ledger.json")
+        with open(file_path, 'w') as f:
+            json.dump({"accounts": globs.ledger}, f, indent=2)
+    except Exception as e:
+        logging.error(f"Failed to save ledger due to: {e}")
 
 
 def save_paths(globs, sources=None, buddies=None):

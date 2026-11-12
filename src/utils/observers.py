@@ -18,7 +18,7 @@ except ImportError:
 if PYSIDE6_AVAILABLE:
     class _WatchdogSignaler(QObject):
         """Thread-safe bridge: emits signal from background thread, received in main thread."""
-        file_changed = Signal()
+        file_changed = Signal(list)  # list of (event_type, filename)
 
 
 class FolderEventHandler(FileSystemEventHandler):
@@ -28,6 +28,7 @@ class FolderEventHandler(FileSystemEventHandler):
         self.update_callback = update_callback
         self.debounce_delay = debounce_delay
         self.last_event_time = 0
+        self.collected_events = []  # (event_type, filename) pairs awaiting debounce
         self.scheduled_update = None
 
         # Qt mode: Set up thread-safe signaling
@@ -55,32 +56,40 @@ class FolderEventHandler(FileSystemEventHandler):
         elif not event.src_path.lower().endswith('.pdf'):
             return
 
+        # Normalize moved events: we only care where the file ended up
+        if event.event_type == 'moved' and event.dest_path \
+                and event.dest_path.lower().endswith('.pdf'):
+            event_type, path = 'created', event.dest_path
+        else:
+            event_type, path = event.event_type, event.src_path
+
+        self.collected_events.append((event_type, os.path.basename(path)))
+
         current_time = time.time()
 
         if PYSIDE6_AVAILABLE:
-            self._signaler.file_changed.emit()
+            self._signaler.file_changed.emit([])  # poke; events travel via the timer
         else:
-            # Tkinter Mode: Cancel and reschedule
             if self.scheduled_update:
                 self.globs.root.after_cancel(self.scheduled_update)
                 self.scheduled_update = None
-
             delay_ms = int(self.debounce_delay * 1000)
             self.scheduled_update = self.globs.root.after(
                 delay_ms, self._trigger_update)
 
         self.last_event_time = current_time
 
-    def _on_file_changed_qt(self):
+    def _on_file_changed_qt(self, events):
         """Runs in the MAIN thread when the signal is received. Handles debouncing."""
-        # Calling start() on a running single-shot timer restarts it automatically
         delay_ms = int(self.debounce_delay * 1000)
         self._debounce_timer.start(delay_ms)
 
     def _trigger_update(self):
         self.scheduled_update = None
-        self.update_callback()
-        logging.debug(f"Watchdog: Folder change detected, updated counts.")
+        events = self.collected_events
+        self.collected_events = []
+        self.update_callback(events)
+        logging.debug(f"Watchdog: {len(events)} debounced event(s) forwarded.")
 
 
 def is_network_drive(globs, path):

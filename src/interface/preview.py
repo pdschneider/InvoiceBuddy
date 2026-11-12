@@ -2,12 +2,14 @@
 from PySide6.QtWidgets import (
     QWidget, QVBoxLayout, QLabel, QFrame,
     QHBoxLayout, QPushButton, QApplication,
-    QScrollArea
+    QScrollArea, QToolTip
 )
-from PySide6.QtCore import Qt
+from PySide6.QtCore import Qt, QTimer
+from PySide6.QtGui import QCursor
 import os
 from src.interface.components.viewer import NativePdfViewer
 from src.utils.load_settings import read_file_metadata
+from src.interface.styles import dark
 
 
 def create_pill(label, value, display=None, is_copy_all=False):
@@ -17,39 +19,44 @@ def create_pill(label, value, display=None, is_copy_all=False):
     pill.setToolTip(f"{label} — click to copy '{value}'")
 
     # Metadata pill styling
-    pill.setStyleSheet("""
-        QPushButton {
-            background-color: #404045;
-            color: #dddddd;
-            border: 1px solid #505055;
-            border-radius: 16px;
-            padding: 4px 14px;
-            font-size: 12px;
-        }
-        QPushButton:hover {
-            background-color: #4a4a50;
-            color: #2ecc71;
-            border-color: #2ecc71;
-        }
-        QPushButton:pressed {
-            background-color: #35353a;
-        }
-        QToolTip {
-            background-color: #2b2b2b;
-            color: #dddddd;
-            border: 1px solid #505055;
-            border-radius: 4px;
-            padding: 4px 8px;
-            font-size: 12px;
-        }
-    """)
+    pill.setStyleSheet(dark.metadata_pill)
+    pill.setFixedHeight(32)
     
-    pill.clicked.connect(lambda: QApplication.clipboard().setText(value))
+    def _copy():
+        QApplication.clipboard().setText(value)
+        QToolTip.showText(QCursor.pos(), "Copied!")
+        QTimer.singleShot(800, lambda: None)
+
+    pill.clicked.connect(_copy)
+
     return pill
 
 
 def create_preview_pane(globs):
     """Creates the right pane with PDF preview and action buttons."""
+
+    # Style the tool tip for copying pills
+    QApplication.instance().setStyleSheet("""
+        QToolTip {
+            background-color: #2b2b2b;
+            color: #dddddd;
+            border: 1px solid #505055;
+            border-radius: 1px;
+            padding: 2px 2px;
+            font-size: 12px;
+        }
+        QMessageBox {
+            background-color: #2b2b2b; color: #dddddd;
+            font-size: 13px;
+        }
+        QMessageBox QLabel { color: #dddddd; }
+        QMessageBox QPushButton {
+            background-color: #3a3a3a; color: white;
+            border: 1px solid #505055; border-radius: 6px;
+            padding: 6px 20px; font-size: 13px;
+        }
+        QMessageBox QPushButton:hover { background-color: #4a4a4a; }
+    """)
 
     pane = QWidget()
     layout = QVBoxLayout(pane)
@@ -185,7 +192,9 @@ def create_preview_pane(globs):
                 "Tax": "Tax",
             }
 
-            # Build ordered list — column_order first, then any leftover fields
+            # Merge Category/Subcategory into one copyable pill
+            merged_labels = {"Category", "Subcategory"}
+
             ordered_fields = []
             seen = set()
             for col in column_order:
@@ -193,8 +202,22 @@ def create_preview_pane(globs):
                     continue
                 field_label = label_mapping.get(col, col)
                 if field_label in fields:
-                    ordered_fields.append((col, fields[field_label]))
-                    seen.add(field_label)
+                    if field_label == "Category":
+                        sub = fields.get("Subcategory", "")
+                        if sub:
+                            ordered_fields.append((col, f"{fields['Category']} - {sub}"))
+                            seen.add("Subcategory")
+                        else:
+                            ordered_fields.append((col, fields[field_label]))
+                        seen.add(field_label)
+                    elif field_label == "Subcategory":
+                        if "Subcategory" in seen:  # already merged
+                            continue
+                        ordered_fields.append((col, fields[field_label]))
+                        seen.add(field_label)
+                    else:
+                        ordered_fields.append((col, fields[field_label]))
+                        seen.add(field_label)
 
             # Fields present in the PDF but not in column_order
             for label, value in fields.items():
